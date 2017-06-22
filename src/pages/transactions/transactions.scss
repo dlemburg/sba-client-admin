@@ -1,0 +1,25 @@
+page-transactions {
+    .transaction-options ion-col {
+        font-size: 12px;
+        color: map-get($colors, primary );
+        position: relative;
+        bottom: -10px;
+        text-align: center;
+    }
+
+    .edited {
+        color: map-get($colors, danger);
+    }
+    .reward-used {
+        color: map-get($colors, secondary);
+    }
+
+
+
+    .details {
+       // background-color: map-get($colors, light);
+        font-size: 10px;
+        padding: none !important;
+        margin: none !important;
+    }
+}

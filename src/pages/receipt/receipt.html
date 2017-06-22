@@ -1,0 +1,99 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Receipt</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+      <style>
+        .align-center {text-align: center; margin: auto;}
+        .align-right {text-align: right;}
+        .width-100 { width: 100%; }
+        .width-80 { width: 80%; }
+        .widht-20 {width: 20%; }
+        .hr-color {
+          background-color: #387ef5;
+        }
+        .purchase-item {
+          border-bottom: 1px solid lightgray !important;
+          padding-top: 10px !important;
+          padding-bottom: 10px !important;
+        }
+
+        .container { padding: 10px !important;}
+        .header-container {
+          background-color: #387ef5;
+          padding: 8px;
+        }
+        .main-content {
+          margin-top: 50px;
+          margin-bottom: 20px;
+        }
+        .greeting {
+          color: #387ef5;
+          margin-bottom: 25px;
+        }
+        .company-message {
+          margin-top: 30px;
+        }
+        .records-statement {
+          margin-top: 50px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .footer { 
+          color: black;
+          background-color: #b3b3b3;
+          padding: 20px;
+          margin-top: 50px !important;
+          font-size: 10px !important;
+          line-height: 18px;
+        }
+        .footer-content {
+          padding: 10px;
+        }
+        .margin-top { margin-top: 30px !important;}
+        .bold { font-weight: bold; }
+        .date { font-size: 10px !important}
+        .added-value { 
+          font-size: 48px;
+          font-weight: bold;
+          color: #387ef5;
+          margin-bottom: 25px;
+        }
+      </style>
+      <div class="container">
+        <div class="header-container">
+          <img src="img/family.png" alt="Company Logo" height="80" />
+        </div>
+        <hr  class="hr-color" />
+        <div>
+          <div class="main-content">
+            <div class="align-center added-value">Added Value!</div>
+            <div class="greeting">Hey $args.name,</div>
+            <div>You just added <span class="bold">$moneyAmount</span> to your $args.companyName mobile card ending in <span class="bold">$args.mobileCardLastFourDigits!</span>!</div>
+            <div class="company-message">args.customCompanyEmailReloadMessage</div>
+            <div class="records-statement">Please keep this email for your records.</div>
+          </div>
+          <div class="footer">
+            <hr />
+            <div class="footer-content">
+              <address>
+                  $args.companyName<br>
+                  $args.companyAddress<br>
+                  $args.companyCity, $args.companyState, $args.companyZipcode<br>
+                  $args.companyPhoneNumber
+                <!-- (args.companyWebsite ? `<a href="${args.companyWebsite}" style="color:#ff8c00;">${args.companyWebsite}</a>`: `<span></span>`) +
+                  (args.companyEmail ? `<a href="${args.companyEmail}" style="color:#ff8c00;">${args.companyEmail}</a>`: `<span></span>`) + -->
+              </address>
+              <br>
+              <br>
+              <footer>***This e-mail message contains information that may be confidential. Unless you are the addressee (or authorized to receive messages for the addressee), you may not use, copy, or disclose this message (or any information contained in it) to anyone. If you have received this message in error, please advise the sender by reply e-mail and delete this message. Thank you.***</footer>
+            </div>
+            <hr />
+          </div>
+        </div>
+      </div>
+
+</ion-content>

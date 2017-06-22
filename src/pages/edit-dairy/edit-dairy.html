@@ -1,0 +1,51 @@
+<!--
+  Generated template for the EditDairy page.
+
+  See http://ionicframework.com/docs/v2/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>edit-dairy</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+    <div class="width-90 align-center">
+    <h3 text-center>Edit {{type}}</h3>
+    <ion-list>
+      <ion-item>
+        <ion-label>Select the {{type}} item to edit</ion-label>
+        <ion-select [disabled]="!values.length" [(ngModel)]="selectedValue" (ionChange)="selectedValueChange($event, x)">
+          <ion-option *ngFor="let x of values; let i = index;" [value]="x">{{x.name}}</ion-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+    <div *ngIf="editOid">
+      <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
+        <ion-item>
+          <ion-label floating>Name</ion-label>
+          <ion-input type="text" formControlName="name"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
+
+        <ion-item margin-vertical *ngIf="COMPANY_DETAILS.DOES_CHARGE_FOR_DAIRY">
+          <ion-label floating>Price</ion-label>
+          <ion-input type="tel" formControlName="price"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.price"></control-messages>
+        
+        <ion-item margin-top>
+          <ion-checkbox formControlName="hasQuantity"></ion-checkbox>
+          <ion-label text-wrap>Does this dairy item have quantities?</ion-label>
+        </ion-item>
+        <button color="primary" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
+      </form>
+    </div>
+    <div *ngIf="editOid" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>
+  </div>
+
+</ion-content>

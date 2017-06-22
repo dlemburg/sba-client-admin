@@ -1,40 +1,74 @@
-import { NgModule, ErrorHandler } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { NgModule, ErrorHandler} from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpModule } from '@angular/http';
+
+// plugins
+import { SplashScreen } from "@ionic-native/splash-screen";
+import { StatusBar } from "@ionic-native/status-bar";
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
+import { File } from '@ionic-native/file';
+
+// both admin and owner
 import { MyApp } from './app.component';
 
-import { AboutPage } from '../pages/about/about';
-import { ContactPage } from '../pages/contact/contact';
-import { HomePage } from '../pages/home/home';
-import { TabsPage } from '../pages/tabs/tabs';
+// services
+import { Authentication } from '../global/authentication.service';
+import { API } from '../global/api.service';
+import { Validation } from '../global/validation';
+import { AsyncValidation } from '../global/async-validation.service';
+import { UtilityService } from '../global/utility.service';
+import { AppDataService } from '../global/app-data.service';
+import { ProcessOrderService } from '../pages/process-order/process-order-store.service';
+import { SocketService } from '../global/socket.service';
+import { ReceiptsService } from '../global/receipts.service';
 
-import { StatusBar } from '@ionic-native/status-bar';
-import { SplashScreen } from '@ionic-native/splash-screen';
+// base-view-controller
+import { BaseViewController } from '../pages/base-view-controller/base-view-controller';
 
 @NgModule({
   declarations: [
     MyApp,
-    AboutPage,
-    ContactPage,
-    HomePage,
-    TabsPage
-  ],
+
+    /*
+    BaseViewController,
+    ControlMessagesComponent,
+    SearchComponent,
+    JsonComponent,
+    DollarIconComponent,
+    CustomValidatorComponent,
+    ProductDetailsComponent
+    */
+],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    HttpModule,
+    IonicModule.forRoot(MyApp),
+    ReactiveFormsModule,
+    FormsModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
-    MyApp,
-    AboutPage,
-    ContactPage,
-    HomePage,
-    TabsPage
+    MyApp
   ],
-  providers: [
+  providers: [    // when put here, don't have to be injected
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    Camera,
+    File,
+    Transfer,
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    UtilityService,
+    Authentication,
+    API,
+    Validation,
+    AsyncValidation,
+    AppDataService,
+    ProcessOrderService,
+    SocketService,
+    ReceiptsService
   ]
 })
 export class AppModule {}

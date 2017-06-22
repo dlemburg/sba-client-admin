@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Reasons For Edit</ion-title>
+
+    <ion-buttons end>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon ios="ios-close" md="ios-close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+  <ion-item *ngFor="let x of reasons; let i = index;">
+    <ion-row>
+      <ion-col text-wrap col-10> {{ x.reason }}</ion-col>
+      <ion-col [ngClass]="{'discounts': x.priceDown, 'price-up': !x.priceDown }" col-2 text-right>
+        <span class="arrow" *ngIf="!x.priceDown"><ion-icon ios="ios-arrow-round-up" md="ios-arrow-round-up"></ion-icon></span>
+        <span class="arrow" *ngIf="x.priceDown"><ion-icon ios="ios-arrow-round-down" md="ios-arrow-round-up"></ion-icon></span>
+
+        {{ x.amount | currency:symbolDisplay:true }}
+      </ion-col>
+    </ion-row>
+  </ion-item>
+</ion-content>

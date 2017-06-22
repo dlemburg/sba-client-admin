@@ -1,0 +1,112 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Transaction Details</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+
+  <!-- date / location -->
+  <ion-card>
+    <h3 margin-top text-center>Transaction Details</h3>
+    <ion-card-content class="internal-info-content">
+      <ion-item><span class="bold">Date: </span> {{ order.purchaseDate | date}}</ion-item>
+      <ion-item><span class="bold">Location: </span>{{ order.locationName }}</ion-item>
+      <ion-item><span class="bold"> Subtotal: </span> {{ order.subtotal | currency:symbolDisplay:true }}</ion-item>
+      <ion-item><span class="bold"> Taxes: </span> {{ order.taxes | currency:symbolDisplay:true }}</ion-item>
+      <ion-item><span class="bold"> Total: </span> {{ order.total | currency:symbolDisplay:true }}</ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- order details -->
+  <ion-card>
+    <ion-card-content>
+      <button ion-item detail-push (click)="showOrders = !showOrders"><span class="bold">Order Details</span> </button>
+        <div text-center *ngIf="showOrders">
+          <ion-item class="width-80" *ngFor="let x of order.products; let i = index;">
+            <ion-row>
+              <ion-col><span class="bold"> {{x.quantity}} <span *ngIf="x.size">{{x.size}}</span> {{x.productName}}</span></ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col *ngIf="x.addons.length" class="font-8">Addons:   
+                <ProductDetails [list]="x.addons"></ProductDetails>     
+              </ion-col>
+            </ion-row>
+
+            <ion-row>
+              <ion-col *ngIf="x.flavors.length" class="font-8"> Flavors:
+                <ProductDetails [list]="x.flavors"></ProductDetails>     
+              </ion-col>
+            </ion-row>
+
+            <ion-row>
+              <ion-col *ngIf="x.dairy.length" class="font-8"> Dairy:
+                <ProductDetails [list]="x.dairy"></ProductDetails>     
+              </ion-col>
+            </ion-row>
+
+             <ion-row>
+              <ion-col *ngIf="x.sweetener.length" class="font-8"> Sweetener:
+                <ProductDetails [list]="x.sweetener"></ProductDetails>     
+              </ion-col>
+            </ion-row>
+
+             <ion-row>
+              <ion-col *ngIf="x.variety.length" class="font-8"> Variety:
+                <ProductDetails [list]="x.variety"></ProductDetails>     
+              </ion-col>
+            </ion-row>
+
+            <div margin-top text-center><button ion-button outline color="primary" (click)="navProduct(x)">View {{x.productName}} details</button></div>
+          </ion-item>
+        </div>
+    </ion-card-content>
+  </ion-card>
+
+
+  <!-- edit details -->
+  <ion-card>
+    <ion-card-content>
+      <div *ngIf="order.isEdited">
+        <button ion-item detail-push (click)="showEdits = !showEdits"><span class="bold">*Order Edited*: Edit Details</span> </button>
+        <div class="width-80 align-center">
+          <ion-item *ngIf="showEdits">
+            <div><span class="bold">Original Price:</span> {{ order.oldPrice | currency:symbolDisplay:true }} </div>
+            <div><span class="bold">New Price:</span> {{ order.newPrice | currency:symbolDisplay:true }} </div>
+            <div><span class="bold">Reason for Edit:</span> {{ order.isEditedReason }} </div>
+          </ion-item>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+
+  <!-- reward details -->
+  <ion-card>
+    <ion-card-content>
+      <div text-center *ngIf="order.isRewardUsed">
+      <button ion-item detail-push (click)="getRewards()"><span class="bold">Rewards Used</span> </button>
+          <div class="width-80 align-center" *ngIf="showRewards">
+            <ion-item *ngFor="let x of rewards; let i = index;">
+              <div><span class="bold">Name: </span> {{x.name}}</div>
+              <div><span class="bold">Description: </span> {{x.description}}</div>
+              <div>
+                <span class="bold">Reward Type: </span>
+                <span *ngIf="x.isRewardAll"> All</span>
+                <span *ngIf="!x.isRewardAll"> Individual</span>
+              </div>
+              <div class="rejected-reward" *ngIf="x.isRewardRejected"><span class="bold">Rejected reason:</span> {{x.isRewardRejectedReason}}</div>
+              <div text-center>
+                <button margin-top ion-button outline color="primary" (click)="navReward(x)">View {{ x.name }} details</button>
+              </div>
+            </ion-item>
+          </div>      
+        </div>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

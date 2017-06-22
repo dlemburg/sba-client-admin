@@ -1,0 +1,85 @@
+page-rewards {
+     $primary: #387ef5;
+
+
+     .ion-card-top {
+        position: relative;
+        text-align: center;
+        width: 100% !important;
+        border-bottom: 8px solid $primary;
+        border-top: 8px solid $primary;
+    }
+
+    .top-card-footer {
+        position: absolute;
+        top: 60%;
+        font-size: 1.3em;
+        width: 100%;
+        font-weight: bold;
+        color: #fff;
+    }
+    .border-right {
+        border-right: 3px solid white;
+    }
+
+    .logo {
+        position: absolute;
+        top: 20%;
+        font-size: 1.3em;
+        width: 100%;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .points-number {
+        font-size: 1.8em;
+    }
+
+    .reward-card-container {
+        width: 80% !important;
+        margin: auto;
+    }
+
+    .reward-card {
+        border-radius: 0px !important;
+        position: relative;
+        width: 100%;
+        margin-top: 40px;
+    }
+
+    .reward-card-title {
+        position: absolute;
+        top: 30%;
+        font-size: 34px;
+        width: 100%;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .reward-card-expiry {
+        font-size: 16px;
+        position: absolute;
+        top: 90%;
+        width: 100%;
+        color: #fff;
+    }
+
+    .reward-card-expiry span {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    .reward-header {
+        position: absolute;
+        top: 0;
+        font-size: 12px;
+        padding: 8px;
+        width: 100%;
+        text-align: center;
+        margin: auto;
+        color: white;
+        background-color: map-get($colors, primary)
+    }
+
+   
+}

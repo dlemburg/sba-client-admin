@@ -1,19 +1,21 @@
 import { Component } from '@angular/core';
+import { Authentication } from '../../global/authentication.service';
+import { AuthUserInfo } from '../../models/models';
+import { IonicPage } from 'ionic-angular';
 
-import { AboutPage } from '../about/about';
-import { ContactPage } from '../contact/contact';
-import { HomePage } from '../home/home';
-
+@IonicPage()
 @Component({
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
+  tab1Root: Component = 'ProcessOrderPage';
+  tab2Root: Component = 'OrderAheadDashboardPage';
+  tab3Root: Component = 'OwnerPage';
+  isOwner: boolean = false;
+  auth: AuthUserInfo;
 
-  tab1Root = HomePage;
-  tab2Root = AboutPage;
-  tab3Root = ContactPage;
-
-  constructor() {
-
+  constructor(private authentication: Authentication) {
+      this.auth = this.authentication.getCurrentUser();
+      this.auth.role === "Owner" ? this.isOwner = true : this.isOwner = false;
   }
 }

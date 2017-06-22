@@ -1,0 +1,45 @@
+page-owner {
+    ion-card {
+        position: relative;
+        text-align: center;
+        border-radius: 8px !important;
+        height: 25vh;
+        //color: map-get($colors, primary);
+    }
+
+    ion-card img {
+        height: 26vh;
+    }
+
+    .card-title {
+        position: absolute;
+        top: 26%;
+        font-size: 34px;
+        width: 100%;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .card-title-settings {
+        font-size: 24px;
+        top: 36%;
+    }
+
+    .card-footer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: map-get($colors, primary);
+        color: white;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        margin: auto;
+    }
+
+    .add-btn {
+        border-right: 1px solid white;
+    }
+
+    
+}

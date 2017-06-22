@@ -1,0 +1,29 @@
+page-order-ahead-dashboard {
+    .arriving-time {
+        color: map-get($colors, danger);
+    }
+
+    .purchase-date {
+        font-size: 12px;
+    }
+
+    .order-title {
+        font-size: 16px !important;  
+    }
+
+    .purchase-item-container {
+        border-bottom: 1px solid lightgray !important;
+        border-top: 1px solid lightgray !important;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .process-btn {
+        position: relative !important;
+        bottom: 10px !important;
+    }
+
+    .name, .arriving {
+        font-size: 12px !important;
+    }
+}

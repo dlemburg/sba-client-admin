@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>{{ rewardDetails.name }}</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+   <div class=" reward-card-container">
+      <ion-card class=" reward-card" no-padding no-margin text-center>
+        <!-- <img src="{{rewardDetails.img}}"/> -->
+        <img src="img/family.png" />
+        <div class="reward-card-title">{{rewardDetails.name}}</div>
+        <div margin-vertical class="reward-expiry">
+            <span>{{ rewardDetails.startDate | date }} </span> -- <span> {{ rewardDetails.expiryDate | date }}</span>
+        </div>      
+      </ion-card>
+      <ion-item margin-top text-wrap>
+        <div text-center class="description-title">Description</div>
+        <div>{{ rewardDetails.description }}</div>
+      </ion-item>
+  </div>
+  <ion-card>
+    <ion-card-header text-center><div class="internal-info-header">Internal Information</div></ion-card-header>
+    <ion-card-content class="internal-info-content">
+      <ion-item no-lines><span>Processing Type: </span> {{ rewardDetails.processingType }} </ion-item>
+      <ion-item no-lines *ngIf="rewardDetails.discountType"><span> Discount Type: </span> {{ rewardDetails.discountType }} </ion-item>
+      <ion-item no-lines *ngIf="rewardDetails.discountRule"><span> Discount Rule: </span>{{ rewardDetails.discountRule }} </ion-item>
+      <ion-item no-lines *ngIf="rewardDetails.discountAmount">
+        <span *ngIf="rewardDetails.discountType !== DISCOUNT_TYPE.NEW_PRICE"><span> Discount Amount ({{ rewardDetails.discountType }}): </span> </span> 
+        <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.NEW_PRICE">New price: {{ rewardDetails.discountAmount | currency:symbolDisplay:true }}</span>
+        <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.MONEY"> - {{ rewardDetails.discountAmount | currency:symbolDisplay:true }} regular price.</span>
+        <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.PERCENT"> {{ rewardDetails.discountAmount }}</span>
+      </ion-item>
+      <!-- if Date-Time-Range -->
+      <ion-item no-lines *ngIf="rewardDetails.dateRuleDays"><span> Customer visit days:  </span>{{ rewardDetails.dateRuleDays }} </ion-item>
+      <ion-item no-lines *ngIf="rewardDetails.dateRuleTimeStart"><span> Customer visit time-of-day start:  </span>{{ rewardDetails.dateRuleTimeStart | date }} </ion-item>
+      <ion-item no-lines *ngIf="rewardDetails.dateRuleTimeEnd"><span> Customer visit time-of-day end: </span>{{ rewardDetails.dateRuleTimeEnd | date }} </ion-item>
+      
+      <!-- If Product -->
+      <ion-item no-lines *ngIf="rewardDetails.productName"><span> Product: </span>{{ rewardDetails.productName }} </ion-item>
+      <!--<ion-item no-lines *ngIf="rewardDetails.productPrice"><span>Regular Price: </span>{{ rewardDetails.productPrice }} </ion-item> -->
+    </ion-card-content>
+  </ion-card>
+</ion-content>

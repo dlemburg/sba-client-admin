@@ -14,3 +14,219 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+
+/*
+.scroll-content {
+    background-color: white !important;
+}
+*/
+/*
+ ion-menu {
+     background-color: black !important;
+ }
+ */
+
+ $background-img : url(../../../img/mountains.jpg) no-repeat;
+ $danger : map-get($colors, danger);
+
+ .menu {
+     background-color: map-get($colors, dark );
+ }
+
+ .menu .menu-list > button {
+     background-color: map-get($colors, dark ) !important;
+     color: white;
+ }
+
+
+.hover {
+    cursor: pointer;
+}
+
+.red {
+    border: 1px solid red;
+}
+.blue {
+    border: 1px solid blue;
+}
+
+.margin-top {
+    margin-top: 40px !important;
+}
+
+.overflow {
+    overflow: hidden;
+    text-overflow: ellipsis !important;
+}
+
+.vertical-align > * {
+    display: flex !important;
+   // align-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    justify-content: center;
+}
+
+
+.icon-facebook {
+    color: blue;
+    font-size: 24px;
+}
+.icon-twitter {
+    color: lightblue;
+    font-size: 24px;
+}
+.icon-instagram {
+    color: tan;
+    font-size: 24px;
+}
+
+.background-login {
+    background: $background-img !important;
+    background-size: cover !important;
+}
+
+.scan-barcode-btn {
+    height: 50px;
+    font-size: 20px;
+    margin-top: 1vh;
+    //width: 40%;
+    font-weight: bold;
+    border: 1px solid blue !important;
+}
+.calories { 
+    color: map-get($colors, primary );
+    font-weight: bold;
+    padding: 5px;
+}
+
+
+.submit-footer-btn-container {
+    background-color: map-get($colors, primary) !important;
+    padding: none !important;
+}
+
+.submit-footer-btn {
+    height: 50px;
+    font-size: 24px;
+    font-weight: bold;
+    border-top: none !important;
+    width: 100% !important;
+}
+
+.footer-btn {
+    height: 70px;
+    font-size: 24px;
+    font-weight: bold;
+    border-top: none !important;
+    width: 100% !important;
+}
+
+.what-is-this {
+    position: relative;
+    left: 20px;
+    color: map-get($colors , primary );
+    font-size: 10px;
+}
+
+.arrow-right {
+    position: relative;
+    left: 15px;
+}
+
+.bold {font-weight: bold !important;}
+
+.width-25 { width: 25% !important; }
+.width-50 { width: 50% !important; }
+.width-80 { width: 80% !important; }
+.width-90 { width: 90% !important; }
+.width-100 {width: 100% !important; }
+
+.align-center {
+    text-align: center !important;
+    margin: auto !important;
+}
+
+.font-20 {font-size: 20px;}
+.font-12 { font-size: 12px;}
+.font-8 {font-size: 8px; }
+
+ .error-msg {
+    color: $danger !important;
+}
+
+.dollar-sign {
+    font-weight: bold;
+    font-size: 20px;
+    margin-right: 5px;
+    // color: black !important;
+    // border: 1px solid red !important;
+}
+
+
+.no-scroll .scroll-content {
+    overflow: hidden;
+}
+
+.align-left {
+    text-align: left !important;
+}
+
+.outline {
+    border: 2px solid map-get($colors, primary);
+}
+
+ .discounts {
+    color: map-get($colors, danger);
+    font-weight: bold;
+    font-style: italic;
+}
+.price-up {
+    color: map-get($colors, primary);
+}
+
+.rounded-edges {
+    border-radius: 6px !important;
+}
+
+.background {
+    //background: $background-img !important;
+    background-size: cover !important;
+}
+
+.total {
+    color: map-get($colors, primary) !important;
+}
+
+.selected {
+    background-color: map-get($colors, primary) !important;
+    color: white !important;
+}
+
+// when near an icon  <span class="btn-text">the btn text</span>
+.btn-text {
+    // position: relative !important;
+    // left: 12px !important;
+    padding-left: 8px;
+}
+
+
+
+/* using flexbox to give vertical spacing 1:1:1
+
+scroll-content {
+    display: flex;
+    flex-direction: column;
+}
+
+ion-grid {
+    padding: 0;
+    height: 100%;
+}
+
+ion-row {
+    flex: 1;
+}
+
+
+*/

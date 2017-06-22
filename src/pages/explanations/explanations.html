@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-navbar>
+    <button (click)="dismissModal()" ion-button>
+      <ion-icon name="arrow-back"></ion-icon>
+    </button>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <ion-item *ngIf="!explanations.length">No explanations to display</ion-item>
+  <ion-list margin-top>
+    <ion-item text-wrap *ngFor="let x of explanations; let i = index;">
+      <div class="bold">{{ x.name }}</div>
+      <div> {{ x.description }}</div>
+    </ion-item>
+  </ion-list>
+</ion-content>

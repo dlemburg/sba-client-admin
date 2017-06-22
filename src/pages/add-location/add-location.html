@@ -1,0 +1,234 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Add Location</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding  class="width-100">
+    <h3 text-center>Add Location</h3>
+    <div class="width-90 align-center">
+
+      <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
+        <ion-item>
+          <ion-label floating>Location Name (i.e.: Your company name + city)</ion-label>
+          <ion-input formControlName="name" type="text"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
+
+        <ion-item margin-top>
+          <ion-label floating>Phone Number</ion-label>
+          <ion-input formControlName="phoneNumber" type="text"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.phoneNumber"></control-messages>
+
+        <ion-item margin-top>
+          <ion-label floating>Address</ion-label>
+          <ion-input formControlName="address" type="text"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.address"></control-messages>
+        <ion-item>
+          <ion-label floating>City</ion-label>
+          <ion-input formControlName="city" type="text"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.city"></control-messages>
+        <ion-item>
+          <ion-label>State</ion-label>
+          <ion-select formControlName="state">
+            <ion-option *ngFor="let x of states; let i = index;" [value]="x">{{ x }}</ion-option>
+          </ion-select>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.state"></control-messages>
+        <ion-item>
+          <ion-label floating>Zip Code</ion-label>
+          <ion-input formControlName="zipcode" type="text"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.zipcode"></control-messages>
+
+        <ion-item margin-top>
+          <ion-label floating>Google maps plugin</ion-label>
+          <ion-input type="text"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.latAndLong"></control-messages>
+
+        <ion-item margin-top>
+          <ion-label floating>Location Password (optional)</ion-label>
+          <ion-input formControlName="password" type="password"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.password"></control-messages>
+        <ion-item>
+          <ion-label floating>Re-enter Location Password (optional)</ion-label>
+          <ion-input formControlName="password2" type="password"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.passsword2"></control-messages>
+
+      <!-- populate with hours here -->
+        <h4 margin-top text-center>Hours</h4>
+          <div *ngIf="locations.length">
+            <ion-item class="outline">
+              <ion-label>Populate hours from another location</ion-label>
+              <ion-select [(ngModel)]="selectedLocation" [ngModelOptions]="{standalone: true}" (ionChange)="locationChanged(x)">
+                <ion-option *ngFor="let x of locations; let i = index;" [value]="x">{{ x.name }}</ion-option>
+              </ion-select>
+            </ion-item>
+          </div>
+
+          <ion-row margin-top>
+            <ion-col col-3 > Sunday </ion-col>
+              <ion-col col-3 *ngIf="myForm.controls.sundayOpen.value !== 'closed'">
+                <ion-item>
+                  <ion-datetime formControlName="sundayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+                </ion-item>
+                <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.sundayOpen"></control-messages>
+                
+              </ion-col>
+              <ion-col col-3 *ngIf="myForm.controls.sundayOpen.value !== 'closed'">
+                <ion-item>
+                    <ion-datetime formControlName="sundayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+                </ion-item>
+                <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.sundayClose"></control-messages>
+              </ion-col>
+            <ion-col text-center col-6 *ngIf="myForm.controls.sundayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
+            <ion-col class="align-center close-toggle">
+              <ion-label>Closed </ion-label>
+              <ion-toggle class="align-center" color="danger" checked="false" (ionChange)="closedToggle($event, 0)"></ion-toggle>
+            </ion-col>
+          </ion-row>
+
+          <ion-row margin-top>
+            <ion-col col-3 > Monday </ion-col>
+            <ion-col col-3 *ngIf="myForm.controls.mondayOpen.value !== 'closed'">
+              <ion-item>
+                <ion-datetime formControlName="mondayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.mondayOpen"></control-messages>
+            </ion-col> 
+            <ion-col col-3 *ngIf="myForm.controls.mondayOpen.value !== 'closed'">
+              <ion-item>
+                  <ion-datetime formControlName="mondayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.mondayClose"></control-messages>
+            </ion-col>
+            <ion-col text-center col-6 *ngIf="myForm.controls.mondayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
+
+            <ion-col class="align-center close-toggle">
+              <ion-label>Closed </ion-label>
+              <ion-toggle class="align-center" color="danger" checked="false" (ionChange)="closedToggle($event, 1)"></ion-toggle>
+            </ion-col>
+          </ion-row>
+
+          <ion-row margin-top>
+            <ion-col col-3 > Tuesday </ion-col>
+            <ion-col col-3 *ngIf="myForm.controls.tuesdayOpen.value !== 'closed'">
+              <ion-item>
+                <ion-datetime formControlName="tuesdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.tuesdayOpen"></control-messages>
+            </ion-col> 
+            <ion-col col-3 *ngIf="myForm.controls.tuesdayOpen.value !== 'closed'">
+              <ion-item>
+                  <ion-datetime formControlName="tuesdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.tuesdayClose"></control-messages>
+            </ion-col>
+            <ion-col text-center col-6 *ngIf="myForm.controls.tuesdayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
+
+            <ion-col class="align-center close-toggle">
+              <ion-label>Closed </ion-label>
+              <ion-toggle class="align-center" color="danger" checked="false" (ionChange)="closedToggle($event, 2)"></ion-toggle>
+            </ion-col>
+          </ion-row>
+
+          <ion-row margin-top>
+            <ion-col col-3 > Wednesday </ion-col>
+            <ion-col col-3 *ngIf="myForm.controls.wednesdayOpen.value !== 'closed'">
+              <ion-item>
+                <ion-datetime formControlName="wednesdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.wednesdayOpen"></control-messages>
+            </ion-col> 
+            <ion-col col-3 *ngIf="myForm.controls.wednesdayOpen.value !== 'closed'">
+              <ion-item>
+                  <ion-datetime formControlName="wednesdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.wednesdayClose"></control-messages>
+            </ion-col>
+            <ion-col text-center col-6 *ngIf="myForm.controls.wednesdayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
+
+            <ion-col class="align-center close-toggle">
+              <ion-label>Closed </ion-label>
+              <ion-toggle class="align-center" color="danger" checked="false" (ionChange)="closedToggle($event, 3)"></ion-toggle>
+            </ion-col>
+          </ion-row>
+
+          <ion-row margin-top>
+            <ion-col col-3 > Thursday </ion-col>
+            <ion-col col-3 *ngIf="myForm.controls.thursdayOpen.value !== 'closed'">
+              <ion-item>
+                <ion-datetime formControlName="thursdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.thursdayOpen"></control-messages>
+            </ion-col> 
+            <ion-col col-3 *ngIf="myForm.controls.thursdayOpen.value !== 'closed'">
+              <ion-item>
+                  <ion-datetime formControlName="thursdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.thursdayClose"></control-messages>
+            </ion-col>
+            <ion-col text-center col-6 *ngIf="myForm.controls.thursdayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
+
+            <ion-col class="align-center close-toggle">
+              <ion-label>Closed </ion-label>
+              <ion-toggle class="align-center" color="danger" checked="false" (ionChange)="closedToggle($event, 4)"></ion-toggle>
+            </ion-col>
+          </ion-row>
+
+          <ion-row margin-top>
+            <ion-col col-3 > Friday </ion-col>
+            <ion-col col-3 *ngIf="myForm.controls.fridayOpen.value !== 'closed'">
+              <ion-item>
+                <ion-datetime formControlName="fridayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.fridayOpen"></control-messages>
+            </ion-col> 
+            <ion-col col-3 *ngIf="myForm.controls.fridayOpen.value !== 'closed'">
+              <ion-item>
+                  <ion-datetime formControlName="fridayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.fridayClose"></control-messages>
+            </ion-col>
+            <ion-col text-center col-6 *ngIf="myForm.controls.fridayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
+
+            <ion-col class="align-center close-toggle">
+              <ion-label>Closed </ion-label>
+              <ion-toggle class="align-center" color="danger" checked="false" (ionChange)="closedToggle($event, 5)"></ion-toggle>
+            </ion-col>
+          </ion-row>
+
+          <ion-row margin-top>
+            <ion-col col-3 > Saturday </ion-col>
+            <ion-col col-3 *ngIf="myForm.controls.saturdayOpen.value !== 'closed'">
+              <ion-item>
+                <ion-datetime formControlName="saturdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.saturdayOpen"></control-messages>
+            </ion-col> 
+            <ion-col col-3 *ngIf="myForm.controls.saturdayOpen.value !== 'closed'">
+              <ion-item>
+                  <ion-datetime formControlName="saturdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.saturdayClose"></control-messages>
+            </ion-col>
+            <ion-col text-center col-6 *ngIf="myForm.controls.saturdayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
+
+            <ion-col class="align-center close-toggle">
+              <ion-label>Closed </ion-label>
+              <ion-toggle class="align-center" color="danger" checked="false" (ionChange)="closedToggle($event, 6)"></ion-toggle>
+            </ion-col>
+          </ion-row>
+      <button color="primary"  [disabled]="!myForm.valid" ion-button block margin-top>Submit</button>
+    </form>
+  </div>
+</ion-content>

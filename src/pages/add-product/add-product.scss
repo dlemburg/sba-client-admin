@@ -1,0 +1,14 @@
+page-add-product {
+     textarea {
+        height: 12vh;
+    }
+
+    .number-icon {
+        font-size: 12px;
+        color: map-get($colors, primary);
+        margin-right: 5px;
+        position: relative;
+        bottom: 5px;
+        right: 2px;
+    }
+}

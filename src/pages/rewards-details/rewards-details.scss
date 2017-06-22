@@ -1,0 +1,45 @@
+page-rewards-details {
+      .reward-card-container {
+        width: 80% !important;
+        margin: auto;
+    }
+
+    .reward-card {
+        border-radius: 0px !important;
+        position: relative;
+        width: 100%;
+        margin-top: 40px;
+    }
+
+    .reward-card-title {
+        position: absolute;
+        top: 30%;
+        font-size: 28px;
+        width: 100%;
+        font-weight: bold;
+        color: #fff;
+    }
+
+    .reward-card-expiry {
+        font-size: 0.8em;
+        position: absolute;
+        top: 90%;
+        width: 100%;
+        color: #fff;
+    }
+
+    .internal-info-header {
+        font-size: 20px !important;
+        font-weight: bold !important;
+    }
+
+    .internal-info-content span{
+        font-weight: bold !important;
+        margin-right: 5px;
+    }
+
+    .description-title {
+        font-size: 20px !important;
+        font-weight: bold !important;
+    }
+}

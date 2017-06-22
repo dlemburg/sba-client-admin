@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Select a Product</ion-title>
+
+    <ion-buttons end>
+      <button ion-button icon-only (click)="dismiss()">
+        <ion-icon ios="ios-close" md="ios-close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+  <ion-row text-center>
+    <ion-col *ngFor="let x of products" col-6 text-center>
+      <ion-card class="hover" tappable (click)="selectProductAndDismiss(x)" >
+        <!--<img src="{{x.img}}"/>-->
+        <img src="img/family.png" />
+        <div class="card-title">{{ x.name }}</div>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+</ion-content>

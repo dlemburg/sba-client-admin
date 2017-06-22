@@ -1,16 +1,6 @@
 // Ionic Variables and Theming. For more info, please see:
 // http://ionicframework.com/docs/v2/theming/
-
-// Font path is used to include ionicons,
-// roboto, and noto sans fonts
 $font-path: "../assets/fonts";
-
-
-// The app direction is used to include
-// rtl styles in your app. For more info, please see:
-// http://ionicframework.com/docs/theming/rtl-support/
-$app-direction: ltr;
-
 
 @import "ionic.globals";
 
@@ -34,19 +24,35 @@ $app-direction: ltr;
 // The "primary" color is the only required color in the map.
 
 $colors: (
-  primary:    #488aff,
+  primary:     #387ef5,
   secondary:  #32db64,
   danger:     #f53d3d,
-  light:      #f4f4f4,
-  dark:       #222
+  light:      #f2f2f2,
+  dark:       black,
+  dl-white: white
 );
 
 
 // App iOS Variables
 // --------------------------------------------------
 // iOS only Sass variables can go here
+$tabs-background: map-get($colors, dark );
+$tabs-md-tab-icon-color-active: map-get($colors, primary );
+$tabs-md-tab-text-color-active: map-get($colors, primary );
+$tabs-md-tab-icon-color-inactive: map-get($colors, dl-white );
+$tabs-md-tab-text-color-inactive: map-get($colors, dl-white );
+$tabs-md-tab-color-inactive: map-get($colors, light);
+$background-md-color: map-get($colors, light );
+$background-ios-color: map-get($colors, light );
+$toolbar-background: map-get($colors, dark );
 
+$item-md-detail-push-show: true;
+$item-wp-detail-push-show: true;
 
+$loading-md-background: black;
+$loading-ios-background: black;
+$loading-md-text-color: white;
+$loading-ios-text-color: white;
 
 
 // App Material Design Variables

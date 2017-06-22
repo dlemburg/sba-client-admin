@@ -1,0 +1,59 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Owner</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+    <h3 text-center>Owner Dashboard</h3>
+    <ion-segment [(ngModel)]="category">
+    <ion-segment-button value="add-edit">
+      Add / Edit
+    </ion-segment-button>
+    <!--
+    <ion-segment-button value="edit">
+      Edit
+    </ion-segment-button>
+    -->
+    <ion-segment-button value="settings">
+      Settings
+    </ion-segment-button>
+  </ion-segment>
+  <div [ngSwitch]="category" margin-top>
+    <div *ngSwitchCase="'add-edit'">
+      <ion-row style="border-bottom: 1px solid lightgray;">
+        <ion-col *ngFor="let x of pages" class="" col-6>
+          <ion-card class="hover">
+            <div (click)="nav(x.addComponent, x.type)">
+              <img *ngIf="!x.img" src="img/family.png" />
+              <img *ngIf="x.img" [src]="x.img"/>
+
+              <div class="card-title">{{ x.name }}</div>
+            </div>
+            <div class="card-footer align-center">
+              <ion-row>
+                <ion-col tappable class="add-btn align-center" text-center *ngIf="x.addComponent" (click)="nav(x.addComponent, x.type)">ADD</ion-col>
+                <ion-col tappable text-center *ngIf="x.editComponent" (click)="nav(x.editComponent, x.type)">EDIT</ion-col>
+              </ion-row>
+            </div>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </div>
+    <div *ngSwitchCase="'settings'">
+      <ion-row style="border-bottom: 1px solid lightgray;">
+        <ion-col *ngFor="let x of settings" class="" col-6>
+          <ion-card class="hover" tappable (click)="nav(x.component, x.type)">
+            <img *ngIf="!x.img" src="img/family.png" />
+             <img *ngIf="x.img" [src]="x.img"/>
+            <div text-wrap class="card-title card-title-settings">{{ x.name }}</div>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+</ion-content>

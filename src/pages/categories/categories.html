@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Categories</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<!-- style="flex-wrap: wrap;" -->
+<!-- example of iteration that will fill to next line; couldn't figure out using ion-list, ion-item
+  the above flex-wrap should be a start w/o having to split into 2 arrays. this works for now
+ -->
+<ion-content padding>
+  <ion-item *ngIf="!categories.length">No categories to display</ion-item>
+  <ion-row style="border-bottom: 1px solid lightgray;">
+    <ion-col *ngFor="let x of categories" class="" col-6>
+      <ion-card tappable class="hover" (click)="navProductsList(x)">
+        <img src="img/family.png" />
+        <!-- <img src="{{x.img}}"/> -->
+        <div class="card-title">{{ x.name }}</div>
+      </ion-card>
+    </ion-col>
+  </ion-row>
+</ion-content>

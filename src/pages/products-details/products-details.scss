@@ -1,0 +1,30 @@
+page-products-details {
+    $primary: map-get($colors, primary);
+    
+    .logo {
+        position: absolute;
+        top: 15%;
+        font-size: 16px;
+        width: 100%;
+        font-weight: bold;
+        color: #fff;
+    }
+    .product-name {
+        position: absolute;
+        top: 60%;
+        font-size: 28px;
+        width: 100%;
+        font-weight: bold;
+        color: #fff;
+    }
+    .ion-card-top {
+        position: relative;
+        text-align: center;
+        width: 100% !important;
+    }
+
+    .product-description {
+        background-color: map-get($colors, light);
+    }
+
+}

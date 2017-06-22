@@ -1,0 +1,18 @@
+page-edit-location {
+    .bottom {
+        line-height: 4 !important;
+    }
+
+    .custom-input {
+        border: none !important;
+        height: 50px;
+        width: 100%;
+        font-size: 16px;
+        text-align: center;
+    }
+    .close-toggle {
+        position: relative;
+        bottom: 10px;
+        left: 5vw;
+    }
+}

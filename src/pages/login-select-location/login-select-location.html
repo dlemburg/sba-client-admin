@@ -1,0 +1,39 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Select a location</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <!-- locations {name: string, oid: number, hasPassword: boolean} -->
+    <ion-item>
+      <ion-label>Locations</ion-label>
+      <ion-select [(ngModel)]="selectedLocation">
+        <ion-option *ngFor="let x of locations" [value]="x">{{ x.name }}</ion-option>
+      </ion-select>
+    </ion-item>
+    <div margin-top *ngIf="selectedLocation && selectedLocation.hasPassword">
+      <ion-item text-center>Please enter the location password</ion-item>
+      <ion-item text-center>
+        <ion-label floating>Password</ion-label>
+          <ion-input type="password" [(ngModel)]="password"></ion-input>
+      </ion-item>
+    </div>
+
+    
+</ion-content>
+ <ion-footer>
+  <ion-toolbar>
+    <ion-row text-center>
+      <ion-col col-6>
+        <button class="width-80" ion-button (click)="dismissBack()">Back</button>
+      </ion-col>
+      <ion-col col-6>
+        <button ion-button class="width-80" (click)="submit()">Submit</button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

@@ -1,0 +1,21 @@
+page-app-images {
+
+    ion-card {
+        position: relative;
+        text-align: center;
+        border-radius: 8px !important;
+        //max-height: 60vh;
+        //color: map-get($colors, primary);
+    }
+
+    .img {
+        height: 100%;
+        width: 100%;
+        border-radius: 8px !important;
+    }
+
+    .label {
+        font-size: 16px;
+        padding: 6px;
+    }
+}

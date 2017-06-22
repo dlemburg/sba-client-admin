@@ -1,0 +1,146 @@
+  
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="navExplanations()">
+        <ion-icon ios="ios-help" md="ios-help"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Edit Reward</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding class="width-100">
+  <div class="width-90 align-center">
+    <h2 text-center>Edit Reward</h2>
+    <ion-list>
+      <ion-item class="outline">
+        <ion-label>Select the reward to edit</ion-label>
+        <ion-select [disabled]="!values.length" [(ngModel)]="editOid" (ionChange)="editValueChange()">
+          <ion-option *ngFor="let x of values; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
+        </ion-select>
+      </ion-item>
+    </ion-list>
+
+    <h4 text-center>Descriptive Info</h4>
+    <div *ngIf="editOid" class="width-80 align-center">
+      <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value)">
+        <ion-item>
+          <ion-label floating>Reward Name</ion-label>
+          <ion-input formControlName="name" type="text"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
+
+        <ion-item margin-top>
+          <ion-label floating>Img</ion-label>
+          <ion-input formControlName="img" type="file"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.img"></control-messages>
+        <ion-item margin-top>
+          <ion-label class="text-area-label" stacked>Description</ion-label>
+          <ion-textarea formControlName="description"></ion-textarea>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.description"></control-messages>
+        <ion-item margin-top>
+          <ion-label class="text-area-label" stacked>Exlusions</ion-label>
+          <ion-textarea formControlName="exclusions"></ion-textarea>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.exclusions"></control-messages>
+
+        <!-- automatic or manual -->
+        <h4 margin-top text-center>Processing Type</h4>
+        <ion-row text-center>
+          <ion-col col-6>
+              <button type="button" class="width-80" color="primary" (click)="setProcessingType(PROCESSING_TYPE.MANUAL)" ion-button margin-top>{{ PROCESSING_TYPE.MANUAL }}</button>
+          </ion-col>
+          <ion-col col-6>
+              <button type="button" class="width-80" color="primary" (click)="setProcessingType(PROCESSING_TYPE.AUTOMATIC)" ion-button margin-top>{{ PROCESSING_TYPE.AUTOMATIC }}</button>
+          </ion-col>
+        </ion-row>
+
+
+      <!-- if processingType === 'automatic'-->
+      <div margin-top *ngIf="myForm.controls.processingType.value === PROCESSING_TYPE.AUTOMATIC">
+        <h4 text-center>Automatic Processing Info</h4>
+
+        <ion-item margin-top>
+          <ion-label>Discount Type</ion-label>
+          <ion-select formControlName="lkpDiscountTypeOid" (ionChange)="discountTypeChanged($event)">
+            <ion-option *ngFor="let x of lkps.discountType; let i = index;" [value]="x.oid">{{ x.value }}</ion-option>            
+          </ion-select>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountTypeOid"></control-messages>
+
+        <ion-item class="width-50" margin-top *ngIf="currentDiscountType">
+            <ion-label *ngIf="currentDiscountType !== DISCOUNT_TYPE.NEWPRICE" floating>
+              <span *ngIf=" currentDiscountType === DISCOUNT_TYPE.MONEY"><dollar-icon></dollar-icon></span> 
+                    Discount Amount ( {{ currentDiscountType }} )
+            </ion-label>
+            <ion-label *ngIf=" currentDiscountType === DISCOUNT_TYPE.NEWPRICE" floating><dollar-icon></dollar-icon> New Price</ion-label>
+            <ion-input formControlName="discountAmount" type="tel"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.discountAmount"></control-messages>
+          
+        <ion-item margin-top>
+          <ion-label>Discount Rule</ion-label>
+          <ion-select formControlName="lkpDiscountRuleOid" (ionChange)="discountRuleChanged($event)">
+            <ion-option *ngFor="let x of lkps.discountRule; let i = index;" [value]="x.oid">{{x.value}}</ion-option>        
+          </ion-select>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountRuleOid"></control-messages>
+
+        
+
+
+        <!-- if product -->
+        <div margin-top *ngIf="currentDiscountRule === DISCOUNT_RULE.PRODUCT">
+          <ion-item>
+            <ion-label>Select the product that is linked to reward</ion-label>
+            <ion-select formControlName="productOid">
+              <ion-option *ngFor="let x of products; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
+            </ion-select>
+          </ion-item>
+          <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.product"></control-messages>
+        </div>
+
+        <!-- if date-range -->
+        <div margin-top *ngIf="currentDiscountRule === DISCOUNT_RULE.DATE">
+            <ion-item margin-top>
+              <ion-label>Customer visitation days</ion-label>
+              <ion-select formControlName="dateRuleDays" multiple="true">
+                <ion-option *ngFor="let x of days; let i = index;" [value]="i">{{x}}</ion-option>        
+              </ion-select>
+            </ion-item>
+            <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleDays"></control-messages>
+
+            <ion-item margin-top>
+              <ion-label>Customer visitation Time of Day Start</ion-label>
+              <ion-datetime displayFormat="hh a" pickerFormat="hh a" formControlName="dateRuleTimeStart"></ion-datetime>
+            </ion-item>
+            <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeStart"></control-messages>
+
+            <ion-item margin-top>
+              <ion-label>Customer visitation Time of Day End</ion-label>
+              <ion-datetime displayFormat="hh a" pickerFormat="hh a" formControlName="dateRuleTimeEnd"></ion-datetime>
+            </ion-item>
+            <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeEnd"></control-messages>
+        </div>
+    </div>
+        <h4 text-center>Reward Start and Expiration Date</h4>
+        <ion-item>
+          <ion-label>Reward Start Date (if today, enter today's date)</ion-label>
+          <ion-datetime displayFormat="MMM DD, YYYY" pickerFormat="YYYY MMMM DD" formControlName="startDate"></ion-datetime>
+        </ion-item>
+        <ion-item>
+          <ion-label>Reward Expiration Date (if today, enter today's date)</ion-label>
+          <ion-datetime displayFormat="MMM DD, YYYY" pickerFormat="YYYY MMMM DD" formControlName="expiryDate" hoursValues="11" minuteValues="59"></ion-datetime>
+        </ion-item>
+      <button color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
+      </form>
+    </div>
+    <div *ngIf="editOid" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>
+  </div>
+</ion-content>

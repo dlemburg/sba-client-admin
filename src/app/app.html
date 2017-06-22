@@ -1,1 +1,18 @@
-<ion-nav [root]="rootPage"></ion-nav>
+<ion-menu [content]="content">  <!-- color="primary" -->
+  <ion-header>
+    <ion-toolbar color="">
+      <ion-title>Dunkin Donuts</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="menu">
+    <ion-list class="menu-list">
+      <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
+       {{p.title}}
+      </button>
+    </ion-list>
+    <div margin-top text-center><button menuClose class="width-50 margin-top" ion-button color="danger" (click)="signOut()">Sign Out</button></div>
+  </ion-content>
+</ion-menu>
+
+<ion-nav #content [root]="rootPage"></ion-nav>

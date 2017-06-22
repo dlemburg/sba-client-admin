@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Rewards</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content no-padding>
+  <div class="rewards-top" text-center>
+     <ion-card class="hover ion-card-top" no-padding no-margin>
+        <img src="img/family.png"/>
+        <div class="logo">Logo</div>
+      </ion-card>
+      <div class="reward-card-container" text-center>
+        <div margin-top *ngIf="!rewards.length">
+          <ion-card>
+            <ion-card-content text-center>No results match your search.</ion-card-content>
+          </ion-card>
+        </div>
+        <ion-card tappable class=" reward-card" (click)="navRewardDetails(x)" *ngFor="let x of rewards" no-padding no-margin>
+        <!--  <img src="{{x.img}}"/> -->
+          <img src="img/family.png"/>
+          <div class="reward-card-title">{{x.name}}</div>
+          <div class="reward-card-expiry">
+            <span>{{ x.startDate | date }} </span> --- <span> {{ x.expiryDate | date }}</span>
+          </div>
+          <div class="reward-header">{{ x.processingType }}</div>
+        </ion-card>
+      </div>
+  </div>
+</ion-content>

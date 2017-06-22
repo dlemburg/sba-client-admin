@@ -1,0 +1,48 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Are you sure?</ion-title>
+  </ion-navbar>
+
+</ion-header>
+<ion-content>
+  <ion-grid>
+    <div class="flex-1 receipt-title">
+      <h3 margin-top class="align-center">Want a receipt?</h3>
+    </div>
+    <div class="flex-1" *ngFor="let x of receiptOptions; let i = index; ">
+      <ion-row *ngIf="x.visible">
+        <div class="align-center col-6">
+          <button [ngClass]="{'selected': receiptType === x.type }"
+                  (click)="onReceiptSelected(x.type)"
+                   margin-top ion-button outline block
+                   class="width-80 align-center">
+                  <span *ngIf="x.type === RECEIPT_TYPES.EMAIL"><ion-icon ios="ios-mail" md="ios-mail"></ion-icon></span>
+                  <span *ngIf="x.type === RECEIPT_TYPES.PRINTER"><ion-icon ios="ios-print" md="ios-print"></ion-icon></span>
+                  <span *ngIf="x.type === RECEIPT_TYPES.TEXT"><ion-icon ios="ios-text" md="ios-text"></ion-icon></span>
+                   
+                  <span class="btn-text">{{ x.type }}</span>
+          </button>
+        </div>
+      </ion-row>
+    </div>
+    <div class="flex-1">
+      <ion-item text-center class="align-center discounts">
+        <div>*Confirming will finalize the transaction*</div>
+        <div>*Receipt is optional*</div>
+      </ion-item>
+    </div>
+  </ion-grid>
+  </ion-content>
+  <ion-footer>
+  <ion-toolbar>
+    <ion-row text-center>
+      <ion-col col-6>
+        <button class="width-80" ion-button (click)="dismissBack()">Back</button>
+      </ion-col>
+      <ion-col col-6>
+        <button ion-button class="width-80" (click)="dismissWithData()">Submit</button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

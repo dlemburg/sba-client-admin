@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>{{ categoryName }}</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+  <ion-list>
+      <ion-item *ngIf="!products.length">No products to display.</ion-item>
+      <ion-item *ngFor="let x of products" class="" >
+        <ion-card class="hover" tappable (click)="navToProductDetails(x)" >
+          <!--<img src="{{x.img}}"/>-->
+          <img src="img/family.png" />
+          <div class="card-title">{{ x.name }}</div>
+        </ion-card>
+      </ion-item>
+  </ion-list>
+</ion-content>

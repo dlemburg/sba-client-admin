@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Enter the 16-digit code to pay</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding class="width-100">
+   <ion-item margin-top color="primary" text-wrap><span class="bold"> Note:</span> 
+      This code should be located above the barcode on the user's Pay Now screen.
+  </ion-item>
+  <div class="width-90 align-center">
+    <ion-item margin-top>
+      <ion-label floating>16-digit code</ion-label>
+      <ion-input [(ngModel)]="paymentID" type="tel"></ion-input>
+    </ion-item>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-row text-center>
+      <ion-col col-6>
+        <button class="width-80" ion-button (click)="dismissBack()">Back</button>
+      </ion-col>
+      <ion-col col-6>
+        <button ion-button class="width-80" (click)="dismissWithData()">Submit</button>
+      </ion-col>
+    </ion-row>
+  </ion-toolbar>
+</ion-footer>

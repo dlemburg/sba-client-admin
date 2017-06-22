@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="navExplanations()">
+        <ion-icon ios="ios-help" md="ios-help"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Add Individual Reward</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding  class="width-100">
+  <ion-item margin-top color="primary" text-wrap><span class="bold"> Note:</span> 
+    All individual rewards will be generated automatically for the user when appropriate. These individual
+    rewards will not be available for everyone; rather, they will be given to the user based on meeting at least one of the following criteria:
+    1.) A reward given for a birthday, 
+    2.) A reward given for the first time a user loads money onto the mobile card, and 3.) A reward given for when 
+    a user crosses the company point threshold amount currently in place. All of these are optional and are up to the company to implement.
+  </ion-item>
+  <div class="width-90 align-center">
+
+    <form margin-top [formGroup]="myForm" (ngSubmit)="submit(myForm.value)" novalidate>
+
+      <!-- general info -->
+      <!-- individual reward type -->
+      <ion-item margin-top>
+        <ion-label>Individual Reward Type</ion-label>
+        <ion-select formControlName="lkpRewardIndividualTypeOid">
+          <ion-option *ngFor="let x of lkps.individualRewardTypes; let i = index;" [value]="x.oid">{{ x.name }}</ion-option>            
+        </ion-select>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpIndividualRewardType"></control-messages>
+      <ion-item>
+        <ion-label floating>Reward Name</ion-label>
+        <ion-input formControlName="name" type="text"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
+      <ion-item margin-top>
+        <ion-label floating>Image</ion-label>
+        <ion-input formControlName="img" type="file"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.img"></control-messages>
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Description</ion-label>
+        <ion-textarea formControlName="description"></ion-textarea>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.description"></control-messages>
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Exlusions</ion-label>
+        <ion-textarea formControlName="exclusions"></ion-textarea>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.exclusions"></control-messages>
+
+
+      <!-- Is free purchase item? 
+      <ion-item margin-top class="width-80">
+        <ion-checkbox formControlName="isFreePurchaseItem"></ion-checkbox>
+        <ion-label>Is this a "one free purchase item (on the order)" reward?</ion-label>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.isFreePurchaseItem"></control-messages>
+      -->
+      <!-- Has expiration date? 
+      <ion-item margin-top class="width-80">
+        <ion-checkbox formControlName="hasExpiryDate"></ion-checkbox>
+        <ion-label>Has expiration date? </ion-label>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.hasExpiryDate"></control-messages>
+
+      <!-- conditional expiry date details 
+      <div margin-top *ngIf="myForm.controls.hasExpiryDate.value">
+        <ion-item>
+          <ion-label>Individual Reward Expiration Date</ion-label>
+          <ion-datetime displayFormat="MMM DD, YYYY" pickerFormat="YYYY MMMM DD" formControlName="expiryDate" hoursValues="11" minuteValues="59"></ion-datetime>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.expiryDate"></control-messages>
+      </div> -->
+      <button color="primary" type="submit" [disabled]="!myForm.valid" ion-button block margin-top>Submit</button>
+    </form>
+  </div>
+</ion-content>

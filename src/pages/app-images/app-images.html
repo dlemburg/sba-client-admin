@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+     <ion-buttons end>
+      <button ion-button icon-only (click)="navExplanations()">
+       <ion-icon ios="ios-help" md="ios-help"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>App Images</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+
+<ion-content padding  class="width-100">
+  <div class="width-90 align-center">
+    <ion-list>
+        <ion-item class="outline">
+          <ion-label>Select the image to add/edit</ion-label>
+          <ion-select [disabled]="!values.length" [(ngModel)]="editValue" (ionChange)="editValueChange()">
+            <ion-option *ngFor="let x of values; let i = index;" [value]="x">{{x.label}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <ion-row *ngIf="editValue.name && appImg">
+        <ion-col>
+          <ion-item  tappable (click)="getImgCordova()">
+            <ion-card item-start>
+              <div text-wrap class="label"> {{ appImg.label }}</div>
+              <div *ngIf="appImg.imgSrc">
+                <img class="img" [src]="appImg.imgSrc" />
+              </div>
+              <div *ngIf="!appImg.imgSrc">
+                <img class="img" src="{{defaultImg}}" />
+              </div>
+            </ion-card>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <button color="primary"  [disabled]="!appImg || !appImg.imgSrc" (click)="submit()" ion-button block margin-top>Submit</button>
+  </div>
+</ion-content>

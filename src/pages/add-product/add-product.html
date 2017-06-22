@@ -1,0 +1,225 @@
+
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="seeExplanations()">
+        <ion-icon ios="ios-help" md="ios-help"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Add Product</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding  class="width-100">
+  <!--<h3 text-center>Add Product</h3>-->
+  
+  <div class="width-90 align-center">
+    <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
+      <ion-item>
+        <ion-label floating>Product Name</ion-label>
+        <ion-input type="text" formControlName="name"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
+
+      <ion-item>
+        <ion-label floating>Img</ion-label>
+        <ion-input type="text" formControlName="img"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.img"></control-messages>
+
+      <ion-item margin-top>
+        <ion-label floating>Calories Low</ion-label>
+        <ion-input formControlName="caloriesLow" type="tel"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.caloriesLow"></control-messages>
+
+      <ion-item>
+        <ion-label floating>Calories High</ion-label>
+        <ion-input formControlName="caloriesHigh" type="tel"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.caloriesHigh"></control-messages>
+
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Description</ion-label>
+        <ion-textarea formControlName="description"></ion-textarea>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.description"></control-messages>
+
+      <!--
+      <ion-item  margin-top>
+        <ion-label text-wrap>Default Product Health Warning</ion-label>
+        <ion-checkbox formControlName="defaultProductHealthWarning"></ion-checkbox>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.defaultProductHealthWarning"></control-messages>
+      -->
+
+      <ion-list>
+        <ion-item margin-top>
+          <ion-label>Category</ion-label>
+          <ion-select formControlName="categoryOid">
+            <ion-option *ngFor="let x of categories;" [value]="x.oid">{{x.name}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.categoryOid"></control-messages>
+
+      <!-- flavors -->
+      <ion-list *ngIf="COMPANY_DETAILS_HAS_FLAVORS">
+        <ion-item>
+          <ion-label>Flavors (optional)</ion-label>
+          <ion-select formControlName="flavors" multiple="true">
+            <!--<ion-option [value]="'all'">ALL</ion-option> -->       
+            <ion-option *ngFor="let x of flavors;" [value]="x.oid">{{x.name}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.flavors"></control-messages>
+
+      <!-- addons -->
+      <ion-list *ngIf="COMPANY_DETAILS.HAS_ADDONS">
+        <ion-item>
+          <ion-label>Add-Ons (optional)</ion-label>
+          <ion-select formControlName="addons" multiple="true">
+            <!--<ion-option [value]="'all'">ALL</ion-option> -->       
+            <ion-option *ngFor="let x of addons;" [value]="x.oid">{{x.name}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.addons"></control-messages>
+
+      <!-- dairy -->
+      <ion-list *ngIf="COMPANY_DETAILS.HAS_DAIRY">
+        <ion-item>
+          <ion-label>Dairy (optional)</ion-label>
+          <ion-select formControlName="dairy" multiple="true">
+            <!--<ion-option [value]="'all'">ALL</ion-option> -->       
+            <ion-option *ngFor="let x of dairy;" [value]="x.oid">{{x.name}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dairy"></control-messages>
+
+      <!-- variety -->
+      <ion-list *ngIf="COMPANY_DETAILS.HAS_VARIETY">
+        <ion-item>
+          <ion-label>Variety (optional)</ion-label>
+          <ion-select formControlName="variety" multiple="true">
+            <!--<ion-option [value]="'all'">ALL</ion-option> -->       
+            <ion-option *ngFor="let x of variety;" [value]="x.oid">{{x.name}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.variety"></control-messages>
+
+      <!-- sweetener -->
+      <ion-list *ngIf="this.COMPANY_DETAILS.HAS_SWEETENER">
+        <ion-item>
+          <ion-label>Sweetener (optional)</ion-label>
+          <ion-select formControlName="sweetener" multiple="true">
+            <!--<ion-option [value]="'all'">ALL</ion-option> -->       
+            <ion-option *ngFor="let x of sweetener;" [value]="x.oid">{{x.name}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.sweetener"></control-messages>
+      
+
+  <!-- dynamic sizesAndPrices -->
+      <ion-list>
+        <ion-item>
+          <ion-label>Does product have a fixed price or multiple sizes/prices?</ion-label>
+          <ion-select [(ngModel)]="sizesAndPricesType" [ngModelOptions]="{standalone: true}"  (ionChange)="onSizesAndPricesTypeChange()">
+            <ion-option *ngFor="let x of sizesAndPricesTypesArr; let i = index;" [value]="x">{{x}}</ion-option>      
+          </ion-select>
+        </ion-item>
+      </ion-list>
+
+      <div *ngIf="sizesAndPricesType === this.SIZES_AND_PRICES_TYPE.FIXED_PRICE">
+        <ion-item>
+          <ion-label floating>Fixed Price</ion-label>
+          <ion-input formControlName="fixedPrice" type="tel"></ion-input>
+        </ion-item>
+        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.fixedPrice"></control-messages>
+      </div>
+      <div *ngIf="sizesAndPricesType === this.SIZES_AND_PRICES_TYPE.SIZES">
+        <ion-list>
+          <ion-item>
+            <ion-label>Sizes</ion-label>
+            <ion-select  multiple="true"  (ionChange)="onSizeChange($event, myForm.controls.sizes)">
+              <ion-option *ngFor="let x of sizes;" [value]="x">{{x.name}}</ion-option>      
+            </ion-select>
+          </ion-item>
+        </ion-list>
+      </div>
+
+      <!-- dynamic size-price array -->
+      <ion-list>
+        <div formArrayName="sizesAndPrices">
+          <div class="width-50 align-center" *ngFor="let x of myForm.controls.sizesAndPrices.controls; let i = index;">
+            <ion-item [formGroupName]="i">
+              <ion-label floating><dollar-icon></dollar-icon> {{x.value.name}} Price</ion-label>
+              <ion-input type="text" formControlName="price"></ion-input>
+            </ion-item>
+            <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.sizesAndPrices"></control-messages>
+          </div>
+        </div>
+      </ion-list>
+      <ion-item margin-top>
+        <ion-label text-wrap floating>Number of free add-ons until charged (hint: enter 999 if all are free; 0 if all are charged)</ion-label>
+        <ion-input formControlName="numberOfFreeAddonsUntilCharged" type="tel"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.numberOfFreeAddonsUntilCharged"></control-messages>
+
+      <ion-item margin-top>
+        <ion-label floating><dollar-icon></dollar-icon>Add-ons price when charged</ion-label>
+      <ion-input formControlName="addonsPriceAboveLimit" type="tel"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.addonsPriceAboveLimit"></control-messages>
+
+      <!---
+      <ion-item margin-top>
+        <ion-label floating><dollar-icon></dollar-icon>  Add Ons Price Below Limit (hint: enter 0 if no cost)</ion-label>
+      <ion-input formControlName="addonsPriceBelowLimit" type="tel"></ion-input>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.addonsPriceBelowLimit"></control-messages>
+      -->
+
+      <div margin-top><h3 text-center>User Tracking Data</h3></div>
+      <ion-list margin-top>
+        <ion-item>
+          <ion-label>Nutrition Level</ion-label>
+          <ion-select formControlName="lkpNutritionOid">
+            <ion-option *ngFor="let x of nutritions" [value]="x.oid">{{x.value}}</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpNutritionOid"></control-messages>
+
+      <ion-list>
+        <ion-item>
+          <ion-label>Season Keyword</ion-label>
+          <ion-select formControlName="lkpSeasonOid">
+            <ion-option *ngFor="let x of seasons;" [value]="x.oid">{{x.value}}</ion-option>        
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpSeasonOid"></control-messages>
+
+      <ion-list>
+        <ion-item>
+          <ion-label>Keywords (select up to 3)</ion-label>
+          <ion-select formControlName="keywords" multiple="true">
+            <ion-option *ngFor="let x of keywords;" [value]="x.oid">{{x.name}}</ion-option>        
+          </ion-select>
+        </ion-item>
+      </ion-list>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.keywords"></control-messages>
+
+      <button color="primary" [disabled]="!myForm.valid" ion-button block margin-top>Submit</button>
+    </form>
+  </div>
+</ion-content>
+

@@ -1,0 +1,391 @@
+<ion-header>
+  <ion-navbar >
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-buttons end>
+      <button class="comment-icon" *ngIf="currentIndex === 1" ion-button icon-only (click)="presentCommentModal()">
+        <ion-icon  ios="ios-create" md="ios-create"></ion-icon>
+      </button>
+      <button class="comment-icon" *ngIf="currentIndex === 1" ion-button icon-only (click)="presentEnterUserPaymentIDModal()">
+        <ion-icon  ios="ios-unlock" md="md-unlock"></ion-icon>
+      </button>
+       <ion-icon *ngIf="currentIndex === 0" class="subtotal-header">
+          <span *ngIf="!order.transactionDetails.subtotal" color="primary">$0.00</span>
+          <span *ngIf="order.transactionDetails.subtotal" color="primary">{{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
+        </ion-icon>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content class="no-scroll" [ngClass]="{'edit-in-progress-full-page': isEditInProgress.status}">
+  <ion-slides (ionSlideDidChange)="slideChanged()">
+
+    <!-- slide 1 -->
+    <ion-slide>
+      <div class="slide-margin-bottom">
+        <ion-row class="header-btns-container">
+
+          <!-- select category button -->
+          <ion-col col-6>
+            <button 
+              (click)="presentCategoriesModal()" 
+              class="width-90 align-center process-order-header-btn" 
+              [ngClass]="{'process-order-header-btn-not-selected': !currentCategoryName, 'process-order-header-btn-selected': currentCategoryName}"
+              ion-button 
+              outline
+              block>
+              <ion-col class="align-center bold" *ngIf="!currentCategoryName">Category </ion-col>
+              <ion-col class="align-center" col-9 *ngIf="currentCategoryName">{{ currentCategoryName }}</ion-col>
+              <ion-col text-left col-3 *ngIf="currentCategoryName"><img class="rounded-edges" src="img/family.png" /></ion-col>
+            </button>
+          </ion-col>
+
+          <!-- select product button -->
+          <ion-col col-6>
+            <button 
+            [disabled]="!canViewProducts" 
+            (click)="presentProductsModal()" 
+            class="width-90 align-center"
+            [ngClass]="{'process-order-header-btn-not-selected': !purchaseItem.selectedProduct.name
+                        , 'process-order-header-btn-selected': purchaseItem.selectedProduct.name}"
+            ion-button
+             outline 
+             block>
+             <ion-row>
+              <ion-col class="bold" *ngIf="!purchaseItem.selectedProduct.name">Product</ion-col>
+              <ion-col class="align-center" col-9 *ngIf="purchaseItem.selectedProduct.name">{{ purchaseItem.selectedProduct.name }}</ion-col>
+              <ion-col text-left col-3 *ngIf="purchaseItem.selectedProduct.name"><img class="rounded-edges" src="img/family.png" /></ion-col>
+            </ion-row>
+            </button>
+          </ion-col>
+        </ion-row>
+
+        <!-- [ngStyle]="{'background': backgroundImg }" -->
+
+
+        <!-- order details -->
+        <div *ngIf="currentCategoryOid && purchaseItem.selectedProduct">
+          <div margin-top class="align-center product-details-container">
+            <div *ngIf="isEditInProgress.status">What would you like to add to the order?</div>
+
+            <!-- sizesAndPrices -->
+            <ion-row col-12>
+              <ion-col col-6>
+                <ion-item *ngIf="productDetails.sizesAndPrices.length">
+                  <ion-label>Size</ion-label>
+                  <ion-select [(ngModel)]="purchaseItem.sizeAndOrPrice" >
+                    <ion-option *ngFor="let x of productDetails.sizesAndPrices; let i = index;" [value]="x">{{ x.name }} &nbsp; {{ x.price | currency:symbolDisplay:true }}</ion-option>
+                  </ion-select>
+                </ion-item>
+                <ion-item *ngIf="!productDetails.sizesAndPrices.length && productDetails.fixedPrice">
+                  <span>Price: </span>
+                  <div text-right>{{ purchaseItem.sizeAndOrPrice.price | currency:symbolDisplay:true }}</div>
+                </ion-item>
+              </ion-col>
+
+              <!-- quantity -->
+              <ion-col col-6>
+                <ion-item *ngIf="purchaseItem.selectedProduct && purchaseItem.selectedProduct.name">
+                  <ion-label>Quantity</ion-label>
+                  <ion-select [(ngModel)]="purchaseItem.quantity">
+                    <ion-option *ngFor="let x of quantities; let i = index;" [value]="x">{{ x }}</ion-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+
+            
+            <ion-row>
+              <!-- addons -->
+              <ion-col>
+                <ion-item *ngIf="productDetails.addonsToClient.length">
+                  <ion-label>Add-ons</ion-label>
+                  <ion-select [(ngModel)]="purchaseItem.addons" multiple="true">
+                    <ion-option *ngFor="let x of productDetails.addonsToClient; let i = index;" [value]="x">{{ x.name }}</ion-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+
+              <!-- flavors -->
+              <ion-col>
+                <ion-item *ngIf="productDetails.flavorsToClient.length">
+                  <ion-label>Flavors</ion-label>
+                  <ion-select [(ngModel)]="purchaseItem.flavors" multiple="true">
+                    <ion-option *ngFor="let x of productDetails.flavorsToClient; let i = index;" [value]="x">{{ x.name }}</ion-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+
+
+            <ion-row>
+              <!-- dairy -->
+              <ion-col>
+                <ion-item *ngIf="productDetails.dairyToClient.length">
+                  <ion-label>Dairy</ion-label>
+                  <ion-select [(ngModel)]="purchaseItem.dairy" multiple="true">
+                    <ion-option *ngFor="let x of productDetails.dairyToClient; let i = index;" [value]="x">{{ x.name }} &nbsp; <span *ngIf="x.price">{{ x.price | currency:symbolDisplay:true }}</span></ion-option>
+                  </ion-select>
+                </ion-item>
+                <!-- dairy quantity -->
+                <div *ngFor="let y of purchaseItem.dairy; let i = index;">
+                  <ion-item *ngIf="y.hasQuantity">
+                    <ion-row>{{ y.name }} quantity?</ion-row>
+                    <ion-row margin>
+                        <ion-col>
+                          <button [ngClass]="{'selected': z == purchaseItem.dairy[i].quantity }"  
+                                  *ngFor="let z of dairyQuantities;" 
+                                  ion-button outline margin-left 
+                                  (click)="selectDairyQuantity(i, z)">{{ z }}</button>
+                        </ion-col>
+                      </ion-row>
+                  </ion-item>
+                </div>
+              </ion-col>
+
+              <!-- variety -->
+              <ion-col>
+                <ion-item *ngIf="productDetails.varietyToClient.length">
+                  <ion-label>Variety</ion-label>
+                  <ion-select [(ngModel)]="purchaseItem.variety" multiple="true">
+                    <ion-option *ngFor="let x of productDetails.varietyToClient; let i = index;" [value]="x">{{x.name}}</ion-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+
+              <!-- sweetener -->
+              <ion-col>
+                <ion-item *ngIf="productDetails.sweetenerToClient.length">
+                  <ion-label>Sweetener</ion-label>
+                  <ion-select [(ngModel)]="purchaseItem.sweetener" multiple="true">
+                    <ion-option *ngFor="let x of productDetails.sweetenerToClient; let i = index;" [value]="x">{{x.name}}</ion-option>
+                  </ion-select>
+                </ion-item>
+                </ion-col>
+            </ion-row>
+
+
+          </div>
+        </div>
+        <button margin-top 
+                *ngIf="!isEditInProgress.status && currentCategoryOid && purchaseItem.selectedProduct && purchaseItem.selectedProduct.name" 
+                class="width-50" 
+                ion-button outline 
+                (click)="addToOrder(purchaseItem)">Add to Order</button>
+        <button *ngIf="isEditInProgress.status" 
+                class="width-50" 
+                ion-button outline
+                class="finish-edit-btn" 
+                (click)="finishEditPurchaseItem()">Finish Edit</button>
+
+       
+        <!-- order summary -->
+        <h3 class="order-summary-header"  *ngIf="order.purchaseItems.length">Order Summary</h3>
+          <!-- move this to a component  -->
+          <div margin-top class="order-card-container width-100">
+            <ion-row text-center>
+              <ion-col *ngFor="let x of order.purchaseItems; let i = index;" col-4 text-center>
+                <ion-card [ngClass]="{'edit-in-progress': isEditInProgress.status && (isEditInProgress.index === i)}" 
+                          class="width-80 align-center cart-order" 
+                          (click)="onEditPurchaseItem(x, i)">
+                  <!-- <img src="{{x.imgSrc}}" /> -->
+                  <img src="img/family.png"/>
+                  <ion-card-content>
+                    <div>
+                      <span class="bold"> {{x.quantity}} </span> 
+                      <span class="bold product-name"> {{ x.selectedProduct.name | uppercase }}<span *ngIf="x.quantity > 1">s</span> </span>
+                      <div><span class="bold"> {{ x.sizeAndOrPrice.name }} {{x.sizeAndOrPrice.price | currency:symbolDisplay:true  }}</span></div>
+
+                      <div class="extras-container">
+                        <!-- remove btn
+                        <button ion-button icon-only (click)="dismiss()">
+                          <ion-icon ios="ios-close" md="ios-close"></ion-icon>
+                        </button>
+                      -->
+                        
+                        <ProductDetails [list]="x.flavors"></ProductDetails>
+                        <ProductDetails [list]="x.addons"></ProductDetails>
+                        <ProductDetails [list]="x.dairy"></ProductDetails>
+                        <ProductDetails [list]="x.variety"></ProductDetails>
+                        <ProductDetails [list]="x.sweetener"></ProductDetails>
+                        
+
+                        <!--
+                        <div>
+                          <span *ngFor="let a of x.flavors; let j = index;">{{ a.name }}<span *ngIf="j !== x.flavors.length - 1">,</span></span>
+                        </div>
+                        <div>
+                          <span *ngFor="let b of x.addons; let k = index;"> {{ b.name }}<span *ngIf="k !== x.addons.length - 1">,</span></span>
+                        </div>
+
+                        <div><span *ngFor="let c of x.dairy; let l = index;"> {{ c.name }}<span *ngIf="l !== x.dairy.length - 1">,</span></span></div>
+
+                        <div><span *ngFor="let d of x.variety; let m = index;"> {{ d.name }}<span *ngIf="m !== x.variety.length - 1">,</span></span></div>
+
+                        <div>
+                          <span *ngFor="let e of x.sweetener; let n = index;"> {{ e.name }}<span *ngIf="n !== x.sweetener.length - 1">,</span></span>
+                        </div>
+                        -->
+                        
+                      </div>
+                      <div *ngIf="x.addons && x.addons.length && x.addonsCost"><span class="bold">Total add-ons cost: {{ x.addonsCost * x.quantity | currency:symbolDisplay:true }} </span></div>
+                    </div>
+                    <button class="" *ngIf="!isEditInProgress.status && isEditInProgress.index !== i" color="danger" ion-button full outline (click)="removePurchaseItemFromOrder(x, i)">Remove</button>
+                    <div *ngIf="isEditInProgress.status && (isEditInProgress.index === i)"  class="edit-in-progress-text">Edit-in-progress</div>
+                  </ion-card-content>
+                </ion-card>
+              </ion-col>
+            </ion-row>
+          </div>
+          <div class=" align-center empty-order-container" margin-top text-center *ngIf="!order.purchaseItems.length">
+            <ion-card class="width-50 align-center">
+              <ion-card-content text-center>Order is empty.</ion-card-content>
+            </ion-card>
+          </div>
+        </div>
+      <ion-footer>
+        <ion-toolbar>
+            <button [disabled]="isEditInProgress.status" (click)="btnSlideChange()" class="footer-btn" color="primary" ion-button block detail-push>Next<ion-icon class="arrow-right" ios="ios-arrow-forward" md="ios-arrow-forward"></ion-icon></button>
+        </ion-toolbar>
+      </ion-footer>
+    </ion-slide>
+
+
+
+
+    <!-- slide 2 -->
+
+    <ion-slide class="">
+      <div class="slide-margin-bottom width-80 align-center">
+        <h4>Complete Transaction</h4>
+        <ion-list class="customer-info-list">
+          <ion-row>
+            <button ion-item (click)="showOrder = !showOrder">Order Items
+              <span *ngIf="order.purchaseItems.length">({{ order.purchaseItems.length }})</span>
+            </button>
+            <div *ngIf="showOrder">
+              <ion-card *ngFor="let x of order.purchaseItems; let i = index;">
+                <ion-card-content>
+                  <div>
+                    <ion-col>
+                      <span>{{ x.quantity }} <span *ngIf="x.sizeAndOrPrice.name">{{ x.sizeAndOrPrice.name }}</span> {{ x.selectedProduct.name }}</span>
+                    </ion-col>
+                     <ion-col>
+                      <span text-right>{{ x.displayPriceWithoutDiscounts | currency:symbolDisplay:true}}</span>
+                    </ion-col>
+                    <!--
+                    <ion-col *ngIf="x.addons.length">
+                      <span text-right>{{ (x.sizeAndOrPrice.price * x.quantity) + (x.addonsCost * x.quantity) | currency:symbolDisplay:true}}</span>
+                    </ion-col>
+                    <ion-col *ngIf="!x.addons.length">
+                      <span text-right>{{ x.sizeAndOrPrice.price * x.quantity | currency:symbolDisplay:true }}</span>
+                    </ion-col>
+                    -->
+                    <ion-col class="discounts" *ngIf="x.discounts"> - {{ x.discounts | currency:symbolDisplay:true }} </ion-col>
+                  </div>
+                </ion-card-content>
+              </ion-card>
+              <div class="font-12">*Price includes the cost of extras</div>
+
+            </div>
+          </ion-row>
+          <ion-row>
+            <button ion-item (click)="showRewards = !showRewards">Rewards 
+              <span *ngIf="order.transactionDetails.rewards.length">({{ order.transactionDetails.rewards.length }})</span>
+            </button>
+          </ion-row>
+          <div *ngIf="showRewards">
+            <ion-card *ngFor="let x of order.transactionDetails.rewards; let i = index;">
+              <ion-card-content>
+                <div  class="width-80 align-center">
+                  <div>
+                    <span class="bold">{{x.name}}</span>
+                  </div>
+                  <div> {{ x.description }} </div>
+                  <div class="discounts" *ngIf="x.discountRule === REWARDS_DISCOUNT_RULE.PRODUCT">
+                    <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.PERCENT || x.discountType === REWARDS_DISCOUNT_TYPE.NEW_PRICE">
+                     <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
+                    </div>
+                    <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.MONEY">
+                     <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
+                    </div>
+                  </div>
+                  <!-- x.discount does not come from server- its a client prop given to track the discount of dtr -->
+                  <div class="discounts" *ngIf="x.discounts && x.discountRule === REWARDS_DISCOUNT_RULE.DATE_TIME_RANGE">
+                    <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.PERCENT"> 
+                      <span>Discount amount on order: </span>{{ x.discount.amount }}%
+                    </div>
+                    <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.MONEY">                     
+                      <span>Discount amount on order: </span> {{ x.discount.amount  | currency:symbolDisplay:true }}
+                    </div>
+                  </div>
+                  <!--
+                  <ion-col width-20>
+                    <button color="danger" ion-button round (click)="onRejectReward(x, i)">Reject</button>
+                  </ion-col>
+                  -->
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </div>
+
+          <!--BUTTONS... REMINDER: only individual rewards can be scanned -->
+          <div>
+            <ion-row text-center>
+              <ion-col col-6>
+                <button class="width-60" margin-top ion-button outline color="primary" (click)="onScanIndividualRewardBarcode()">
+                  <ion-icon class="icon-primary" ios="ios-trophy" md="ios-trophy"></ion-icon><span class="btn-text">Scan Reward</span></button>
+              </ion-col>
+              <ion-col col-6>
+                <div>
+                  <button class="width-80" margin-top ion-button (click)="onScanUserBarcode()" class="scan-barcode-btn-invert-color">
+                     <ion-icon ios="ios-barcode-outline" md="ios-barcode-outline"></ion-icon> <span class="btn-text">Scan User Barcode</span>
+                  </button>
+                </div>
+              </ion-col>
+            </ion-row>
+          </div>
+          <!--
+          <div class="align-center">
+            <button margin-top ion-button color="primary" outline (click)="onScanIndividualRewardBarcode()">Scan Individual Reward</button>
+          </div>
+          -->
+          <ion-item margin-top>
+            <span>Subtotal:</span> 
+            <div tappable (click)="onEditSubtotal()" text-right> 
+              <span *ngIf="order.transactionDetails.subtotal" class="edit-subtotal-background"> {{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
+              <span *ngIf="!order.transactionDetails.subtotal" class="edit-subtotal-background">$0.00</span>
+            </div>
+            <div *ngIf="order.transactionDetails.isEdited" [ngClass]="{'discounts': order.transactionDetails.editAmount < 0, 'price-up': order.transactionDetails.editAmount > 0}" class="subtotal-edit" text-right>
+              <span><button (click)="presentReasonsForEditModal()" class="reasons-for-edit-btn" ion-button outline small>View</button></span>
+              <span>
+                The subtotal has been edited by: {{ order.transactionDetails.editAmount | currency:symbolDisplay:true }}
+              </span>
+
+            </div>
+          </ion-item> 
+           <ion-item>
+              <span>Estimated Tax:</span> 
+              <div text-right> {{ order.transactionDetails.taxes | currency:symbolDisplay:true }}</div>
+            </ion-item>
+            <ion-item *ngIf="order.transactionDetails.rewardsSavings && order.transactionDetails.rewardsSavings > 0">
+              <span>Savings:</span> 
+              <div text-right> {{ order.transactionDetails.rewardsSavings | currency:symbolDisplay:true }}</div>
+            </ion-item>
+            <ion-item>
+              <span>Total:</span> 
+              <div class="inline-total" text-right>{{ order.transactionDetails.total | currency:symbolDisplay:true }}</div>
+            </ion-item>
+          
+        </ion-list>
+      </div>
+      <ion-footer>
+        <ion-toolbar>
+            <button [disabled]="!order.purchaseItems.length || !userData || !sufficientFunds" (click)="submit()" class="footer-btn" color="secondary" ion-button block detail-push>Complete Transaction</button>
+        </ion-toolbar>
+      </ion-footer>
+    </ion-slide>
+  </ion-slides>  
+</ion-content>

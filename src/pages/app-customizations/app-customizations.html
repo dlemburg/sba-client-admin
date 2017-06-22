@@ -1,0 +1,193 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+     <ion-buttons end>
+      <button ion-button icon-only (click)="navExplanations()">
+       <ion-icon ios="ios-help" md="ios-help"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Customizations and Settings</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding class="width-100">
+  <div class="width-90 align-center">
+    <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value)">
+      <!-- food and drink settings -->
+      <h3 text-center margin-top>Food and Drink Settings</h3>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasFlavors"></ion-checkbox>
+        <ion-label text-wrap>Does your company have flavors?</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasAddons"></ion-checkbox>
+        <ion-label text-wrap>Does your company have addons?</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasDairy"></ion-checkbox>
+        <ion-label text-wrap>Does your company have dairy?  (i.e.: cream, whipped cream, etc.)</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasVariety"></ion-checkbox>
+        <ion-label text-wrap>Does your company have variety options?  (i.e.: decaf, regular, etc.)</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasSweetener"></ion-checkbox>
+        <ion-label text-wrap>Does your company have sweetener options?  (i.e.: sugar, splenda, etc.)</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="doesChargeForDairy"></ion-checkbox>
+        <ion-label text-wrap>Does your company charge for some dairy items? (i.e.: soy milk, etc.)</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="doesChargeForAddons"></ion-checkbox>
+        <ion-label text-wrap>Does your company charge for addons?</ion-label>
+      </ion-item>
+
+
+      <!-- reward settings -->
+      <br>
+      <hr />
+      <h3 text-center margin-top>Rewards Settings</h3>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasRewardIndividualBirthday"></ion-checkbox>
+        <ion-label text-wrap>Would you like to give users a free item reward on birthdays?</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasRewardIndividualFirstMobileCardUpload"></ion-checkbox>
+        <ion-label text-wrap>Would you like to give users a free item reward the first time money is uploaded to the mobile card?</ion-label>
+      </ion-item>
+      <!--
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasRewardIndividualPointsThreshold"></ion-checkbox>
+        <ion-label>Would you like to give users a free item reward when going over the point threshold?</ion-label>
+      </ion-item>
+      -->
+
+      <!-- app content: exclusions and product warnings -->
+      <br>
+      <hr />
+      <h3 text-center margin-top>App Content: Exclusions and Product Health Warnings</h3>
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Default product health warning</ion-label>
+        <ion-textarea formControlName="defaultProductHealthWarning"></ion-textarea>
+      </ion-item>
+      <!--
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Default rewards exclusions message</ion-label>
+        <ion-textarea formControlName="defaultRewardsExclusionsMessage"></ion-textarea>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Default Order-Ahead exclusions message</ion-label>
+        <ion-textarea formControlName="defaultOrderAheadExclusionsMessage"></ion-textarea>
+      </ion-item>
+      -->
+
+      <!-- email messages -->
+      <br>
+      <hr />
+      <h3 text-center margin-top>Email Custom Messages</h3>
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Mobile Card Reload Email Message</ion-label>
+        <ion-textarea formControlName="customCompanyEmailReloadMessage"></ion-textarea>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Receipt Message</ion-label>
+        <ion-textarea formControlName="customCompanyEmailReceiptMessage"></ion-textarea>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Message in Footer of All Emails</ion-label>
+        <ion-textarea formControlName="customCompanyEmailFooterMessage"></ion-textarea>
+      </ion-item>
+
+
+      <!-- social media -->
+      <br>
+      <hr />
+      <h3 text-center margin-top>Social Media</h3>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasSocialMediaRewards"></ion-checkbox>
+        <ion-label text-wrap>Would you like to give a discount for social media?</ion-label>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-label floating>If yes, what percentage? ( enter as decimal; i.e.:  5% = 0.05)</ion-label>
+        <ion-input formControlName="socialMediaDiscountAmountPercent" type="text"></ion-input>
+      </ion-item>
+      <ion-item  margin-top>
+        <ion-label text-wrap>Facebook</ion-label>
+        <ion-checkbox formControlName="hasFacebook"></ion-checkbox>
+      </ion-item>
+      <ion-item  margin-top>
+        <ion-label text-wrap>Twitter</ion-label>
+        <ion-checkbox formControlName="hasTwitter"></ion-checkbox>
+      </ion-item>
+      <ion-item  margin-top>
+        <ion-label text-wrap>Instagram</ion-label>
+        <ion-checkbox formControlName="hasInstagram"></ion-checkbox>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-label floating>Social Media Message</ion-label>
+        <ion-input formControlName="socialMediaMessage" type="text"></ion-input>
+      </ion-item>
+
+
+
+
+      <!-- points -->
+      <br>
+      <hr />
+      <h3 text-center margin-top>Points</h3>
+      <ion-item  margin-top>
+        <ion-label floating>Points amount until reward generated</ion-label>
+        <ion-input formControlName="pointsThreshold" type="tel"></ion-input>
+      </ion-item>
+      <ion-item  margin-top>
+        <ion-label floating>Points per fifty cents </ion-label>
+        <ion-input formControlName="pointsPerFiftyCents" type="tel"></ion-input>
+      </ion-item>
+
+      <!-- other -->
+      <br>
+      <hr />
+      <h3 text-center margin-top>Other Settings</h3>
+      <ion-item margin-top>
+        <ion-checkbox formControlName="hasPrinter"></ion-checkbox>
+        <ion-label>Do your locations have a printer for receipts?</ion-label>
+      </ion-item>
+      <ion-item margin-top class="width-80">
+        <ion-checkbox formControlName="acceptsPartialPayments"></ion-checkbox>
+        <ion-label text-wrap>Do you want to accept partial payments (pay with mobile card, and other form of payment)?</ion-label>
+      </ion-item>
+
+      <!-- owner alert (not yet) 
+      <br>
+      <hr />
+      <h3 text-center margin-top>Home page alerts</h3>
+      <ion-item margin-top class="width-80">
+        <ion-checkbox formControlName="hasHomePageAlert"></ion-checkbox>
+        <ion-label>Do you want a home page alert?</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-label floating>If yes, what is the message?</ion-label>
+        <ion-input formControlName="homePageAlertMessage" type="text"></ion-input>
+      </ion-item>
+      <ion-item margin-top class="width-80">
+        <ion-checkbox formControlName="redirectToProductPage"></ion-checkbox>
+        <ion-label>Should the alert redirect to a product page? </ion-label>
+      </ion-item>
+      <ion-item class="outline">
+        <ion-label>If yes, which product? </ion-label>
+        <ion-select formControlName="redirectProductOid">
+          <ion-option *ngFor="let x of products; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
+        </ion-select>
+      </ion-item>
+      -->
+
+      <!-- deal of week not done yet -->
+        <button color="primary" type="submit" [disabled]="!myForm.valid" ion-button block margin-top>Submit</button>
+    </form>
+  </div>
+</ion-content>
