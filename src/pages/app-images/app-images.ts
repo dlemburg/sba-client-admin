@@ -23,30 +23,25 @@ export class AppImagesPage extends BaseViewController {
   auth: AuthUserInfo;
   defaultImg: string = global.defaultImg;
   prependImgString = global.prependImgString;
-  appImgsClone: Array<any> = [];
-  appImg = {
-    label: null,
-    img: null,
-    imgSrc: null,
-    name: null
-  }
+  currentIndex: number = null;
 
-  // names correspond to fields in db
+
+  // 'name' correspond to fields in db
   values = [
-    {label: "'My Card'", name: "homeMyCardImg"},
-    {label: "'Rewards'", name: "homeRewardsImg"},
-    {label: "'Order Ahead'", name: "homeOrderAheadImg"},
-    {label: "'Menu'", name: "homeMenuImg"},
-    {label: "Your Company Logo", name: "logoImg"},
-    {label: "Added-To-Cart", name: "addedToCartImg"},
-    {label: "App Header Bar", name: "appHeaderBarImg"},
-    {label: "Default (fallback)", name: "defaultImg"},
-    {label: "Rewards (top of page)", name: "rewardsPageImg"},
-    {label: "Login Background", name: "loginPageBackgroundImg"},
-    {label: "Order Complete Background", name: "orderCompleteBackgroundImg"},
-    {label: "Order Complete (middle of page)", name: "orderCompleteMiddleOfPageImg"},
+    {label: "'My Card'", name: "homeMyCardImg", img: null, imgSrc: null},
+    {label: "'Rewards'", name: "homeRewardsImg", img: null, imgSrc: null},
+    {label: "'Order Ahead'", name: "homeOrderAheadImg", img: null, imgSrc: null},
+    {label: "'Menu'", name: "homeMenuImg", img: null, imgSrc: null},
+    {label: "Your Company Logo", name: "logoImg", img: null, imgSrc: null},
+    {label: "Added-To-Cart", name: "addedToCartImg", img: null, imgSrc: null},
+    {label: "App Header Bar", name: "appHeaderBarImg", img: null, imgSrc: null},
+    {label: "Default (fallback)", name: "defaultImg", img: null, imgSrc: null},
+    {label: "Rewards (top of page)", name: "rewardsPageImg", img: null, imgSrc: null},
+    {label: "Login Background", name: "loginPageBackgroundImg", img: null, imgSrc: null},
+    {label: "Order Complete Background", name: "orderCompleteBackgroundImg", img: null, imgSrc: null},
+    {label: "Order Complete (middle of page)", name: "orderCompleteMiddleOfPageImg", img: null, imgSrc: null},
   ];
-  editValue = {label: null, name: null};
+  editValue = {label: null, name: null, img: null, imgSrc: null};
 
  constructor(public navCtrl: NavController, 
              public navParams: NavParams, 
@@ -66,47 +61,13 @@ export class AppImagesPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
-    // API get info, if all null -> this.allFieldsEmptyOnEnter = true
     this.auth = this.authentication.getCurrentUser();
-   // this.getImg();
   }
 
-  editValueChange() {
-    //this.editValue;
-    this.appImg = {label: this.editValue.label, name: this.editValue.name, img: null, imgSrc: null};
-    this.getImg();
-    
+  editValueChange(value, index) {
+    // do nothing right now
   }
 
-  getImg() {
-    this.API.stack(ROUTES.getAppImg + `/${this.auth.companyOid}/${this.editValue.name}`, "GET")
-        .subscribe(
-            (response) => {
-              console.log("response.data: ", response.data);
-              if (response.data.appImg) {
-                this.appImg.img = response.data.img;
-                this.downloadImg(this.appImg);
-              }
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
-  }
-
-  // CORDOVA download from node server
-  downloadImg(appImg) {
-    const fileTransfer: TransferObject = this.transfer.create();
-    const url = ROUTES.downloadImg + `?img=${appImg.img}`;
-
-    fileTransfer.download(url, AppDataService.getStorageDirectory + `/${appImg.img}`).then((entry) => {
-      console.log('download complete: ' + entry.toURL());
-      appImg.imgSrc = entry.toURL();
-      // return entry.toURL();
-    }, (err) => {
-      const shouldPopView = false;
-      this.errorHandler.call(this, err, shouldPopView);
-    });
-  }
 
   // cordova
   getImgCordova() {
@@ -127,10 +88,11 @@ export class AppImagesPage extends BaseViewController {
       this.camera.getPicture(options).then((imageData) => {
         console.log("imageData, ", imageData);
        // this.appImg.imgSrc = this.domSanitizer.bypassSecurityTrustResourceUrl(imageData);
-
        // don't need sanitizer b/c used [src] in template instead of src
-        this.appImg.imgSrc = imageData;
-        this.appImg.img = this.editValue.name + `$` + this.auth.companyOid;   // $ serves as separator for server parsing
+
+
+        this.editValue.img = imageData;
+        this.editValue.imgSrc = this.editValue.name + `$` + this.auth.companyOid;
         this.dismissLoading();
       })
     })
@@ -145,19 +107,19 @@ export class AppImagesPage extends BaseViewController {
     this.presentModal('ExplanationsPage', {type: "app_images"});
   }
 
-  uploadImg(appImg): Promise<any> {
+  uploadImg(editValue): Promise<any> {
     console.log("inside cordova");
     return new Promise((resolve, reject) => {
         let options: FileUploadOptions = {
           fileKey: 'company-app-img',  // correlates to name in multer
-          fileName: appImg.img,        // correlates to name it will be saved as
+          fileName: editValue.img,        // correlates to name it will be saved as
           headers: {}
         };
         const fileTransfer: TransferObject = this.transfer.create();
         let res = resolve;
         let rej = reject;
 
-        fileTransfer.upload(appImg.imgSrc, ROUTES.uploadImg, options).then((data) => {
+        fileTransfer.upload(editValue.imgSrc, ROUTES.uploadImg, options).then((data) => {
           console.log("uploaded successfully... resolving now...");
           res(data);
         })
@@ -173,11 +135,9 @@ export class AppImagesPage extends BaseViewController {
     console.log("inside submit");
     this.presentLoading(AppDataService.loading.saving);
     this.platform.ready().then(() => {
-      this.uploadImg(this.appImg).then((data) => {
+      this.uploadImg(this.editValue).then((data) => {
+        this.editValue = { label: null, name: null, img: null, imgSrc: null };
         this.dismissLoading(AppDataService.loading.saved);
-        this.appImg = null;
-        this.editValue = {label: null, name: null};
-        console.log("popup here");
       });
     })
     .catch((err) => {
@@ -188,6 +148,7 @@ export class AppImagesPage extends BaseViewController {
   }
 }
 
+//////////////////////////////// attempt 1 /////////////////////////////////////////////
 
 /*
   getImgSrcChanges(appImgs, appImgsClone) {
@@ -271,6 +232,41 @@ upload(http:Http, file:Blob, name:string, url:string){
           reject(err);
         });
       });
+    });
+  }
+*/
+
+
+//////////////////////////////// attempt 2 ///////////////////////////////////////////
+
+
+/*
+  getImg() {
+    this.API.stack(ROUTES.getAppImg + `/${this.auth.companyOid}/${this.editValue.name}`, "GET")
+        .subscribe(
+            (response) => {
+              console.log("response.data: ", response.data);
+              if (response.data.appImg) {
+                this.appImg.img = response.data.img;
+              }
+            }, (err) => {
+              const shouldPopView = false;
+              this.errorHandler.call(this, err, shouldPopView)
+            });
+  }
+
+  // CORDOVA download from node server
+  downloadImg(appImg) {
+    const fileTransfer: TransferObject = this.transfer.create();
+    const url = ROUTES.downloadImg + `?img=${appImg.img}`;
+
+    fileTransfer.download(url, AppDataService.getStorageDirectory + `/${appImg.img}`).then((entry) => {
+      console.log('download complete: ' + entry.toURL());
+      appImg.imgSrc = entry.toURL();
+      // return entry.toURL();
+    }, (err) => {
+      const shouldPopView = false;
+      this.errorHandler.call(this, err, shouldPopView);
     });
   }
 */

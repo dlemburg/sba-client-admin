@@ -9,24 +9,25 @@ export class AsyncValidation {
 constructor(private API: API) { }
 
     public isEmailNotUniqueAsync(control: FormControl): any {
-        
-        const email = control.value;
-        this.API.stack(ROUTES.getEmailUnique + `/${email}`, "GET")
-            .subscribe(
-                (response) => {
-                    if (response.data.isUnique) {
+        return (control: FormControl) => {
+            const email = control.value;
+            return this.API.stack(ROUTES.getEmailUnique + `/${email}`, "GET")
+                .subscribe(
+                    (response) => {
+                        if (response.data.isUnique) {
+                            return null;
+                        } else return {isEmailNotUnique: true, options: "Email"}
+                    }, (err) => {
+                        console.log(err);
                         return null;
-                    } else return {isEmailNotUnique: true, options: "Email"}
-                }, (err) => {
-                    console.log(err);
-                    return null;
-                });
+                    });
+        }
     }
 
     public isNameNotUniqueAsync(table: string): any {
         return (control: FormControl) => {
 
-            this.API.stack(ROUTES.getNameUniqueOwner + `/${table}/${control.value}`, "GET")
+            return this.API.stack(ROUTES.getNameUniqueOwner + `/${table}/${control.value}`, "GET")
                 .subscribe(
                     (response) => {
                         if (response.data.isUnique) {
@@ -44,7 +45,7 @@ constructor(private API: API) { }
             // originalValue must have value and not equal the current control.value (b/c on edit, name will always match first value)
             debugger;
             if (originalValue !== null && control.value !== originalValue) {
-                this.API.stack(ROUTES.getNameUniqueOwner + `/${table}/${control.value}`, "GET")
+                return this.API.stack(ROUTES.getNameUniqueOwner + `/${table}/${control.value}`, "GET")
                     .subscribe(
                         (response) => {
                             if (response.data.isUnique) {

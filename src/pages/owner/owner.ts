@@ -80,21 +80,22 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
     }
 
     if (this.COMPANY_DETAILS.HAS_SWEETENER) {
-      pages = [...pages, {name: 'Sweetener', img: null, addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Sweetener"}];
+      pages = [...pages, {name: 'Sweetener', img: 'img/sweetener.jpg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Sweetener"}];
     }
 
     if (this.COMPANY_DETAILS.HAS_FLAVORS) {
-      pages = [...pages, {name: 'Flavors', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Flavors"}];
+      pages = [...pages, {name: 'Flavors', img: 'img/flavors.jpg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Flavors"}];
     }
 
     if (this.COMPANY_DETAILS.HAS_ADDONS) {
-      pages = [...pages, {name: 'Addons', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Addons"}];
+      pages = [...pages, {name: 'Addons', img: 'img/addons.jpg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Addons"}];
     }
 
     return pages;
   }
 
   nav(component, type) {
+    debugger;
     this.navCtrl.push(component, {type: type ? type : null});
   }
 

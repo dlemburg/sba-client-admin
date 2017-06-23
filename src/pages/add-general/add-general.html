@@ -10,7 +10,6 @@
 
 <ion-content padding  class="width-100">
   <div class="width-90 align-center">
-    <h3 text-center>Add {{type}}</h3>
     <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
       <ion-item>
         <ion-label floating>{{type}} Name</ion-label>

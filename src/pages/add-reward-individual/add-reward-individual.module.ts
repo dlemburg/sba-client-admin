@@ -4,7 +4,7 @@ import { AddRewardIndividualPage } from './add-reward-individual';
 
 // imports
 import { ControlMessagesComponentModule } from '../../components/control-messages/control-messages.component.module';
-import { DollarIconComponentModule } from '../../components/dollar-icon.component.module';
+import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-icon.component.module';
 
 
  

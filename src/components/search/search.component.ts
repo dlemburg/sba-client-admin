@@ -11,7 +11,7 @@ import { FormControl} from '@angular/forms'
 // use [formControl] when no parent <form></form>  needed
 export class SearchComponent {
   constructor() {}
-  searchControl = new FormControl();
+  //searchControl = new FormControl();
 
 /* inside ionViewDidEnter()
     this.searchControl.valueChanges.subscribe(value => {

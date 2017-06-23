@@ -4,7 +4,7 @@ import { AddRewardPage } from './add-reward';
 
 // imports
 import { ControlMessagesComponentModule } from '../../components/control-messages/control-messages.component.module';
-import { DollarIconComponentModule } from '../../components/dollar-icon.component.module';
+import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-icon.component.module';
 
 
 @NgModule({

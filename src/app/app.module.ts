@@ -25,22 +25,17 @@ import { ProcessOrderService } from '../pages/process-order/process-order-store.
 import { SocketService } from '../global/socket.service';
 import { ReceiptsService } from '../global/receipts.service';
 
-// base-view-controller
+// Components && base-view-controller
 import { BaseViewController } from '../pages/base-view-controller/base-view-controller';
+import { MyJsonComponent } from '../components/json/json.component';
+import { SearchComponent } from '../components/search/search.component';
 
 @NgModule({
   declarations: [
     MyApp,
-
-    /*
     BaseViewController,
-    ControlMessagesComponent,
-    SearchComponent,
-    JsonComponent,
-    DollarIconComponent,
-    CustomValidatorComponent,
-    ProductDetailsComponent
-    */
+    MyJsonComponent,
+    SearchComponent
 ],
   imports: [
     BrowserModule,

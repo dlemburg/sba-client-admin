@@ -80,7 +80,7 @@ export const ROUTES = {
     getRewardsNameAndOid: '/api/cs/owner/getRewardsNameAndOid',
     getRewardToEdit: '/api/cs/owner/getRewardToEdit',
     editReward: '/api/cs/owner/editReward', 
-    getLocations: '/api/cs/shared/getLocations',
+    getLocations: '/api/cs/shared/getLocationsOwner',
     getRewards: '/api/cs/shared/getRewards',
     getCategories: '/api/cs/shared/getCategories',
     getProducts: '/api/cs/shared/getProducts',

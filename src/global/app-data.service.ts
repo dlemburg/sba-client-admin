@@ -105,4 +105,9 @@ constructor() { }
     public static checkAll(): Array<string> {
          return ['flavors', 'addons', 'variety', 'dairy', 'sweetener'];
     }
+
+
+    public static cleanup() {
+        //AppDataService.setStorageDirectory(null);
+    }
 }

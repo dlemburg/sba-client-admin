@@ -60,6 +60,7 @@ export class MyApp {
 
     this.authentication.deleteToken();
     this.socketService.disconnect();
+    AppDataService.cleanup();
 
     let navLogin = setTimeout(() => {
       this.nav.setRoot('LoginPage');

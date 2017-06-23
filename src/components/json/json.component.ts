@@ -1,10 +1,10 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
-  selector: 'my-json',
+  selector: 'MyJson',
   templateUrl: './json.component.html',
 })
-export class JsonComponent implements OnInit {
+export class MyJsonComponent implements OnInit {
   @Input() data;
   constructor() { }
 
