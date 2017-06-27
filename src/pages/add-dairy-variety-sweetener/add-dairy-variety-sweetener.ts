@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { API, ROUTES } from '../../global/api.service';
+import { API, ROUTES } from '../../global/api';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AsyncValidation } from '../../global/async-validation.service';
-import { Authentication } from '../../global/authentication.service';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 
@@ -29,8 +28,8 @@ export class AddDairyVarietySweetenerPage extends BaseViewController {
     VARIETY: "Variety"
   }
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, private AsyncValidation: AsyncValidation) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.compose([Validators.maxLength(45), Validators.required])],
@@ -66,40 +65,17 @@ export class AddDairyVarietySweetenerPage extends BaseViewController {
   }
 
   submit(myForm, isValid) {
-    /*
-    let values = [];
-    let selectedValues = false;
-    let formValue = false;
-
-    if (this.selectedValues.length) {
-      values = [...this.selectedValues];
-    } else selectedValues = false;
-    if (myForm.name) {
-      values = [...values, myForm.name];
-    } else formValue = false;
-*/
-   // if (selectedValues || formValue) {
-      this.presentLoading(AppDataService.loading.saving);
-      this.API.stack(ROUTES.saveDairyVarietySweetenerValues, 'POST', {name: myForm.name, type: this.type, companyOid: this.auth.companyOid})
-        .subscribe(
-          (response) => {
-            console.log('response: ', response);
-            this.dismissLoading(AppDataService.loading.saved);
-            this.myForm.reset();
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
-          /*
-    } else {
-      this.showPopup({
-        title: "Uh Oh!", 
-        message: `You don't have any ${this.type} options ready to be saved!`, 
-        buttons: [{text: "OK"}],
-        enableBackdropDismiss: true
-      });
-    }
-    */
+    this.presentLoading(this.appData.getLoading().saving);
+    this.API.stack(ROUTES.saveDairyVarietySweetenerValues, 'POST', {name: myForm.name, type: this.type, companyOid: this.auth.companyOid})
+      .subscribe(
+        (response) => {
+          console.log('response: ', response);
+          this.dismissLoading(this.appData.getLoading().saved);
+          this.myForm.reset();
+        }, (err) => {
+          const shouldPopView = false;
+          this.errorHandler.call(this, err, shouldPopView)
+        });
   }
 
 }

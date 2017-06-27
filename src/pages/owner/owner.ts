@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ModalController, AlertController, ToastController, LoadingController, ViewController } from 'ionic-angular';
-import { Authentication } from '../../global/authentication.service';
+import { Authentication } from '../../global/authentication';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { API, ROUTES } from '../../global/api.service';
+import { API, ROUTES } from '../../global/api';
 import * as global from '../../global/global';
+import { AppData } from  '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -14,13 +15,11 @@ import * as global from '../../global/global';
 export class OwnerPage extends BaseViewController {
   addPages: Array<any> = [];
   pages: Array<any> = [
-    {name: 'Products', img: 'img/products.jpeg', addComponent: 'AddProductPage', editComponent: 'EditProductPage'},
-    {name: 'Categories', img: null, type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
     {name: 'Reward: All', img: null, addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
     {name: 'Reward: Individual', img: null, addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
+    {name: 'Categories', img: null, type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
+    {name: 'Products', img: 'img/products.jpeg', addComponent: 'AddProductPage', editComponent: 'EditProductPage'},
     {name: 'Sizes', type: 'Sizes', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
-    {name: 'Keywords', type: 'Keywords', img: 'img/keywords.jpeg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
-    {name: 'Locations', img: 'img/locations.jpeg', addComponent: 'AddLocationPage', editComponent: 'EditLocationPage'},
   ];
   selectedPage: any = null;
   settings:  Array<any> =  [
@@ -34,8 +33,8 @@ export class OwnerPage extends BaseViewController {
 
   COMPANY_DETAILS = global.COMPANY_DETAILS;
 
-constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public viewCtrl: ViewController) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+constructor(public navCtrl: NavController, public appData: AppData, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public viewCtrl: ViewController) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
   }
 
@@ -71,25 +70,29 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
   }
 
   concatConditionalPages(pages) {
-    if (this.COMPANY_DETAILS.HAS_DAIRY) {
-      pages = [...pages, {name: 'Dairy', img: 'img/dairy.jpeg', addComponent: 'AddDairyPage', editComponent: 'EditDairyPage', type: "Dairy"}];
-    }
 
     if (this.COMPANY_DETAILS.HAS_VARIETY) {
       pages = [...pages, {name: 'Variety', img: 'img/variety.jpeg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Variety"}];
     }
 
-    if (this.COMPANY_DETAILS.HAS_SWEETENER) {
-      pages = [...pages, {name: 'Sweetener', img: 'img/sweetener.jpg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Sweetener"}];
+    if (this.COMPANY_DETAILS.HAS_DAIRY) {
+      pages = [...pages, {name: 'Dairy', img: 'img/dairy.jpeg', addComponent: 'AddDairyPage', editComponent: 'EditDairyPage', type: "Dairy"}];
     }
 
     if (this.COMPANY_DETAILS.HAS_FLAVORS) {
       pages = [...pages, {name: 'Flavors', img: 'img/flavors.jpg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Flavors"}];
     }
 
+    if (this.COMPANY_DETAILS.HAS_SWEETENER) {
+      pages = [...pages, {name: 'Sweetener', img: 'img/sweetener.jpg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Sweetener"}];
+    }
+
     if (this.COMPANY_DETAILS.HAS_ADDONS) {
       pages = [...pages, {name: 'Addons', img: 'img/addons.jpg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Addons"}];
     }
+
+    pages = [...pages, {name: 'Locations', img: 'img/locations.jpeg', addComponent: 'AddLocationPage', editComponent: 'EditLocationPage'}];
+    pages = [...pages, {name: 'Keywords', type: 'Keywords', img: 'img/keywords.jpeg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'}];
 
     return pages;
   }

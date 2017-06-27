@@ -1,13 +1,16 @@
 import { Component, ViewChild } from '@angular/core';
-import { API, ROUTES } from '../../global/api.service';
-import { UtilityService } from '../../global/utility.service';
+import { API, ROUTES } from '../../global/api';
+import { AppUtils } from '../../utils/app-utils';
+import { Utils } from '../../utils/utils';
 import { IErrChecks, IOrder, IPurchaseItem, INameAndOid, IProductForProcessOrder, AuthUserInfo, ICompanyDetailsForProcessOrder, IEditSubtotalDismiss, IUserDataForProcessOrder } from '../../models/models';
-import { Authentication } from '../../global/authentication.service';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, Slides, LoadingController, ModalController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Dates } from '../../global/dates.service';
-import { ReceiptsService } from '../../global/receipts.service';
+import { DateUtils } from '../../utils/date-utils';
+import { ReceiptTemplates } from '../../global/receipt-templates';
+import { COMPANY_DETAILS, ID_TYPES } from '../../global/global';
+import { NativeNotifications } from '../../global/native-notifications';
 
 
 // cloneDeep(this.purchaseItem)
@@ -34,7 +37,7 @@ export class ProcessOrderPage extends BaseViewController {
   products: Array<INameAndOid> = [];
   categories: Array<INameAndOid> = [];
   employeeComment: string = null;
-  dairyQuantities = UtilityService.getNumbersList(5);
+  dairyQuantities = this.utils.getNumbersList(5);
   userData: IUserDataForProcessOrder = {
     userOid: null,
     email: null,
@@ -47,14 +50,8 @@ export class ProcessOrderPage extends BaseViewController {
 
 
 /* Constants */
-  COMPANY_DETAILS: ICompanyDetailsForProcessOrder = {
-    HAS_SOCIAL_MEDIA : true,
-    ACCEPTS_PARTIAL_PAYMENTS : true,
-    SOCIAL_MEDIA_DISCOUNT_AMOUNT : 0.05,
-    TAX_RATE: 0.0785,
-    DOES_CHARGE_FOR_ADDONS: false,
-    HAS_PRINTER: false
-  };
+  COMPANY_DETAILS = COMPANY_DETAILS;
+  ID_TYPES = ID_TYPES;
   REWARDS_TYPE = {
     REWARDS_INDIVIDUAL: "rewards_individual",
     REWARDS_ALL: "rewards_all"
@@ -77,10 +74,7 @@ export class ProcessOrderPage extends BaseViewController {
     PRINTER: "printer",
     TEXT: "text message"
   }
-  ID_TYPES = {
-    PAYMENT: "payment",
-    USER: "user"
-  }
+  
   order: IOrder = { 
     purchaseItems: [], 
     transactionDetails: { 
@@ -103,7 +97,7 @@ export class ProcessOrderPage extends BaseViewController {
     } 
   };
   purchaseItem: IPurchaseItem = {
-    selectedProduct: {oid: null, name: null},
+    selectedProduct: {oid: null, name: null, imgSrc: null},
     sizeAndOrPrice: { oid: null, name: null, price: null},
     quantity: 1,
     addons: [],
@@ -127,7 +121,7 @@ export class ProcessOrderPage extends BaseViewController {
     numberOfFreeAddonsUntilCharged: null,
     addonsPriceAboveLimit: null
   };
-  quantities: Array<number> = UtilityService.getNumbersList();
+  quantities: Array<number> = this.utils.getNumbersList();
 
   isEditInProgress: any = {
     status: false,
@@ -139,11 +133,15 @@ export class ProcessOrderPage extends BaseViewController {
   auth: AuthUserInfo;
   currentCategoryOid: number = null;
   currentCategoryName: string = null;
+  currentCategoryImgSrc: string = null;
   currentProductOid: number;
+  currentProductImgSrc: string = null;
   backgroundImg: string = 'url(../../../img/family.png) no-repeat;';   // will need to change this
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public receiptsService: ReceiptsService) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public nativeNotifications: NativeNotifications, public appData: AppData, public dateUtils: DateUtils, public utils: Utils, public appUtils: AppUtils, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public receiptsTemplates: ReceiptTemplates) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+
+    this.COMPANY_DETAILS = COMPANY_DETAILS;
 
   }
 
@@ -151,6 +149,7 @@ export class ProcessOrderPage extends BaseViewController {
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
+    
     this.getCompanyDetailsAPI();
   }
 
@@ -190,7 +189,7 @@ export class ProcessOrderPage extends BaseViewController {
       if (this.order.purchaseItems.length) {
         if (isGoingBack) {
           this.order.transactionDetails.isRewardUsed = false;
-          this.order.transactionDetails.subtotal = UtilityService.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+          this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
           this.order.transactionDetails.rewardsSavings = 0;
           this.order.transactionDetails.rewards = [...this.getIndividualRewards()];
           this.order.transactionDetails.isEdited = false;
@@ -358,7 +357,8 @@ export class ProcessOrderPage extends BaseViewController {
     selectProductModal.onDidDismiss((data) => {
       if (data) {
         this.currentProductOid = data.oid;
-        this.purchaseItem.selectedProduct = {oid: data.oid, name: data.name}
+        this.currentProductImgSrc = this.appData.getDisplayImgSrc(data.img);
+        this.purchaseItem.selectedProduct = {oid: data.oid, name: data.name, imgSrc: this.currentProductImgSrc };
         this.onProductChangeGetProductInfoAPI(data.oid);
       }
     });
@@ -373,6 +373,7 @@ export class ProcessOrderPage extends BaseViewController {
       if (data) {
         this.currentCategoryOid = data.oid;
         this.currentCategoryName = data.name;
+        this.currentCategoryImgSrc = this.appData.getDisplayImgSrc(data.img);
         this.onCategoryChangeGetProductsAPI();
       }
     });
@@ -439,7 +440,7 @@ export class ProcessOrderPage extends BaseViewController {
     } 
 
     // calculate subtotal
-    this.order.transactionDetails.subtotal = UtilityService.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+    this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
   }
 
   setEditInProgress(index) {
@@ -460,7 +461,7 @@ export class ProcessOrderPage extends BaseViewController {
       dairy: [],
       variety: [],
       sweetener: [],
-      selectedProduct: { name: null, oid: null},
+      selectedProduct: { name: null, oid: null, imgSrc: null},
       sizeAndOrPrice: { name: null, oid: null, price: null},
       addonsCost: 0,
       dairyCost: 0,
@@ -530,7 +531,7 @@ export class ProcessOrderPage extends BaseViewController {
       this.purchaseItem.addonsCost = this.calculateAddonsCost(this.purchaseItem);
       this.purchaseItem.dairyCost = this.calculateDairyCost(this.purchaseItem);
       this.order.purchaseItems = [...this.order.purchaseItems, this.purchaseItem];
-      this.order.transactionDetails.subtotal = UtilityService.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+      this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
 
       // clear
       this.purchaseItem = this.clearPurchaseItem();
@@ -549,7 +550,7 @@ export class ProcessOrderPage extends BaseViewController {
       this.purchaseItem = this.clearPurchaseItem();
       this.productDetails = this.clearProductDetails();
       this.isEditInProgress = this.clearEditInProgress(); 
-      this.order.transactionDetails.subtotal = UtilityService.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+      this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
 
     }
     
@@ -561,7 +562,7 @@ export class ProcessOrderPage extends BaseViewController {
     this.showPopup({
       title: "Please confirm",
       message: "Are you sure you want to remove this item?",
-      buttons: [{text: AppDataService.defaultCancelButtonText, handler: cancelFn}, {text: AppDataService.defaultConfirmButtonText, handler: confirmFn}]
+      buttons: [{text: this.appData.getPopup().defaultCancelButtonText, handler: cancelFn}, {text: this.appData.getPopup().defaultConfirmButtonText, handler: confirmFn}]
     });
 
   }
@@ -578,9 +579,9 @@ export class ProcessOrderPage extends BaseViewController {
   getEligibleRewards() {
     this.presentLoading();
 
-    const dateInfo = Dates.getCurrentDateInfo();
+    const dateInfo = this.dateUtils.getCurrentDateInfo();
     const toData = {
-      date: Dates.toLocalIsoString(dateInfo.date.toString()), // get all rewards where expiry date < date
+      date: this.dateUtils.toLocalIsoString(dateInfo.date.toString()), // get all rewards where expiry date < date
       day: dateInfo.day, 
       hours: dateInfo.hours,
       mins: dateInfo.mins, 
@@ -611,8 +612,8 @@ export class ProcessOrderPage extends BaseViewController {
               this.order = this.calculateFreePurchaseItem(this.order);
             }
 
-            this.order.transactionDetails.taxes = UtilityService.round(this.calculateTaxes(this.order.transactionDetails.subtotal, this.COMPANY_DETAILS.TAX_RATE));
-            this.order.transactionDetails.total = UtilityService.round(this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes));
+            this.order.transactionDetails.taxes = this.utils.round(this.calculateTaxes(this.order.transactionDetails.subtotal, this.COMPANY_DETAILS.TAX_RATE));
+            this.order.transactionDetails.total = this.utils.round(this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes));
             this.dismissLoading();
 
           },  (err) => {
@@ -716,7 +717,7 @@ export class ProcessOrderPage extends BaseViewController {
 
   calculateFreePurchaseItem(order: IOrder): IOrder {
     let highItem: IPurchaseItem = {
-      selectedProduct: {oid: null, name: null},
+      selectedProduct: {oid: null, name: null, imgSrc: null},
       sizeAndOrPrice: { oid: null, name: null, price: null},
       fixedPrice: null,
       quantity: null,
@@ -761,7 +762,7 @@ export class ProcessOrderPage extends BaseViewController {
           order.transactionDetails.subtotal += (x.sizeAndOrPrice.price * x.quantity) + (addonsCost * x.quantity) + (x.dairyCost);
       });
       
-      return UtilityService.round(order.transactionDetails.subtotal);
+      return this.utils.round(order.transactionDetails.subtotal);
   }
 
   calculateAddonsCost(purchaseItem: IPurchaseItem): number {
@@ -826,7 +827,7 @@ export class ProcessOrderPage extends BaseViewController {
   cordovaPrinter() {
 
       this.presentLoading("Printing...");
-      const receiptHTML = this.receiptsService.generateReceiptHTML(this.order, this.auth);
+      const receiptHTML = this.receiptsTemplates.generateReceiptHTML(this.order, this.auth);
       
        //////////////// Cordova printer plugin ///////////////////////////////
 
@@ -846,7 +847,7 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
   finishSubmit(navToReceiptPage = false) {
-    this.dismissLoading(AppDataService.loading.complete);
+    this.dismissLoading(this.appData.getLoading().complete);
 
     if (!navToReceiptPage) {
        this.navCtrl.setRoot('TabsPage');
@@ -861,7 +862,7 @@ export class ProcessOrderPage extends BaseViewController {
         console.log("dismissed and inside of .then");
         if (!data) return;
         if (data.isConfirmed) {
-          this.presentLoading(AppDataService.loading.processing);
+          this.presentLoading(this.appData.getLoading().processing);
 
           let toData = { 
             companyOid: this.auth.companyOid, 
@@ -871,7 +872,7 @@ export class ProcessOrderPage extends BaseViewController {
             isOrderAhead: false,
             eta: null,
             employeeComment: this.employeeComment,
-            purchaseDate: Dates.toLocalIsoString(new Date().toString()),
+            purchaseDate: this.dateUtils.toLocalIsoString(new Date().toString()),
             purchaseItems: this.order.purchaseItems,
             transactionDetails: this.order.transactionDetails
           };
@@ -888,7 +889,7 @@ export class ProcessOrderPage extends BaseViewController {
                       // send email
                       this.API.stack(ROUTES.generateReceipt, "POST", {
                             order: this.order, 
-                            date: Dates.toLocalIsoString(new Date().toString()), 
+                            date: this.dateUtils.toLocalIsoString(new Date().toString()), 
                             companyOid: this.auth.companyOid, 
                             email: this.auth.email, 
                             userOid: this.userData.userOid

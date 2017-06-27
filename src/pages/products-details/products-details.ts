@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { API, ROUTES } from '../../global/api.service';
-import { UtilityService } from '../../global/utility.service';
-import { Authentication } from '../../global/authentication.service';
+import { API, ROUTES } from '../../global/api';
+import { Utils } from '../../utils/utils';
+import { Authentication } from '../../global/authentication';
 import { IPurchaseItem, AuthUserInfo} from '../../models/models';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
+import { AppData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -12,7 +13,8 @@ import { BaseViewController } from '../base-view-controller/base-view-controller
   templateUrl: 'products-details.html'
 })
 export class ProductsDetailsPage extends BaseViewController {
-   productDetails: any = {
+  productImgSrc: string = null;
+  productDetails: any = {
     addonsToClient: [],
     flavorsToClient: [],
     sizesAndPrices: [],
@@ -20,9 +22,9 @@ export class ProductsDetailsPage extends BaseViewController {
     varietyToClient: [],
     dairyToClient: []
   };
-  quantities: Array<number> = UtilityService.getNumbersList(25);
+  quantities: Array<number> = this.utils.getNumbersList(25);
   purchaseItem: IPurchaseItem = {
-    selectedProduct: {oid: null, name: null},
+    selectedProduct: {oid: null, name: null, imgSrc: null},
     sizeAndOrPrice: { oid: null, name: null, price: null},
     quantity: null,
     addons: [],
@@ -35,13 +37,14 @@ export class ProductsDetailsPage extends BaseViewController {
   productImg: string;
   productOid: number;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public utils: Utils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.productImg = this.navParams.data.product.img
+    this.productImg = this.navParams.data.product.img;
+    this.productImgSrc = this.appData.getDisplayImgSrc(this.navParams.data.product.img);
     this.productOid = this.navParams.data.product.oid;
     this.presentLoading();
 

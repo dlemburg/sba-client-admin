@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { UtilityService } from './utility.service';
+import { Utils } from '../utils/utils';
 
 @Injectable()
-export class ReceiptsService {
+export class ReceiptTemplates {
 
-constructor() { }
+constructor(public utils: Utils) { }
 
     public generateReceiptHTML(order, auth) {
         const date = new Date().toLocaleString();
-        const subtotal = UtilityService.roundAndAppendZero(order.transactionDetails.subtotal);
-        const total = UtilityService.roundAndAppendZero(order.transactionDetails.total);
-        const taxes = UtilityService.roundAndAppendZero(order.transactionDetails.taxes);
-        const discounts = UtilityService.roundAndAppendZero(order.transactionDetails.editAmount + order.transactionDetails.rewardsSavings);
+        const subtotal = this.utils.roundAndAppendZero(order.transactionDetails.subtotal);
+        const total = this.utils.roundAndAppendZero(order.transactionDetails.total);
+        const taxes = this.utils.roundAndAppendZero(order.transactionDetails.taxes);
+        const discounts = this.utils.roundAndAppendZero(order.transactionDetails.editAmount + order.transactionDetails.rewardsSavings);
 
         const purchaseItemsHTML =this.loopOverPurchaseItems(order.purchaseItems);
         console.log("auth: ", auth);
@@ -81,7 +81,7 @@ constructor() { }
 
         purchaseItems.forEach((x, index) => {
             let size = "";
-            let displayPriceWithoutDiscounts = UtilityService.roundAndAppendZero(x.displayPriceWithoutDiscounts);
+            let displayPriceWithoutDiscounts = this.utils.roundAndAppendZero(x.displayPriceWithoutDiscounts);
 
             innerHTML += 
                 `<tr style="width:100%">

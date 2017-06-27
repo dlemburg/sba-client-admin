@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
-import { API, ROUTES } from '../../global/api.service';
-import { Validation } from '../../global/validation';
-import { Authentication } from '../../global/authentication.service';
-import { AppDataService } from '../../global/app-data.service';
+import { API, ROUTES } from '../../global/api';
+import { Validation } from '../../utils/validation-utils';
+import { Authentication } from '../../global/authentication';
+import { AppData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 
@@ -24,8 +24,8 @@ export class AppCustomizationsPage extends BaseViewController {
   auth: AuthUserInfo;
   customizations: Array<any> = [];
 
- constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+ constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
    
     this.myForm = this.formBuilder.group({
       hasDairy: [false],
@@ -45,13 +45,13 @@ export class AppCustomizationsPage extends BaseViewController {
       customCompanyEmailReceiptMessage: [" "],
       customCompanyEmailFooterMessage: [" "],
       hasSocialMediaRewards: [false],
-      socialMediaDiscountAmountPercent: [0, Validation.test("money")],
+      socialMediaDiscountAmountPercent: [0, this.validation.test("isMoney")],
       socialMediaMessage: [null],
       hasFacebook: [false],
       hasTwitter: [false],
       hasInstagram: [false],
-      pointsThreshold: [0, Validation.test("numbersOnly")],
-      pointsPerFiftyCents: [0, Validation.test("numbersOnly")],
+      pointsThreshold: [0, this.validation.test("isNumbersOnly")],
+      pointsPerFiftyCents: [0, this.validation.test("isNumbersOnly")],
       hasPrinter: [false],
       acceptsPartialPayments: [false]
     });
@@ -134,7 +134,7 @@ upload(http:Http, file:Blob, name:string, url:string){
       this.API.stack(ROUTES.saveCompanyDetails, "POST", toData)
         .subscribe(
             (response) => {
-              this.dismissLoading(AppDataService.loading.saved);
+              this.dismissLoading(this.appData.getLoading().saved);
               console.log("response: ", response);
             }, (err) => {
               const shouldPopView = false;

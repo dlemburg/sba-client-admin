@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
-import { Validation } from '../../global/validation';
-import { AsyncValidation } from '../../global/async-validation.service';
+import { Validation } from '../../utils/validation-utils';
 import { ILkp } from '../../models/models';
-import { API, ROUTES } from '../../global/api.service';
-import { Authentication } from '../../global/authentication.service';
+import { API, ROUTES } from '../../global/api';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
 import { AuthUserInfo, INameOidCompanyOid, INameAndOid } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 
@@ -52,14 +51,14 @@ export class EditProductPage extends BaseViewController {
   };
 
 
-constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, private AsyncValidation: AsyncValidation) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
       this.myForm = this.formBuilder.group({
         name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
         img: ['', Validators.required],
-        caloriesLow: ['', Validators.compose([Validation.aboveZero, Validation.test("numbersOnly")])],
-        caloriesHigh: ['', Validators.compose([Validation.aboveZero, Validation.test("numbersOnly")])],
+        caloriesLow: ['', Validators.compose([this.validation.test('isAboveZero'), this.validation.test("isNumbersOnly")])],
+        caloriesHigh: ['', Validators.compose([this.validation.test("isAboveZero"), this.validation.test("isNumbersOnly")])],
         description: ['', Validators.compose([Validators.required, Validators.maxLength(150)])],
         categoryOid: ['', Validators.required],
         flavors: [ [] ],
@@ -68,14 +67,14 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
         variety: [ [] ],
         sweetener: [ [] ],
         sizesAndPrices: this.formBuilder.array([]),   // init to empty  (could also build the group here if wanted)
-        fixedPrice: ['', Validation.test("numbersOnly")],
-        numberOfFreeAddonsUntilCharged: [0, Validation.test("numbersOnly")],
-        addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, Validation.money]) ],
+        fixedPrice: ['', this.validation.test("numbersOnly")],
+        numberOfFreeAddonsUntilCharged: [0, this.validation.test("numbersOnly")],
+        addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, this.validation.test("money")]) ],
         lkpNutritionOid: ['', Validators.required],
         lkpSeasonOid: ['', Validators.required],
         keywords: ['', Validators.required],
         hasDefaultProductHealthWarning: [false]
-      }, {validator: Validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')});
+      }, {validator: this.validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')});
   }
 
   ionViewDidLoad() {
@@ -107,7 +106,8 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
             this.getAllProductOptionsAPI();
           }, (err) => {
             const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
+            const shouldDismiss = false;
+            this.errorHandler.call(this, err, shouldPopView, shouldDismiss)
           });
   }
 
@@ -130,8 +130,6 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
             
             console.log('response.data: ', response.data);
             this.dismissLoading(); // this one is needed first, so just dismiss here
-
-
           }, (err) => {
             const shouldPopView = false;
             this.errorHandler.call(this, err, shouldPopView)
@@ -223,7 +221,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
       arr.push(this.formBuilder.group({
         name: x.name,
         oid: x.oid, 
-        price: [x.price || null, Validators.compose([Validators.required, Validation.money])]
+        price: [x.price || null, Validators.compose([Validators.required, this.validation.test("isMoney")])]
       }))
     });
   }
@@ -245,11 +243,11 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
 
 
   remove(): void {
-    this.presentLoading(AppDataService.loading.removing);
+    this.presentLoading(this.appData.getLoading().removing);
     this.API.stack(ROUTES.removeProduct + `/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(AppDataService.loading.removed);
+          this.dismissLoading(this.appData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
         }, (err) => {
@@ -267,11 +265,11 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
     }
 
     /*** Package for submit ***/
-    this.presentLoading(AppDataService.loading.saving);
+    this.presentLoading(this.appData.getLoading().saving);
 
     // account for 'all' selected
     /*
-    AppDataService.checkAll().forEach((x) => {
+    this.appData.checkAll().forEach((x) => {
       this.checkIfAllSelected(x);
     });
     */
@@ -284,7 +282,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
       .subscribe(
           (response) => {
             console.log('response: ', response);
-            this.dismissLoading(AppDataService.loading.saved);
+            this.dismissLoading(this.appData.getLoading().saved);
             this.myForm.reset();
             this.editOid = null;
           }, (err) => {

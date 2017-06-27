@@ -1,15 +1,13 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
-import { API, ROUTES } from '../../global/api.service';
-import { AsyncValidation } from '../../global/async-validation.service';
-import { UtilityService } from '../../global/utility.service';
-import { Authentication } from '../../global/authentication.service';
-import { ExplanationsPage } from '../../pages/explanations/explanations';
+import { API, ROUTES } from '../../global/api';
+import { AppUtils } from '../../utils/app-utils';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
 import { AuthUserInfo, INameAndOid } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Dates } from '../../global/dates.service';
+import { DateUtils } from '../../utils/date-utils';
 
 @IonicPage()
 @Component({
@@ -44,8 +42,8 @@ export class EditRewardIndividualPage extends BaseViewController {
   editOid: number = null;
   values: Array<INameAndOid> = [];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, private AsyncValidation: AsyncValidation) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public dateUtils: DateUtils, public appUtils: AppUtils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
      this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
@@ -62,7 +60,7 @@ export class EditRewardIndividualPage extends BaseViewController {
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.days = UtilityService.getDays();
+    this.days = this.appUtils.getDays();
     this.presentLoading();
 
     // SUBSCRIBE TO FORM
@@ -80,7 +78,8 @@ export class EditRewardIndividualPage extends BaseViewController {
               console.log('response.data: ', response.data);
             }, (err) => {
               const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
+              const shouldDismiss = false;
+              this.errorHandler.call(this, err, shouldPopView, shouldDismiss)
             });
   }
 
@@ -145,11 +144,11 @@ export class EditRewardIndividualPage extends BaseViewController {
   }
 
   remove(): void {
-    this.presentLoading(AppDataService.loading.removing);
+    this.presentLoading(this.appData.getLoading().removing);
     this.API.stack(ROUTES.removeRewardIndividual + `/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(AppDataService.loading.removed);
+          this.dismissLoading(this.appData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
         }, (err) => {
@@ -163,13 +162,13 @@ export class EditRewardIndividualPage extends BaseViewController {
     let expiryDate = this.myForm.controls.expiryDate.value.toString();
     
     /*** package ***/
-    this.presentLoading(AppDataService.loading.saving);
-    if (myForm.hasExpiryDate) this.myForm.patchValue({expiryDate: expiryDate.indexOf("T23:59:59") < 0 ? Dates.patchStartTime(this.myForm.controls.startDate.value) : expiryDate})
+    this.presentLoading(this.appData.getLoading().saving);
+    if (myForm.hasExpiryDate) this.myForm.patchValue({expiryDate: expiryDate.indexOf("T23:59:59") < 0 ? this.dateUtils.patchStartTime(this.myForm.controls.startDate.value) : expiryDate})
     const toData: ToDataSaveOrEditReward = {toData: this.myForm.value, companyOid: this.auth.companyOid, editOid: this.editOid};
     this.API.stack(ROUTES.editRewardIndividual, "POST", toData)
       .subscribe(
           (response) => {
-            this.dismissLoading(AppDataService.loading.saved);
+            this.dismissLoading(this.appData.getLoading().saved);
             this.navCtrl.pop();
           }, (err) => {
             const shouldPopView = false;

@@ -1,13 +1,11 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
-import { Validation } from '../../global/validation';
-import { AsyncValidation } from '../../global/async-validation.service';
-import { INameOidCompanyOid, ILkp } from '../../models/models';
-import { API, ROUTES } from '../../global/api.service';
-import { Authentication } from '../../global/authentication.service';
+import { Validation } from '../../utils/validation-utils';
+import { INameOidCompanyOid, ILkp,  IPopup, AuthUserInfo  } from '../../models/models';
+import { API, ROUTES } from '../../global/api';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
-import { IPopup, AuthUserInfo } from '../../models/models';
+import { AppData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 
 @IonicPage()
@@ -47,14 +45,14 @@ export class AddProductPage extends BaseViewController {
   };
 
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, private AsyncValidation: AsyncValidation) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
       img: ['', Validators.required],
-      caloriesLow: ['', Validators.compose([Validation.aboveZero, Validation.test("numbersOnly")])],
-      caloriesHigh: ['', Validators.compose([Validation.aboveZero, Validation.test("numbersOnly")])],
+      caloriesLow: ['', Validators.compose([this.validation.test("isAboveZero"), this.validation.test("isNumbersOnly")])],
+      caloriesHigh: ['', Validators.compose([this.validation.test("isAboveZero"), this.validation.test("isNumbersOnly")])],
       description: ['', Validators.compose([Validators.required, Validators.maxLength(500)])],
       categoryOid: ['', Validators.required],
       flavors: [ [] ],
@@ -63,14 +61,14 @@ export class AddProductPage extends BaseViewController {
       variety: [ [] ],
       sweetener: [ [] ],
       sizesAndPrices: this.formBuilder.array([]),   // init to empty  (could also build the group here if wanted)
-      fixedPrice: ['', Validation.test("money")],
-      numberOfFreeAddonsUntilCharged: [0, Validation.test("numbersOnly")],
-      addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, Validation.money]) ],
+      fixedPrice: ['', this.validation.test("isMoney")],
+      numberOfFreeAddonsUntilCharged: [0, this.validation.test("isNumbersOnly")],
+      addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, this.validation.test("isMoney")]) ],
       lkpNutritionOid: ['', Validators.required],
       lkpSeasonOid: ['', Validators.required],
       keywords: ['', Validators.required],
       hasDefaultProductHealthWarning: [false]
-    }, {validator: Validators.compose([Validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')])});
+    }, {validator: Validators.compose([this.validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')])});
 
     this.auth = this.authentication.getCurrentUser();
   }
@@ -91,7 +89,8 @@ export class AddProductPage extends BaseViewController {
 
           }, (err) => {
             const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
+            const shouldDismiss = false;
+            this.errorHandler.call(this, err, shouldPopView, shouldDismiss)
           });
     
     // doesn't need to be async
@@ -149,7 +148,7 @@ export class AddProductPage extends BaseViewController {
         arr.push(this.formBuilder.group({
           name: x.name,
           oid: x.oid,
-          price: [null, Validators.compose([Validators.required, Validation.money])]
+          price: [null, Validators.compose([Validators.required, this.validation.test("isMoney")])]
         }))
       })
   }
@@ -185,7 +184,7 @@ export class AddProductPage extends BaseViewController {
     */
     
     /*** Package for submit ***/
-    this.presentLoading(AppDataService.loading.saving);
+    this.presentLoading(this.appData.getLoading().saving);
     const toData: ToDataSaveProduct = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
 
     console.log("toData: ", toData);
@@ -194,7 +193,7 @@ export class AddProductPage extends BaseViewController {
       .subscribe(
           (response) => {
             
-            this.dismissLoading(AppDataService.loading.saved);
+            this.dismissLoading(this.appData.getLoading().saved);
             this.navCtrl.pop();
           },  (err) => {
             const shouldPopView = false;

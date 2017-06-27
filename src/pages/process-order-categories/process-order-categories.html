@@ -14,9 +14,8 @@
 <ion-content padding>
   <ion-row>
     <ion-col *ngFor="let x of categories" class="" col-6 style="border-bottom: 1px solid lightgray;">
-      <ion-card class="hover" tappable (click)="selectCategoryAndDismiss(x)">
-        <img src="img/family.png" />
-        <!-- <img src="{{x.img}}"/> -->
+      <ion-card class="hover" tappable (click)="dismissWithData(x)">
+        <img [src]="x.imgSrc"/>
         <div class="card-title">{{ x.name }}</div>
       </ion-card>
     </ion-col>

@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { Validation } from '../../global/validation';
-import { AsyncValidation } from '../../global/async-validation.service';
-import { API, ROUTES } from '../../global/api.service';
-import { UtilityService } from '../../global/utility.service';
-import { Authentication } from '../../global/authentication.service';
+import { Validation } from '../../utils/validation-utils';
+import { API, ROUTES } from '../../global/api';
+import { AppUtils } from '../../utils/app-utils';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
 import { INameAndOid, AuthUserInfo, ILocation } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Dates } from '../../global/dates.service';
+import { DateUtils } from '../../utils/date-utils';
 
 @IonicPage()
 @Component({
@@ -20,28 +19,28 @@ export class EditLocationPage extends BaseViewController {
   didPasswordChange: boolean = false;
   editValue: any = null;
   editOid: number = null;
-  days: Array<string> = UtilityService.getDays();
+  days: Array<string> = this.appUtils.getDays();
   values: Array<INameAndOid> = [];
   myForm: FormGroup;
   selectedLocation: ILocation;
   isSubmitted: boolean;
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
-  states: Array<string> = UtilityService.getStates();
+  states: Array<string> = this.appUtils.getStates();
   locations: Array<ILocation> = [];
   isCoordsSet: boolean = false;
   originalValue: string = null;
 
-constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, private AsyncValidation: AsyncValidation) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public dateUtils: DateUtils, public appUtils: AppUtils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.required],
-      address: [null, Validators.compose([Validators.required, Validation.isStreetAddress])],
+      address: [null, Validators.compose([Validators.required, this.validation.test('isStreetAddress')])],
       city: [null, Validators.required],
       state: [null, Validators.required],
-      zipcode: [null, Validators.compose([Validators.required, Validation.isZipCode])],
-      phoneNumber: [null, Validators.compose([Validators.required, Validation.isPhoneNumber])],
+      zipcode: [null, Validators.compose([Validators.required, this.validation.test('isZipcode')])],
+      phoneNumber: [null, Validators.compose([Validators.required, this.validation.test('isPhoneNumber')])],
       coordsLat: [],
       coordsLong: [],
       sundayOpen: [null, Validators.required],
@@ -60,7 +59,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
       saturdayClose: [null, Validators.required],
       password: [null],
       password2: [null]
-    }, {validator: Validation.isMismatch('password', 'password2')});
+    }, {validator: this.validation.isMismatch('password', 'password2')});
     this.auth = this.authentication.getCurrentUser();
   }
 
@@ -145,7 +144,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
   }
   
   setTimesToIsoString(days): void {
-    let daysOfWeek = UtilityService.getDays();
+    let daysOfWeek = this.appUtils.getDays();
 
     // loop through open/close
     daysOfWeek.forEach((x, index) => {
@@ -159,8 +158,8 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
         })
       } else {
         this.myForm.patchValue({
-          [dayOpenKey]: Dates.convertTimeStringToIsoString(days[dayOpenKey]),
-          [dayCloseKey]: Dates.convertTimeStringToIsoString(days[dayCloseKey])
+          [dayOpenKey]: this.dateUtils.convertTimeStringToIsoString(days[dayOpenKey]),
+          [dayCloseKey]: this.dateUtils.convertTimeStringToIsoString(days[dayCloseKey])
         });
       }
       
@@ -180,7 +179,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
  }
 
   closedToggle(event, index): void {
-    let days = UtilityService.getDays();
+    let days = this.appUtils.getDays();
     let ctrlOpen = days[index].toLowerCase() + "Open";
     let ctrlClose = days[index].toLowerCase() + "Close";
 
@@ -208,11 +207,11 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
   }
 
   remove() {
-    this.presentLoading(AppDataService.loading.removing);
+    this.presentLoading(this.appData.getLoading().removing);
     this.API.stack(ROUTES.removeLocation + `/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(AppDataService.loading.removed);
+          this.dismissLoading(this.appData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
         }, (err) => {
@@ -225,32 +224,32 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
 
 
     /*** Package for submit ***/
-     this.presentLoading(AppDataService.loading.saving);
+     this.presentLoading(this.appData.getLoading().saving);
     
     
     // convert iso string back to time string. this always needs to happen before submitting.
     // 2 ways to create open/close time:   1.) pre-populate, 2.) choose from datepicker.  both need to be converted ISOString -> timeString
     
-      myForm.sundayOpen = Dates.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
-      myForm.sundayClose = Dates.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
-      myForm.mondayOpen = Dates.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
-      myForm.mondayClose = Dates.convertIsoStringToHoursAndMinutesString(myForm.mondayClose),
-      myForm.tuesdayOpen = Dates.convertIsoStringToHoursAndMinutesString(myForm.tuesdayOpen),
-      myForm.tuesdayClose = Dates.convertIsoStringToHoursAndMinutesString(myForm.tuesdayClose),
-      myForm.wednesdayOpen = Dates.convertIsoStringToHoursAndMinutesString(myForm.wednesdayOpen),
-      myForm.wednesdayClose = Dates.convertIsoStringToHoursAndMinutesString(myForm.wednesdayClose),
-      myForm.thursdayOpen = Dates.convertIsoStringToHoursAndMinutesString(myForm.thursdayOpen),
-      myForm.thursdayClose = Dates.convertIsoStringToHoursAndMinutesString(myForm.thursdayClose),
-      myForm.fridayOpen = Dates.convertIsoStringToHoursAndMinutesString(myForm.fridayOpen),
-      myForm.fridayClose = Dates.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
-      myForm.saturdayOpen = Dates.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
-      myForm.saturdayClose = Dates.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
+      myForm.sundayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
+      myForm.sundayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
+      myForm.mondayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
+      myForm.mondayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayClose),
+      myForm.tuesdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayOpen),
+      myForm.tuesdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayClose),
+      myForm.wednesdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayOpen),
+      myForm.wednesdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayClose),
+      myForm.thursdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayOpen),
+      myForm.thursdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayClose),
+      myForm.fridayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayOpen),
+      myForm.fridayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
+      myForm.saturdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
+      myForm.saturdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
 
       const toData: ToDataEditLocation = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editValue.oid, didPasswordChange: this.didPasswordChange};
       this.API.stack(ROUTES.editLocation, "POST", toData )
         .subscribe(
             (response) => {
-              this.dismissLoading(AppDataService.loading.saved);
+              this.dismissLoading(this.appData.getLoading().saved);
               this.navCtrl.pop();
               console.log('response: ', response);
             },  (err) => {

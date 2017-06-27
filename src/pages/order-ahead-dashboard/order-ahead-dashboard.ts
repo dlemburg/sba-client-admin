@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { IonicPage, Events, NavController, NavParams, LoadingController, AlertController, ToastController, ModalController } from 'ionic-angular';
-import { API, ROUTES } from '../../global/api.service';
-import { Authentication } from '../../global/authentication.service';
+import { API, ROUTES } from '../../global/api';
+import { Authentication } from '../../global/authentication';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { IOrderAhead, AuthUserInfo } from '../../models/models';
-import { SocketService } from '../../global/socket.service';
+import { SocketIO } from '../../global/socket-io';
+import { AppData } from '../../global/app-data';
 //import { Observable } from 'rxjs/Observable';
 
 @IonicPage()
@@ -13,17 +14,17 @@ import { SocketService } from '../../global/socket.service';
   templateUrl: 'order-ahead-dashboard.html'
 })
 export class OrderAheadDashboardPage extends BaseViewController {
-  activeOrders: Array<IOrderAhead> = [];
+  orders: Array<IOrderAhead> = [];
   setIntervalHandler: any = null;
   loading: any;
   auth: AuthUserInfo;
   initHasRun: boolean = false;
   connection;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public socketService: SocketService, public events: Events) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public socketIO: SocketIO, public events: Events) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
     /* using ionic's events */
-    this.events.subscribe(this.socketService.socketEvents.incomingNewOrder, (data) => {
+    this.events.subscribe(this.socketIO.socketEvents.incomingNewOrder, (data) => {
       this.onIncomingNewOrder(data);
     });
   }
@@ -55,7 +56,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
      let data = response.data;
      let order: Array<IOrderAhead> = this.setArrivalDates([data]);  // the new order
      this.setTimerInterval();    // set arrival times
-     this.activeOrders = this.sortOrders([...this.activeOrders, ...order]);  // sort orders by arrival times
+     this.orders = this.sortOrders([...this.orders, ...order]);  // sort orders by arrival times
   }
 
 
@@ -68,9 +69,9 @@ export class OrderAheadDashboardPage extends BaseViewController {
             (response) => {
               console.log('response.data: ', response.data);
 
-              this.activeOrders = this.setArrivalDates(response.data.activeOrders);
+              this.orders = this.setArrivalDates(response.data.activeOrders);
               this.setTimerInterval(); 
-              this.activeOrders = this.sortOrders(response.data.activeOrders);
+              this.orders = this.sortOrders(response.data.activeOrders);
 
               this.dismissLoading();
 
@@ -114,7 +115,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
   setTimerInterval(): void {
     if (this.setIntervalHandler) clearInterval(this.setIntervalHandler);
 
-    if (this.activeOrders.length) {
+    if (this.orders.length) {
       this.runOrderTimers();  // runs on first tick
       this.setIntervalHandler = setInterval(() => {
         this.runOrderTimers();
@@ -123,7 +124,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
   }
 
   runOrderTimers(): void {
-    this.activeOrders.forEach((x, index) => {
+    this.orders.forEach((x, index) => {
      // debugger;
       if (!x.isExpired) {
         let timeLeft = x.arrivalDate.getTime() - new Date().getTime();
@@ -153,7 +154,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
     this.API.stack(ROUTES.processActiveOrderForOrderAhead, "POST", toData)
         .subscribe(
             (response) => {
-              this.activeOrders[index].isProcessing = true;
+              this.orders[index].isProcessing = true;
               console.log('response.data: ' , response.data);
             },  (err) => {
               const shouldPopView = false;
@@ -174,7 +175,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
         .subscribe(
             (response) => {
               //clear order client side
-              this.activeOrders = this.activeOrders.filter((x) => {
+              this.orders = this.orders.filter((x) => {
                 return x.transactionOid !== order.transactionOid 
               });
               console.log('response.data: ', response.data);

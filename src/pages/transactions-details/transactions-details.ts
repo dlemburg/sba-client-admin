@@ -1,15 +1,17 @@
 import { Component } from '@angular/core';
-import { API, ROUTES } from '../../global/api.service';
+import { API, ROUTES } from '../../global/api';
 import { ITransactionDetailsOwner, AuthUserInfo } from '../../models/models';
-import { Authentication } from '../../global/authentication.service';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
+import { AppData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
   selector: 'page-transactions-details',
   templateUrl: 'transactions-details.html'
 })
+
 export class TransactionsDetailsPage extends BaseViewController {
   transactionOid: number;
   doCallGetRewards: boolean = true;
@@ -40,8 +42,8 @@ export class TransactionsDetailsPage extends BaseViewController {
     isSocialMediaDiscount: null
   };
  
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
     this.auth = this.authentication.getCurrentUser();
   }
 

@@ -11,7 +11,7 @@
    <div class=" reward-card-container">
       <ion-card class=" reward-card" no-padding no-margin text-center>
         <!-- <img src="{{rewardDetails.img}}"/> -->
-        <img src="img/family.png" />
+        <img [src]="reward.imgSrc" />
         <div class="reward-card-title">{{rewardDetails.name}}</div>
         <div margin-vertical class="reward-expiry">
             <span>{{ rewardDetails.startDate | date }} </span> -- <span> {{ rewardDetails.expiryDate | date }}</span>

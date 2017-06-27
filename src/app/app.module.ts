@@ -10,20 +10,28 @@ import { StatusBar } from "@ionic-native/status-bar";
 import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
+import { Vibration } from '@ionic-native/vibration';
+import { NativeAudio } from '@ionic-native/native-audio';
+import { LocalNotifications } from '@ionic-native/local-notifications';
+import { BackgroundMode } from '@ionic-native/background-mode';
+
 
 // both admin and owner
 import { MyApp } from './app.component';
 
 // services
-import { Authentication } from '../global/authentication.service';
-import { API } from '../global/api.service';
-import { Validation } from '../global/validation';
-import { AsyncValidation } from '../global/async-validation.service';
-import { UtilityService } from '../global/utility.service';
-import { AppDataService } from '../global/app-data.service';
-import { ProcessOrderService } from '../pages/process-order/process-order-store.service';
-import { SocketService } from '../global/socket.service';
-import { ReceiptsService } from '../global/receipts.service';
+import { Authentication } from '../global/authentication';    // holds all auth info
+import { API } from '../global/api';                          // holds routes and api call
+import { Validation } from '../utils/validation-utils';       // hold all validation methods
+import { AsyncValidation } from '../utils/validation-async-utils';   // holds async validation methods
+import { Utils } from '../utils/utils';                       // holds standard utility methods
+import { DateUtils } from '../utils/date-utils';              // holds date utility methods
+import { AppUtils } from '../utils/app-utils';                // holds utility methods specific to this app
+import { AppData } from '../global/app-data';                 // holds data about this app this is customizable (some constant right now)
+import { AppFeatures } from '../global/app-features';         // holds data about premium features
+import { SocketIO } from '../global/socket-io';     //  holds socket.io methods
+import { ReceiptTemplates } from '../global/receipt-templates';   // holds HTML receipt template
+import { NativeNotifications } from '../global/native-notifications';     // all native notification logic
 
 // Components && base-view-controller
 import { BaseViewController } from '../pages/base-view-controller/base-view-controller';
@@ -54,16 +62,23 @@ import { SearchComponent } from '../components/search/search.component';
     Camera,
     File,
     Transfer,
+    Vibration,
+    NativeAudio,
+    LocalNotifications,
+    BackgroundMode,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    UtilityService,
     Authentication,
     API,
     Validation,
     AsyncValidation,
-    AppDataService,
-    ProcessOrderService,
-    SocketService,
-    ReceiptsService
+    AppData,
+    AppFeatures,
+    SocketIO,
+    ReceiptTemplates,
+    Utils,
+    DateUtils,
+    AppUtils,
+    NativeNotifications
   ]
 })
 export class AppModule {}

@@ -12,8 +12,7 @@
 <ion-content no-padding>
     <ion-card class="hover ion-card-top" no-padding no-margin>
       <!-- <img src="{{productImg}}" /> -->
-      <img src="img/family.png"/>
-      <div class="logo">Logo</div>
+      <img [src]="productImgSrc"/>
       <div class="product-name">{{ productDetails.name }}</div>
       <div class="product-description">
         <div>{{ productDetails.description }}</div>

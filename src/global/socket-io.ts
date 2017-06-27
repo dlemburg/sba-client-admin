@@ -2,20 +2,17 @@ import { Injectable } from '@angular/core';
 import { Events } from 'ionic-angular'
 import * as global from './global';
 import * as io from "socket.io-client";
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
-import { Authentication } from './authentication.service';
+import { Authentication } from './authentication';
 import { AuthUserInfo, SocketEvents}  from '../models/models';
+import { NativeNotifications } from './native-notifications';
 
 @Injectable()
-export class SocketService {
+export class SocketIO {
   private socket: SocketIOClient.Socket = null;
   private auth: AuthUserInfo;
-  private currentObservables: any;
   public socketEvents: SocketEvents;
-  private subscriber$: any;
 
-  constructor(public authentication: Authentication, public events: Events) {
+  constructor(public authentication: Authentication, public events: Events, public nativeNotifications: NativeNotifications ) {
     this.auth = this.authentication.getCurrentUser();
     this.socketEvents = {
         subscribe: "subscribe",
@@ -25,6 +22,7 @@ export class SocketService {
         alertUserProcessingOrder: "alert-user-processing-order",
         locationIsProcessingOrder: "location-is-processing-order"
     }
+   
  }
 
 /*
@@ -35,7 +33,11 @@ export class SocketService {
         if (!this.socket) {
             this.socket = io.connect(global.SERVER_URL_NODE, { reconnection: true });
             if (room) this.emit(this.socketEvents.subscribe, { room });
-            this.on(this.socketEvents.incomingNewOrder);
+
+            // set listeners
+            this.on(this.socketEvents.incomingNewOrder, [
+                this.nativeNotifications.types.vibrate, this.nativeNotifications.types.localNotifications, this.nativeNotifications.types.sound
+            ]);
 
 
             /* subscriber pattern
@@ -56,10 +58,14 @@ export class SocketService {
         }
     }
 
-    public on(socketEvent: string) {
+    public on(socketEvent: string, notifications = []) {
         this.socket.on(socketEvent, (data) => {
             /////////////////////   cordova:  vibrate, sound, local notification ///////////////////////////
-            this.publish(socketEvent, data);
+            notifications.forEach((x) => {
+               let notify = this.nativeNotifications.create(x)();
+
+            });
+            this.publishToClientListeners(socketEvent, data);
         });
     }
 
@@ -67,7 +73,7 @@ export class SocketService {
         this.socket.emit(eventName, data);
     }
 
-    public publish(event: string, data) {
+    public publishToClientListeners(event: string, data) {
         this.events.publish(event, data);
     }
 }

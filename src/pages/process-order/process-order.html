@@ -38,7 +38,9 @@
               block>
               <ion-col class="align-center bold" *ngIf="!currentCategoryName">Category </ion-col>
               <ion-col class="align-center" col-9 *ngIf="currentCategoryName">{{ currentCategoryName }}</ion-col>
-              <ion-col text-left col-3 *ngIf="currentCategoryName"><img class="rounded-edges" src="img/family.png" /></ion-col>
+              <ion-col text-left col-3 *ngIf="currentCategoryName">
+                <img class="rounded-edges" [src]="currentCategoryImgSrc" />
+              </ion-col>
             </button>
           </ion-col>
 
@@ -56,13 +58,13 @@
              <ion-row>
               <ion-col class="bold" *ngIf="!purchaseItem.selectedProduct.name">Product</ion-col>
               <ion-col class="align-center" col-9 *ngIf="purchaseItem.selectedProduct.name">{{ purchaseItem.selectedProduct.name }}</ion-col>
-              <ion-col text-left col-3 *ngIf="purchaseItem.selectedProduct.name"><img class="rounded-edges" src="img/family.png" /></ion-col>
+              <ion-col text-left col-3 *ngIf="purchaseItem.selectedProduct.name">
+                <img class="rounded-edges" [src]="currentProductImgSrc" />
+              </ion-col>
             </ion-row>
             </button>
           </ion-col>
         </ion-row>
-
-        <!-- [ngStyle]="{'background': backgroundImg }" -->
 
 
         <!-- order details -->
@@ -190,8 +192,7 @@
                 <ion-card [ngClass]="{'edit-in-progress': isEditInProgress.status && (isEditInProgress.index === i)}" 
                           class="width-80 align-center cart-order" 
                           (click)="onEditPurchaseItem(x, i)">
-                  <!-- <img src="{{x.imgSrc}}" /> -->
-                  <img src="img/family.png"/>
+                  <img [src]="x.selectedProduct.imgSrc"/>
                   <ion-card-content>
                     <div>
                       <span class="bold"> {{x.quantity}} </span> 
@@ -199,36 +200,11 @@
                       <div><span class="bold"> {{ x.sizeAndOrPrice.name }} {{x.sizeAndOrPrice.price | currency:symbolDisplay:true  }}</span></div>
 
                       <div class="extras-container">
-                        <!-- remove btn
-                        <button ion-button icon-only (click)="dismiss()">
-                          <ion-icon ios="ios-close" md="ios-close"></ion-icon>
-                        </button>
-                      -->
-                        
                         <ProductDetails [list]="x.flavors"></ProductDetails>
                         <ProductDetails [list]="x.addons"></ProductDetails>
-                        <ProductDetails [list]="x.dairy"></ProductDetails>
+                        <ProductDetails [list]="x.dairy" hasQuantity="true"></ProductDetails>
                         <ProductDetails [list]="x.variety"></ProductDetails>
                         <ProductDetails [list]="x.sweetener"></ProductDetails>
-                        
-
-                        <!--
-                        <div>
-                          <span *ngFor="let a of x.flavors; let j = index;">{{ a.name }}<span *ngIf="j !== x.flavors.length - 1">,</span></span>
-                        </div>
-                        <div>
-                          <span *ngFor="let b of x.addons; let k = index;"> {{ b.name }}<span *ngIf="k !== x.addons.length - 1">,</span></span>
-                        </div>
-
-                        <div><span *ngFor="let c of x.dairy; let l = index;"> {{ c.name }}<span *ngIf="l !== x.dairy.length - 1">,</span></span></div>
-
-                        <div><span *ngFor="let d of x.variety; let m = index;"> {{ d.name }}<span *ngIf="m !== x.variety.length - 1">,</span></span></div>
-
-                        <div>
-                          <span *ngFor="let e of x.sweetener; let n = index;"> {{ e.name }}<span *ngIf="n !== x.sweetener.length - 1">,</span></span>
-                        </div>
-                        -->
-                        
                       </div>
                       <div *ngIf="x.addons && x.addons.length && x.addonsCost"><span class="bold">Total add-ons cost: {{ x.addonsCost * x.quantity | currency:symbolDisplay:true }} </span></div>
                     </div>
@@ -275,14 +251,6 @@
                      <ion-col>
                       <span text-right>{{ x.displayPriceWithoutDiscounts | currency:symbolDisplay:true}}</span>
                     </ion-col>
-                    <!--
-                    <ion-col *ngIf="x.addons.length">
-                      <span text-right>{{ (x.sizeAndOrPrice.price * x.quantity) + (x.addonsCost * x.quantity) | currency:symbolDisplay:true}}</span>
-                    </ion-col>
-                    <ion-col *ngIf="!x.addons.length">
-                      <span text-right>{{ x.sizeAndOrPrice.price * x.quantity | currency:symbolDisplay:true }}</span>
-                    </ion-col>
-                    -->
                     <ion-col class="discounts" *ngIf="x.discounts"> - {{ x.discounts | currency:symbolDisplay:true }} </ion-col>
                   </div>
                 </ion-card-content>
@@ -321,11 +289,6 @@
                       <span>Discount amount on order: </span> {{ x.discount.amount  | currency:symbolDisplay:true }}
                     </div>
                   </div>
-                  <!--
-                  <ion-col width-20>
-                    <button color="danger" ion-button round (click)="onRejectReward(x, i)">Reject</button>
-                  </ion-col>
-                  -->
                 </div>
               </ion-card-content>
             </ion-card>
@@ -335,7 +298,7 @@
           <div>
             <ion-row text-center>
               <ion-col col-6>
-                <button class="width-60" margin-top ion-button outline color="primary" (click)="onScanIndividualRewardBarcode()">
+                <button class="width-80" margin-top ion-button outline color="primary" (click)="onScanIndividualRewardBarcode()">
                   <ion-icon class="icon-primary" ios="ios-trophy" md="ios-trophy"></ion-icon><span class="btn-text">Scan Reward</span></button>
               </ion-col>
               <ion-col col-6>

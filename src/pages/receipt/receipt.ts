@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import { AuthUserInfo } from '../../models/models';
-import { Authentication } from '../../global/authentication.service';
-import { ReceiptsService } from '../../global/receipts.service';
+import { Authentication } from '../../global/authentication';
+import { ReceiptTemplates } from '../../global/receipt-templates';
 
 @IonicPage()
 @Component({
@@ -13,10 +13,12 @@ export class ReceiptPage {
   order = null;
   purchaseItem = null;
   auth: AuthUserInfo
-  constructor(public navCtrl: NavController, public navParams: NavParams, public authentication: Authentication, public receiptsService: ReceiptsService) {}
+  constructor(public navCtrl: NavController, public navParams: NavParams, public authentication: Authentication, public receiptTemplates: ReceiptTemplates) {}
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
+
+    // fake data
     this.order = { 
       purchaseItems: [
         { quantity: 1, selectedProduct: {name: "Iced Coffee"}, sizeAndOrPrice: {name: undefined, price: 1.99}, displayPriceWithoutDiscounts: 1.99 },
@@ -41,7 +43,7 @@ export class ReceiptPage {
         newPrice: null
       } 
     };
-    let innerHTML = this.receiptsService.generateReceiptHTML(this.order, this.auth);
+    let innerHTML = this.receiptTemplates.generateReceiptHTML(this.order, this.auth);
 
     console.log("innerHTML: ", innerHTML);
     //this.auth = this.authentication.getCurrentUser();

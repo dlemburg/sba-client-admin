@@ -44,7 +44,7 @@ export class CompleteOrderConfirmationPage {
     });
   } 
 
-  dismissBack() {
+  dismiss() {
     this.viewCtrl.dismiss({
       isConfirmed: false
     });

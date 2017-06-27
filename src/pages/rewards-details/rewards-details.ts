@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { API, ROUTES } from '../../global/api.service';
+import { API, ROUTES } from '../../global/api';
 import { IRewardDetailsOwner, AuthUserInfo } from '../../models/models';
-import { Authentication } from '../../global/authentication.service';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
+import { AppData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -12,6 +13,7 @@ import { BaseViewController } from '../base-view-controller/base-view-controller
 })
 export class RewardsDetailsPage extends BaseViewController {
   rewardImg: string;
+  rewardImgSrc: string;
   rewardOid: number;
   DISCOUNT_TYPE: any = {
     MONEY: "Money",
@@ -37,13 +39,14 @@ export class RewardsDetailsPage extends BaseViewController {
   };
   auth: AuthUserInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
     this.rewardImg = this.navParams.data.rewardImg;
+    this.rewardImgSrc = this.appData.getDisplayImgSrc(this.navParams.data.rewardImg);
     this.rewardOid = this.navParams.data.rewardOid;
     this.presentLoading();
 

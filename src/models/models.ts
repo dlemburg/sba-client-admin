@@ -139,7 +139,7 @@ export interface ITransactionDetailsOwner {
 }
 
 export interface IPurchaseItem {
-    selectedProduct: INameAndOid;
+    selectedProduct: INameOidImgSrc;
     sizeAndOrPrice: INameOidPrice;
     fixedPrice?: number;
     quantity: number;
@@ -167,6 +167,7 @@ export interface IReward {
 
 export interface IRewardForRewardsList {
     img: string;
+    imgSrc: string;
     description: string;
     name: string;
     startDate: string|Date;
@@ -272,6 +273,12 @@ export interface INameOidPrice {
 export interface INameAndOid {
     oid: number;
     name: string;
+}
+
+export interface INameOidImgSrc {
+    oid: number;
+    name: string;
+    imgSrc: string;
 }
 
 export interface ILkp {

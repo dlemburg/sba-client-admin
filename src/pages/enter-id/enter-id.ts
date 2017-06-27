@@ -14,7 +14,7 @@ export class EnterIDPage {
     console.log('ionViewDidLoad EnterIdPage');
   }
 
-  dismissBack() {
+  dismiss() {
     this.viewCtrl.dismiss({
       paymentID: null
     });

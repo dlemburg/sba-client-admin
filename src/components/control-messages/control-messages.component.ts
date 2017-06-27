@@ -1,6 +1,6 @@
 import { Component, Input, OnInit} from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { Validation } from '../../global/validation';
+import { Validation } from '../../utils/validation-utils';
 
 @Component({
   selector: 'control-messages',
@@ -9,7 +9,7 @@ import { Validation } from '../../global/validation';
 export class ControlMessagesComponent implements OnInit {
   @Input() controlInstance: FormControl;  // form control has all kinds of methods and props
   @Input() isSubmitted: boolean;
-  constructor() { }
+  constructor(public validation: Validation) { }
 
   // two validation props:  
   // 1.) this.control.someFormName.valid
@@ -39,7 +39,7 @@ export class ControlMessagesComponent implements OnInit {
             validatorValue: this.controlInstance.errors[prop],  // for min and max length
             validatorOptions                                     // prop that container custom info
           }
-          let message = Validation.getValidatorErrorMessage(args);
+          let message = this.validation.getValidatorErrorMessage(args);
 
           return message;
         }

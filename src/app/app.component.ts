@@ -2,9 +2,12 @@ import { Component, ViewChild } from '@angular/core';
 import { Nav, Platform } from 'ionic-angular';
 import { SplashScreen } from "@ionic-native/splash-screen";
 import { StatusBar } from "@ionic-native/status-bar";
-import { Authentication } from '../global/authentication.service';
-import { SocketService } from '../global/socket.service';
-import { AppDataService } from '../global/app-data.service';
+import { BackgroundMode } from '@ionic-native/background-mode';
+import { Authentication } from '../global/authentication';
+import { SocketIO } from '../global/socket-io';
+import { AppData } from '../global/app-data';
+import { AppFeatures } from '../global/app-features';
+import { API, ROUTES } from '../global/api';
 
 declare var cordova: any;
 
@@ -17,50 +20,91 @@ export class MyApp {
   pages: Array<any>;
   auth;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, private authentication: Authentication, public socketService: SocketService) {
+  constructor(
+    platform: Platform, 
+    public statusBar: StatusBar, 
+    public splashScreen: SplashScreen, 
+    public backgroundMode: BackgroundMode, 
+    public API: API, 
+    public appFeatures: AppFeatures, 
+    public appData: AppData, 
+    private authentication: Authentication, 
+    public socketIO: SocketIO) {
+      
     platform.ready().then(() => {
-      // Okay, so the platform is ready and our plugins are available.
-      // Here you can do any higher level native things you might need.
-      statusBar.styleDefault();
-      splashScreen.hide();
 
-
-      //cordova.file.cacheDirectory ??
-      if (platform.is('ios')) {
-        AppDataService.setStorageDirectory(cordova.file.documentsDirectory);
-      }
-      else if(platform.is('android')) {
-         AppDataService.setStorageDirectory(cordova.file.dataDirectory);
+      if (this.authentication.isLoggedIn()) {
+        this.initializeApp();
+      } else {
+        this.nav.setRoot('LoginPage');
       }
     });
+  }
 
-    this.pages = [
-      {title: 'Home', component: 'TabsPage' },
-      {title: 'Menu', component: 'CategoriesPage'},
-      {title: 'Rewards', component: 'RewardsPage'},
-      {title: 'Transactions', component: 'TransactionsPage'}
-    ];
+  /*
+    set appData
+    set appFeatures
+    connect to socket
+    navigate to TabsPage
+    enable background mode
+
+   */
+
+  initializeApp() {
     this.auth = this.authentication.getCurrentUser();
 
-    if (this.authentication.isLoggedIn()) {
-      const room = this.auth.companyOid + this.auth.locationOid;
-      this.socketService.connect(room);
-      this.rootPage = 'TabsPage' // AppImagesPage 
-    } else {
-      this.rootPage = 'LoginPage'; // LoginPage;
-    }
+    this.API.stack(ROUTES.getAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
+      .subscribe(
+        (response) => {
+          const defaultImg = response.data.imgs.defaultImg;
+
+          console.log("response.data: ", response.data);
+          
+          this.appData.setImgs({
+            logoImgSrc: `${ROUTES.downloadImg}?img=${response.data.imgs.logoImg}`,
+            defaultImgSrc: defaultImg ? `${ROUTES.downloadImg}?img=${defaultImg}` : "img/default.png"
+          });
+          this.appFeatures.setFeatures({
+            hasProcessOrder: response.data.appFeatures.hasProcessOrder
+          });
+
+          this.finishInitialization();
+
+        }, (err) => {
+
+          this.finishInitialization();
+          console.log("Problem downloading images on app startup");
+        });
   }
+
+  finishInitialization() {
+
+    const room = this.auth.companyOid + this.auth.locationOid;
+    this.socketIO.connect(room);
+    this.nav.setRoot('TabsPage');
+
+
+    !this.backgroundMode.isEnabled && this.backgroundMode.enable();
+    this.statusBar.styleDefault();
+    this.splashScreen.hide();
+  }
+  
 
   openPage(page) {
     this.nav.setRoot(page.component);
   }
 
   signOut() {
-    // clean up services here
 
     this.authentication.deleteToken();
-    this.socketService.disconnect();
-    AppDataService.cleanup();
+    this.socketIO.disconnect();
+    this.backgroundMode.isEnabled && this.backgroundMode.disable();
+
+
+    // clean up providers that hold state here
+
+    //this.appData.cleanup();
+    //this.appFeatures.cleanup();
 
     let navLogin = setTimeout(() => {
       this.nav.setRoot('LoginPage');
@@ -69,6 +113,11 @@ export class MyApp {
    // clearTimeout(navLogin);
   }
 }
+
+
+
+
+
 
 
 /******************************* NOTES *******************************/

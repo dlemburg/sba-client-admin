@@ -1,5 +1,6 @@
 <ion-tabs>
-  <ion-tab [root]="tab1Root" tabTitle="Take Order" tabIcon="clipboard"></ion-tab>
+  <ion-tab *ngIf="hasProcessOrderFeature" [root]="tab1aRoot" tabTitle="Take Order" tabIcon="clipboard"></ion-tab>
+  <ion-tab *ngIf="!hasProcessOrderFeature" [root]="tab1bRoot" tabTitle="Scan Barcode(s)" tabIcon="barcode"></ion-tab>
   <ion-tab [root]="tab2Root" tabTitle="Order-Ahead" tabIcon="arrow-round-forward"></ion-tab>
   <ion-tab *ngIf="isOwner" [root]="tab3Root" tabTitle="Owner" tabIcon="ios-lock-outline"></ion-tab>
 </ion-tabs>

@@ -28,7 +28,7 @@
         <ion-col>
           <ion-item>
             <ion-card tappable (click)="getImgCordova()" item-start>
-              <div text-wrap class="label"> {{ appImg.label }}</div>
+              <div text-wrap class="label"> {{ editValue.label }}</div>
               <img *ngIf="editValue.imgSrc" class="img" [src]="editValue.imgSrc" />
               <img *ngIf="!editValue.imgSrc" class="img" src="{{defaultImg}}" />
             </ion-card>

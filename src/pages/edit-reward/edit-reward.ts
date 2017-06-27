@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Validation } from '../../global/validation';
-import { AsyncValidation } from '../../global/async-validation.service';
-import { UtilityService } from '../../global/utility.service';
+import { Validation } from '../../utils/validation-utils';
+import { AppUtils } from '../../utils/app-utils';
 import { INameAndOid, AuthUserInfo } from '../../models/models';
-import { API, ROUTES } from '../../global/api.service';
-import { Authentication } from '../../global/authentication.service';
+import { API, ROUTES } from '../../global/api';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Dates } from '../../global/dates.service';
+import { DateUtils } from '../../utils/date-utils';
 
 @IonicPage()
 @Component({
@@ -51,8 +50,8 @@ export class EditRewardPage extends BaseViewController {
   };
   originalValue: string = null;
 
-constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, private AsyncValidation: AsyncValidation) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+constructor(public navCtrl: NavController, public navParams: NavParams, public dateUtils: DateUtils, public appUtils: AppUtils, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
      this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
@@ -69,7 +68,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
       dateRuleTimeEnd: [null],
       startDate: ['', Validators.required],
       expiryDate: ['', Validators.required ],
-    }, {validator: Validators.compose([Validation.discountAmountInvalid('lkpDiscountTypeOid', 'discountAmount'), Validation.isInvalidDate('startDate', 'expiryDate'), Validation.isInvalidDate('dateRuleTimeStart', 'dateRuleTimeEnd')])});
+    }, {validator: Validators.compose([this.validation.isDiscountAmountInvalid('lkpDiscountTypeOid', 'discountAmount'), this.validation.isInvalidDate('startDate', 'expiryDate'), this.validation.isInvalidDate('dateRuleTimeStart', 'dateRuleTimeEnd')])});
   }
 
 
@@ -78,14 +77,14 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
     /*** going to have to do something with dateRuleTimeStart and dateRuleTimeEnd- 
      * coming in as number (changed it to make server call easier), need to get it to ISO string for client***/
     
-    this.days = UtilityService.getDays();
+    this.days = this.appUtils.getDays();
     this.auth = this.authentication.getCurrentUser();
 
     // SUBSCRIBE TO FORM
     this.myForm.valueChanges.subscribe(data => this.onFormChanged(data));    // all
     this.myForm.get('processingType').valueChanges.subscribe(data => this.onProcessingTypeChanged(data));
 
-
+    this.presentLoading();
     // get name and oid of all rewards
     this.API.stack(ROUTES.getRewardsNameAndOid + `/${this.auth.companyOid}`, "GET")
         .subscribe(
@@ -95,7 +94,8 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
               
             }, (err) => {
               const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
+              const shouldDismiss = false;
+              this.errorHandler.call(this, err, shouldPopView, shouldDismiss)
             });
 
      // get lkps- doesn't need to be async
@@ -107,6 +107,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
               this.lkps.discountRule = discountRule;
 
               console.log('response.data: ', response.data);
+              this.dismissLoading();
               
             }, (err) => {
               const shouldPopView = false;
@@ -141,9 +142,9 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
                   lkpDiscountRuleOid: reward.lkpDiscountRuleOid,
                   discountAmount: reward.discountAmount,
                   productOid: reward.productOid,
-                  dateRuleDays: reward.dateRuleDays ? UtilityService.toArray(reward.dateRuleDays) : null,
-                  dateRuleTimeStart: reward.dateRuleTimeStart !== null ? Dates.convertTimeStringToIsoString(reward.dateRuleTimeStart) : null,
-                  dateRuleTimeEnd: reward.dateRuleTimeEnd !== null ? Dates.convertTimeStringToIsoString(reward.dateRuleTimeEnd) : null,
+                  dateRuleDays: reward.dateRuleDays ? reward.dateRuleDays.split(",") : null,
+                  dateRuleTimeStart: reward.dateRuleTimeStart !== null ? this.dateUtils.convertTimeStringToIsoString(reward.dateRuleTimeStart) : null,
+                  dateRuleTimeEnd: reward.dateRuleTimeEnd !== null ? this.dateUtils.convertTimeStringToIsoString(reward.dateRuleTimeEnd) : null,
                   startDate: reward.startDate,
                   expiryDate: reward.expiryDate,
                 });
@@ -243,11 +244,11 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
   }
 
   remove(): void {
-    this.presentLoading(AppDataService.loading.removing);
+    this.presentLoading(this.appData.getLoading().removing);
     this.API.stack(ROUTES.removeReward + `/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(AppDataService.loading.removed);
+          this.dismissLoading(this.appData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
         }, (err) => {
@@ -262,13 +263,13 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
 
 
     /*** Package for submit ***/
-    this.presentLoading(AppDataService.loading.saving);
+    this.presentLoading(this.appData.getLoading().saving);
     this.myForm.patchValue({
-      startDate: expiryDate.indexOf("T23:59:59") < 0 ? Dates.patchStartTime(myForm.startDate) : expiryDate,
-      expiryDate: startDate.indexOf("T00:00:00") < 0 ? Dates.patchEndTime(myForm.expiryDate) : startDate,
-      dateRuleTimeStart: myForm.dateRuleTimeStart ? Dates.getHours(myForm.dateRuleTimeStart) : null,
-      dateRuleTimeEnd: myForm.dateRuleTimeEnd ? Dates.getHours(myForm.dateRuleTimeEnd) : null,
-      dateRuleDays: myForm.dateRuleDays ? UtilityService.arrayToString(myForm.dateRuleDays): null
+      startDate: expiryDate.indexOf("T23:59:59") < 0 ? this.dateUtils.patchStartTime(myForm.startDate) : expiryDate,
+      expiryDate: startDate.indexOf("T00:00:00") < 0 ? this.dateUtils.patchEndTime(myForm.expiryDate) : startDate,
+      dateRuleTimeStart: myForm.dateRuleTimeStart ? this.dateUtils.getHours(myForm.dateRuleTimeStart) : null,
+      dateRuleTimeEnd: myForm.dateRuleTimeEnd ? this.dateUtils.getHours(myForm.dateRuleTimeEnd) : null,
+      dateRuleDays: myForm.dateRuleDays ? myForm.dateRuleDays.split(","): null
     });
 
     const toData: ToDataEditReward = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
@@ -278,7 +279,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public A
     this.API.stack(ROUTES.editReward, "POST", toData)
       .subscribe(
           (response) => {
-            this.dismissLoading(AppDataService.loading.saved);
+            this.dismissLoading(this.appData.getLoading().saved);
             //this.navCtrl.pop();
             console.log('response: ', response);            
           }, (err) => {

@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Scan Barcodes</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+  <div class="width-90 align-center">
+    <ion-item margin-top class="width-50">
+      <ion-label stacked><dollar-icon></dollar-icon>Enter total</ion-label>
+      <ion-input [(ngModel)]="total" type="tel"></ion-input>
+    </ion-item>
+    <ion-item margin-top>
+      <ion-label class="text-area-label" stacked>Additional Comments</ion-label>
+      <ion-textarea [(ngModel)]="comments" type="text" ></ion-textarea>
+    </ion-item>
+    <div margin-top text-center class="width-100">
+      <button class="width-50" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
+        <ion-icon class="icon-primary" ios="ios-trophy" md="ios-trophy"></ion-icon><span class="btn-text">Scan Reward Barcode</span>
+      </button>
+    </div>
+    <div margin-top text-center class="width-100">
+      <button class="width-50" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
+        <ion-icon ios="ios-barcode-outline" md="ios-barcode-outline"></ion-icon><span class="btn-text">Scan User Barcode</span>
+      </button>
+    </div>
+  </div>
+
+</ion-content>
+ <ion-footer>
+  <ion-toolbar>
+      <button [disabled]="!sufficientFunds || !userData.userOid || !total" (click)="submit()" class="footer-btn" color="secondary" ion-button block detail-push>Submit</button>
+  </ion-toolbar>
+</ion-footer>

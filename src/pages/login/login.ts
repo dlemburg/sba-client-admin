@@ -1,12 +1,15 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
-import { API, ROUTES } from '../../global/api.service';
-import { Authentication } from '../../global/authentication.service';
+import { API, ROUTES } from '../../global/api';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
+import { AppFeatures } from '../../global/app-features';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { SocketService } from '../../global/socket.service';
+import { SocketIO } from '../../global/socket-io';
+import { BackgroundMode } from '@ionic-native/background-mode';
+
 
 @IonicPage()
 @Component({
@@ -21,8 +24,22 @@ export class LoginPage extends BaseViewController {
   locations: Array<any>;
   auth: AuthUserInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, public socketService: SocketService) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public backgroundMode: BackgroundMode, 
+    public appFeatures: AppFeatures,  
+    public appData: AppData, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    private formBuilder: FormBuilder, 
+    public socketService: SocketIO) { 
+      
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
   
     this.myForm = this.formBuilder.group({
       email: [null, Validators.required],
@@ -31,7 +48,7 @@ export class LoginPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
-    this.bgroundImg = AppDataService.loginBackgroundImg;
+    //this.bgroundImg = this.appData.getImg().loginBackgroundImgSrc;
   }
 
   navForgotPassword(): void {
@@ -49,13 +66,24 @@ export class LoginPage extends BaseViewController {
         this.authentication.saveToken(token);
         this.auth = this.authentication.getCurrentUser();
 
-        // join socket room
-        const room = this.auth.companyOid + this.auth.locationOid;
-        this.socketService.connect(room);
+         this.API.stack(ROUTES.getAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
+          .subscribe(
+            (response) => {
+              const defaultImg = response.data.imgs.defaultImg;
 
-        // nav
-        if (data.role === "Admin") this.navCtrl.setRoot('TabsPage');
-        else if (data.role === "Owner") this.navCtrl.setRoot('TabsPage'); //(FingerprintPage);
+              this.appData.setImgs({
+                logoImgSrc: `${ROUTES.downloadImg}?img=${response.data.imgs.logoImg}`,
+                defaultImgSrc: defaultImg ? `${ROUTES.downloadImg}?img=${defaultImg}` : "img/default.png"
+              });
+              this.appFeatures.setFeatures({
+                hasProcessOrder: response.data.appFeatures.hasProcessOrder
+              });
+
+              this.finishInitialization(data.role);
+            }, (err) => {
+              console.log("error on login: ", err);
+              this.finishInitialization(data.role);
+            });
 
     } else {
         // do nothing yet
@@ -64,6 +92,18 @@ export class LoginPage extends BaseViewController {
     });
     selectLocationPage.present();
 
+  }
+
+  finishInitialization(role) {
+     // join socket room
+    const room = this.auth.companyOid + this.auth.locationOid;
+    this.socketService.connect(room);
+    !this.backgroundMode.isEnabled && this.backgroundMode.enable();
+
+
+    // originally had these going different routes
+    if (role === "Admin") this.navCtrl.setRoot('TabsPage');
+    else if (role === "Owner") this.navCtrl.setRoot('TabsPage');
   }
 
   submit(myForm, isValid): void {
@@ -82,9 +122,9 @@ export class LoginPage extends BaseViewController {
             // incorrect login password or email
             if (response.code === 2) {
               this.showPopup({
-                title: AppDataService.defaultErrorTitle, 
+                title: this.appData.getPopup().defaultErrorTitle, 
                 message: response.message || "Sorry, the password or email you entered is incorrect.", 
-                buttons: [{text: AppDataService.defaultConfirmButtonText}]
+                buttons: [{text: this.appData.getPopup().defaultConfirmButtonText}]
               });
             } else {
               preliminaryToken = response.data.preliminaryCompanyTokenPayload;

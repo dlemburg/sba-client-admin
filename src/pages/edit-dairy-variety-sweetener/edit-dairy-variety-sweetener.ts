@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { API, ROUTES } from '../../global/api.service';
+import { API, ROUTES } from '../../global/api';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
-import { AsyncValidation } from '../../global/async-validation.service';
-import { Authentication } from '../../global/authentication.service';
+import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppDataService } from '../../global/app-data.service';
+import { AppData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 
@@ -20,8 +19,8 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
   values: Array<any>;
   editOid: number;
   selectedValue: any;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder, private AsyncValidation: AsyncValidation) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.compose([Validators.maxLength(45)])],
@@ -54,11 +53,11 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
   }
 
   remove(): void {
-    this.presentLoading(AppDataService.loading.removing);
+    this.presentLoading(this.appData.getLoading().removing);
     this.API.stack(ROUTES.removeDairyVarietySweetener + `/${this.type}/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(AppDataService.loading.removed);
+          this.dismissLoading(this.appData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
         }, (err) => {
@@ -68,13 +67,13 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
   }
 
 submit(myForm, isValid): void {
-    this.presentLoading(AppDataService.loading.saving);
+    this.presentLoading(this.appData.getLoading().saving);
 
     const toData: ToDataEditDairyVarietySweetener = {toData: myForm, editOid: this.editOid, companyOid: this.auth.companyOid, name: myForm.name };
     this.API.stack(ROUTES.editDairyVarietySweetener + `/${this.type}`, 'POST', toData)
       .subscribe(
         (response) => {
-          this.dismissLoading(AppDataService.loading.saved);
+          this.dismissLoading(this.appData.getLoading().saved);
           this.navCtrl.pop();
           console.log('response: ', response);
         }, (err) => {

@@ -124,9 +124,9 @@ export const ROUTES = {
     removeDairyVarietySweetener: '/api/cs/owner/removeDairyVarietySweetener',
     editDairyVarietySweetener: '/api/cs/owner/editDairyVarietySweetener',        // takes one
     getCompanyDetails: '/api/cs/shared/getCompanyDetails',
+    getCompanyAppFeatures: '/api/cs/shared/getCompanyAppFeatures',
+    getAppStartupInfo: `/api/cs/shared/getAppStartupInfo`,
 
-
-    getAppImg: '/api/cs/owner/getAppImg',
 
 
     // TODO
@@ -136,6 +136,7 @@ export const ROUTES = {
     // NODE
     generateReceipt: '/api/node/emails/generateReceipt',
     downloadImg: `${global.SERVER_URL_NODE}/api/node/download/img`,
+    getImgName: `/api/cs/shared/getImgName`,
     uploadImg: `${global.SERVER_URL_NODE}/api/node/upload/img`,
     saveAppImg: '/api/node/owner/saveAppImg',
 

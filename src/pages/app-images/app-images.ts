@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { IonicPage, Platform, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { API, ROUTES } from '../../global/api.service';
-import { Authentication } from '../../global/authentication.service';
-import { AppDataService } from '../../global/app-data.service';
+import { API, ROUTES } from '../../global/api';
+import { Authentication } from '../../global/authentication';
+import { AppData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import * as global from '../../global/global';
+import { APP_IMGS, DEFAULT_IMG } from '../../global/global';
 //import cloneDeep from 'lodash.cloneDeep';
+//import { DomSanitizer } from '@angular/platform-browser';
+
 
 @IonicPage()
 @Component({
@@ -21,30 +22,30 @@ export class AppImagesPage extends BaseViewController {
   type: string;
   isSubmitted: boolean = false;
   auth: AuthUserInfo;
-  defaultImg: string = global.defaultImg;
-  prependImgString = global.prependImgString;
+  defaultImg: string = DEFAULT_IMG;
   currentIndex: number = null;
-
-
-  // 'name' correspond to fields in db
   values = [
-    {label: "'My Card'", name: "homeMyCardImg", img: null, imgSrc: null},
-    {label: "'Rewards'", name: "homeRewardsImg", img: null, imgSrc: null},
-    {label: "'Order Ahead'", name: "homeOrderAheadImg", img: null, imgSrc: null},
-    {label: "'Menu'", name: "homeMenuImg", img: null, imgSrc: null},
-    {label: "Your Company Logo", name: "logoImg", img: null, imgSrc: null},
-    {label: "Added-To-Cart", name: "addedToCartImg", img: null, imgSrc: null},
-    {label: "App Header Bar", name: "appHeaderBarImg", img: null, imgSrc: null},
-    {label: "Default (fallback)", name: "defaultImg", img: null, imgSrc: null},
-    {label: "Rewards (top of page)", name: "rewardsPageImg", img: null, imgSrc: null},
-    {label: "Login Background", name: "loginPageBackgroundImg", img: null, imgSrc: null},
-    {label: "Order Complete Background", name: "orderCompleteBackgroundImg", img: null, imgSrc: null},
-    {label: "Order Complete (middle of page)", name: "orderCompleteMiddleOfPageImg", img: null, imgSrc: null},
+    {label: "'My Card'", name: APP_IMGS[0], img: null, imgSrc: null},
+    {label: "'Rewards'", name: APP_IMGS[1], img: null, imgSrc: null},
+    {label: "'Order Ahead'", name: APP_IMGS[2], img: null, imgSrc: null},
+    {label: "'Menu'", name: APP_IMGS[3], img: null, imgSrc: null},
+    {label: "Your Company Logo", name: APP_IMGS[4], img: null, imgSrc: null},
+    {label: "App Header Bar", name: APP_IMGS[5], img: null, imgSrc: null},
+    {label: "Default (fallback)", name: APP_IMGS[6], img: null, imgSrc: null},
+    {label: "Rewards (top of page)", name: APP_IMGS[7], img: null, imgSrc: null},
+    {label: "Login Background", name: APP_IMGS[8], img: null, imgSrc: null},
+    {label: "Order Complete Background", name: APP_IMGS[9], img: null, imgSrc: null},
+    {label: "Order Complete (middle of page)", name: APP_IMGS[10], img: null, imgSrc: null},
+    {label: "Mobile Card", name: APP_IMGS[11], img: null, imgSrc: null},
+    {label: "Added-To-Cart", name:APP_IMGS[12], img: null, imgSrc: null},
+
+
   ];
   editValue = {label: null, name: null, img: null, imgSrc: null};
 
  constructor(public navCtrl: NavController, 
-             public navParams: NavParams, 
+             public navParams: NavParams,
+             public appData: AppData, 
              public API: API, 
              public authentication: Authentication,
              public modalCtrl: ModalController, 
@@ -55,8 +56,8 @@ export class AppImagesPage extends BaseViewController {
              private transfer: Transfer, 
              private file: File,
              private platform: Platform,
-             private domSanitizer: DomSanitizer) { 
-    super(navCtrl, navParams, API, authentication, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+             /*private domSanitizer: DomSanitizer */) { 
+    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
    
   }
 
@@ -76,8 +77,8 @@ export class AppImagesPage extends BaseViewController {
 
       // used lower quality for speed
       quality: 50,
-      targetHeight: 600,
-      targetWidth: 800,
+      targetHeight: 400,
+      targetWidth: 600,
       destinationType: this.camera.DestinationType.FILE_URI,
       encodingType: this.camera.EncodingType.JPEG,
       mediaType: this.camera.MediaType.PICTURE,
@@ -133,11 +134,11 @@ export class AppImagesPage extends BaseViewController {
 
   submit() {
     console.log("inside submit");
-    this.presentLoading(AppDataService.loading.saving);
+    this.presentLoading(this.appData.getLoading().saving);
     this.platform.ready().then(() => {
       this.uploadImg(this.editValue).then((data) => {
         this.editValue = { label: null, name: null, img: null, imgSrc: null };
-        this.dismissLoading(AppDataService.loading.saved);
+        this.dismissLoading(this.appData.getLoading().saved);
       });
     })
     .catch((err) => {
