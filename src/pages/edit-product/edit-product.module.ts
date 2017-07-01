@@ -5,6 +5,7 @@ import { EditProductPage } from './edit-product';
 // imports
 import { ControlMessagesComponentModule } from '../../components/control-messages/control-messages.component.module';
 import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-icon.component.module';
+import { ImageComponentModule } from '../../components/image/image.component.module';
 
  
 @NgModule({
@@ -14,7 +15,8 @@ import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-i
   imports: [
     IonicPageModule.forChild(EditProductPage),
     ControlMessagesComponentModule,
-    DollarIconComponentModule
+    DollarIconComponentModule,
+    ImageComponentModule
   ],
   exports: [
     EditProductPage

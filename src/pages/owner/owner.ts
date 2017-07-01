@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, ModalController, AlertController, ToastController, LoadingController, ViewController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ViewController } from 'ionic-angular';
 import { Authentication } from '../../global/authentication';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { API, ROUTES } from '../../global/api';
-import * as global from '../../global/global';
-import { AppData } from  '../../global/app-data';
+import { CONST_PASSWORD_TYPES } from '../../global/global';
+import { AppViewData } from  '../../global/app-data';
+import { ICompanyDetails } from '../../models/models';
 
 @IonicPage()
 @Component({
@@ -25,16 +26,24 @@ export class OwnerPage extends BaseViewController {
   settings:  Array<any> =  [
     {name: 'App Customizations and Settings', img: 'img/app-settings.jpeg', component: 'AppCustomizationsPage' },
     {name: 'App Images', img: 'img/app-images.jpeg', component: 'AppImagesPage' },
-    {name: 'Admin Passwords', img: 'img/admin-passwords.jpeg', component: 'EditPasswordsPage', type: global.PASSWORD_TYPES.ADMIN },
-    {name: 'Owner Passwords', img: 'img/owner-passwords.jpg', component: 'EditPasswordsPage', type: global.PASSWORD_TYPES.OWNER },
+    {name: 'Admin Passwords', img: 'img/admin-passwords.jpeg', component: 'EditPasswordsPage', type: CONST_PASSWORD_TYPES.ADMIN },
+    {name: 'Owner Passwords', img: 'img/owner-passwords.jpg', component: 'EditPasswordsPage', type: CONST_PASSWORD_TYPES.OWNER },
   ];
   category: string = null;
   auth: AuthUserInfo
 
-  COMPANY_DETAILS = global.COMPANY_DETAILS;
+  companyDetails: ICompanyDetails = {};
 
-constructor(public navCtrl: NavController, public appData: AppData, public navParams: NavParams, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public viewCtrl: ViewController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+constructor(
+  public navCtrl: NavController, 
+  public navParams: NavParams, 
+  public API: API, 
+  public authentication: Authentication, 
+  public alertCtrl: AlertController, 
+  public toastCtrl: ToastController, 
+  public loadingCtrl: LoadingController, 
+  public viewCtrl: ViewController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
   }
 
@@ -48,11 +57,7 @@ constructor(public navCtrl: NavController, public appData: AppData, public navPa
       .subscribe(
         (response) => {
           console.log('response: ', response);
-          this.COMPANY_DETAILS.HAS_DAIRY = response.data.companyDetails.hasDairy;
-          this.COMPANY_DETAILS.HAS_SWEETENER = response.data.companyDetails.hasSweetener;
-          this.COMPANY_DETAILS.HAS_VARIETY = response.data.companyDetails.hasVariety;
-          this.COMPANY_DETAILS.HAS_ADDONS = response.data.companyDetails.hasAddons;
-          this.COMPANY_DETAILS.HAS_FLAVORS = response.data.companyDetails.hasFlavors;
+          this.companyDetails = response.data.companyDetails;
 
           this.pages = this.concatConditionalPages(this.pages);
           this.dismissLoading();
@@ -71,23 +76,23 @@ constructor(public navCtrl: NavController, public appData: AppData, public navPa
 
   concatConditionalPages(pages) {
 
-    if (this.COMPANY_DETAILS.HAS_VARIETY) {
+    if (this.companyDetails.hasVariety) {
       pages = [...pages, {name: 'Variety', img: 'img/variety.jpeg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Variety"}];
     }
 
-    if (this.COMPANY_DETAILS.HAS_DAIRY) {
+    if (this.companyDetails.hasDairy) {
       pages = [...pages, {name: 'Dairy', img: 'img/dairy.jpeg', addComponent: 'AddDairyPage', editComponent: 'EditDairyPage', type: "Dairy"}];
     }
 
-    if (this.COMPANY_DETAILS.HAS_FLAVORS) {
+    if (this.companyDetails.hasFlavors) {
       pages = [...pages, {name: 'Flavors', img: 'img/flavors.jpg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Flavors"}];
     }
 
-    if (this.COMPANY_DETAILS.HAS_SWEETENER) {
+    if (this.companyDetails.hasSweetener) {
       pages = [...pages, {name: 'Sweetener', img: 'img/sweetener.jpg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Sweetener"}];
     }
 
-    if (this.COMPANY_DETAILS.HAS_ADDONS) {
+    if (this.companyDetails.hasAddons) {
       pages = [...pages, {name: 'Addons', img: 'img/addons.jpg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage', type: "Addons"}];
     }
 
@@ -98,7 +103,6 @@ constructor(public navCtrl: NavController, public appData: AppData, public navPa
   }
 
   nav(component, type) {
-    debugger;
     this.navCtrl.push(component, {type: type ? type : null});
   }
 

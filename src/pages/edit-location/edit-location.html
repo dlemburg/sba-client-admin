@@ -26,7 +26,6 @@
             <ion-input formControlName="name" type="text"></ion-input>
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
-
           <ion-item margin-top>
             <ion-label floating>Phone Number</ion-label>
             <ion-input formControlName="phoneNumber" type="text"></ion-input>
@@ -55,13 +54,7 @@
             <ion-input formControlName="zipcode" type="text"></ion-input>
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.zipcode"></control-messages>
-        
-          <ion-item margin-top>
-            <ion-label floating>Google maps plugin</ion-label>
-            <ion-input type="text"></ion-input>
-          </ion-item>
-          <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.latAndLong"></control-messages>
-          
+
           <div margin-top text-left><span class="bold">Note:</span> if you would like to keep your password the same, do not change the passwords listed below.</div>
           <ion-item margin-top>
             <ion-label floating>Location Password</ion-label>
@@ -74,6 +67,34 @@
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.passsword2"></control-messages>
 
+          
+          
+          <!-- Location Coords -->
+          <h3 text-center margin-top>Get Coordinates or Enter Manually</h3>
+          <ion-row>
+            <ion-col>
+              <ion-item>
+                <ion-label floating>Location Latitude</ion-label>
+                <ion-input type="text"></ion-input>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.coordsLat"></control-messages>
+            </ion-col>
+            <ion-col>
+              <ion-item>
+                <ion-label floating>Location Longitude</ion-label>
+                <ion-input type="text"></ion-input>
+              </ion-item>
+              <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.coordsLong"></control-messages>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <button ion-button block (click)="navMap()">Get Coordinates</button>
+          </ion-row>
+
+           <!-- image -->
+          <h3 text-center margin-top>Location Image</h3>
+          <Image (getImgCordova)="getImgCordova()" header="Location Image (optional)" [imgSrc]="imgSrc"></Image>
+        
         <!-- populate with hours here -->
           <h4 margin-top text-center>Hours</h4>
             <div *ngIf="locations.length">

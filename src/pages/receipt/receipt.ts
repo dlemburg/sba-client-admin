@@ -9,11 +9,32 @@ import { ReceiptTemplates } from '../../global/receipt-templates';
   selector: 'page-receipt',
   templateUrl: 'receipt.html'
 })
+/**
+*
+* //////////////////////////////     NOT USING THIS PAGE FOR ANYTHING RIGHT NOW ////////////////////////////////
+* /////////////////////////////      JUST FOR TESTING                  ////////////////////////////////////////
+*
+*
+*
+*
+*
+*
+
+**/
+
+
+
+
+
+
+
+
+
 export class ReceiptPage {
   order = null;
   purchaseItem = null;
   auth: AuthUserInfo
-  constructor(public navCtrl: NavController, public navParams: NavParams, public authentication: Authentication, public receiptTemplates: ReceiptTemplates) {}
+  constructor(public navCtrl: NavController, public navParams: NavParams, public authentication: Authentication) {}
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
@@ -43,7 +64,7 @@ export class ReceiptPage {
         newPrice: null
       } 
     };
-    let innerHTML = this.receiptTemplates.generateReceiptHTML(this.order, this.auth);
+    let innerHTML = ReceiptTemplates.generateReceiptHTML(this.order, this.auth);
 
     console.log("innerHTML: ", innerHTML);
     //this.auth = this.authentication.getCurrentUser();

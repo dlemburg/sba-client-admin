@@ -1,18 +1,18 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { ScanBarcodesPage } from './scan-barcodes';
+import { SimpleProcessingPage } from './simple-processing';
 import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-icon.component.module';
 
 @NgModule({
   declarations: [
-    ScanBarcodesPage,
+    SimpleProcessingPage,
   ],
   imports: [
-    IonicPageModule.forChild(ScanBarcodesPage),
+    IonicPageModule.forChild(SimpleProcessingPage),
     DollarIconComponentModule
   ],
   exports: [
-    ScanBarcodesPage
+    SimpleProcessingPage
   ]
 })
-export class ScanBarcodesPageModule {}
+export class SimpleProcessingPageModule {}

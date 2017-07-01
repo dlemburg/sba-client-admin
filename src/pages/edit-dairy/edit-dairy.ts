@@ -4,8 +4,8 @@ import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms'
 import { Validation } from '../../utils/validation-utils';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
-import { AuthUserInfo, INameAndOid } from '../../models/models';
+import { AppViewData } from '../../global/app-data';
+import { AuthUserInfo, INameAndOid, ICompanyDetails } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 
 @IonicPage()
@@ -22,15 +22,23 @@ export class EditDairyPage extends BaseViewController {
   editOid: number = null;
   values: Array<INameAndOid> = [];
 
-  COMPANY_DETAILS = {
-    DOES_CHARGE_FOR_DAIRY: false
-  }
-  constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  companyDetails: ICompanyDetails = {};
+
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    private formBuilder: FormBuilder) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.compose([Validators.required, Validators.maxLength(45)])],
-      price: [0, Validators.compose([this.validation.test("isMoney"), ...this.doesChargeForDairy()])],
+      price: [0, Validators.compose([Validation.test("isMoney"), ...this.doesChargeForDairy()])],
       hasQuantity: [false]
     });
   }
@@ -41,20 +49,25 @@ export class EditDairyPage extends BaseViewController {
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
 
+    this.API.stack(ROUTES.getCompanyDetails, "POST", {companyOid: this.auth.companyOid})
+      .subscribe(
+          (response) => {
+            this.companyDetails = response.data.companyDetails;
+          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+  
+
+
     this.API.stack(ROUTES.getDairy + `/${this.type}/${this.auth.companyOid}`, 'GET')
       .subscribe(
         (response) => {
           this.dismissLoading();
           console.log('response: ', response); 
           this.values = response.data.values;
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   doesChargeForDairy() {
-    return this.COMPANY_DETAILS.DOES_CHARGE_FOR_DAIRY ? [this.validation.test("isMoney")] : [];
+    return this.companyDetails.doesChargeForDairy ? [Validation.test("isMoney")] : [];
   }
 
 
@@ -66,33 +79,27 @@ export class EditDairyPage extends BaseViewController {
   }
 
   remove(): void {
-    this.presentLoading(this.appData.getLoading().removing);
+    this.presentLoading(AppViewData.getLoading().removing);
     this.API.stack(ROUTES.removeDairy, 'POST', {companyOid: this.auth.companyOid, editOid: this.editOid})
       .subscribe(
         (response) => {
-          this.dismissLoading(this.appData.getLoading().removed);
+          this.dismissLoading(AppViewData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
-        }, (err) => {
-          const shouldPopView = true;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   submit(myForm, isValid): void {
-    this.presentLoading(this.appData.getLoading().saving);
+    this.presentLoading(AppViewData.getLoading().saving);
 
     const toData: ToDataEditGeneral = {toData: myForm, editOid: this.editOid, companyOid: this.auth.companyOid };
     this.API.stack(ROUTES.editDairy, 'POST', toData)
       .subscribe(
         (response) => {
-          this.dismissLoading(this.appData.getLoading().saved);
+          this.dismissLoading(AppViewData.getLoading().saved);
           this.navCtrl.pop();
           console.log('response: ', response);
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 interface ToDataEditGeneral {

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
+import { CONST_RECEIPT_TYPES } from '../../global/global';
 
 @IonicPage()
 @Component({
@@ -10,11 +11,8 @@ export class CompleteOrderConfirmationPage {
   doesWantReceipt: boolean = false;
   receiptType: string = null;
   receiptOptions: Array<any> = [];
-  RECEIPT_TYPES = {
-    EMAIL: "email",
-    PRINTER: "printer",
-    TEXT: "text message"
-  }
+  RECEIPT_TYPES = CONST_RECEIPT_TYPES;
+
   HAS_PRINTER: boolean = false;
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController) {}
 

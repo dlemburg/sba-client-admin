@@ -37,7 +37,7 @@
             <button (click)="onProcessOrder(order, i)" class="process-btn" color="secondary" ion-button outline no-margin>Process</button>
           </ion-col>
           <ion-col *ngIf="order.isProcessing" text-right>
-            <button (click)="onClearOrder(order, i)" class="process-btn" color="danger" ion-button outline no-margin>Clear</button>
+            <button (click)="onSetIsActiveFalse(order, i)" class="process-btn" color="danger" ion-button outline no-margin>Clear</button>
           </ion-col>
         </ion-row>
       </ion-card-header>

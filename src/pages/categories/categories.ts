@@ -4,7 +4,7 @@ import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -15,8 +15,16 @@ export class CategoriesPage extends BaseViewController {
   categories: Array<{img: string, imgSrc: string, title: string, oid: number}> = [];
   auth: AuthUserInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ionViewDidLoad() {
@@ -28,12 +36,9 @@ export class CategoriesPage extends BaseViewController {
               this.dismissLoading();
               this.categories = response.data.categories;
               this.categories.forEach((x) => {
-                x.imgSrc = this.appData.getDisplayImgSrc(x.img);
+                x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
               });
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navProductsList(category): void {

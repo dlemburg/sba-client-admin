@@ -2,15 +2,26 @@ import { Component, ViewChild } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
 import { AppUtils } from '../../utils/app-utils';
 import { Utils } from '../../utils/utils';
-import { IErrChecks, IOrder, IPurchaseItem, INameAndOid, IProductForProcessOrder, AuthUserInfo, ICompanyDetailsForProcessOrder, IEditSubtotalDismiss, IUserDataForProcessOrder } from '../../models/models';
+import { IErrChecks, 
+        IBarcodeUserData, 
+        IBarcodeRewardData, 
+        ICompanyDetails, 
+        IOrder, 
+        IPurchaseItem, 
+        INameAndOid, 
+        IProductForProcessOrder, 
+        AuthUserInfo, 
+        IEditSubtotalDismiss, 
+        IUserDataForProcessOrder } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, Slides, LoadingController, ModalController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
 import { ReceiptTemplates } from '../../global/receipt-templates';
-import { COMPANY_DETAILS, ID_TYPES } from '../../global/global';
+import { CONST_ID_TYPES, CONST_RECEIPT_TYPES, CONST_REWARDS_TYPES, CONST_REWARDS_DISCOUNT_RULE, CONST_REWARDS_DISCOUNT_TYPE, CONST_REWARDS_PROCESSING_TYPE } from '../../global/global';
 import { NativeNotifications } from '../../global/native-notifications';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 
 // cloneDeep(this.purchaseItem)
@@ -23,6 +34,7 @@ import { NativeNotifications } from '../../global/native-notifications';
 
 export class ProcessOrderPage extends BaseViewController {
   @ViewChild(Slides) slides: Slides;
+
   canViewProducts: boolean = false;
   initHasRun: boolean = false;
   rewards: Array<any> = [];
@@ -37,43 +49,27 @@ export class ProcessOrderPage extends BaseViewController {
   products: Array<INameAndOid> = [];
   categories: Array<INameAndOid> = [];
   employeeComment: string = null;
-  dairyQuantities = this.utils.getNumbersList(5);
+  dairyQuantities = Utils.getNumbersList(5);
   userData: IUserDataForProcessOrder = {
     userOid: null,
     email: null,
     companyOid: null,
-    lkpSocialMediaTypeOid: null,
+    socialMediaType: null,
     isSocialMediaUsed: false,
     balance: 0
   };
   sufficientFunds: boolean = true;
-
+  barcodeUserData: IBarcodeUserData;
+  barcodeRewardData: IBarcodeRewardData;
 
 /* Constants */
-  COMPANY_DETAILS = COMPANY_DETAILS;
-  ID_TYPES = ID_TYPES;
-  REWARDS_TYPE = {
-    REWARDS_INDIVIDUAL: "rewards_individual",
-    REWARDS_ALL: "rewards_all"
-  };
-  REWARDS_PROCESSING_TYPE = {
-    AUTOMATIC: "Automatic",
-    MANUAL: "Manual"
-  };
-  REWARDS_DISCOUNT_RULE = {
-    DATE_TIME_RANGE: "Date-Time-Range",
-    PRODUCT: "Product"
-  };
-  REWARDS_DISCOUNT_TYPE = {
-    MONEY: "Money",
-    NEW_PRICE: "New Price",
-    PERCENT: "Percent"
-  }
-  RECEIPT_TYPES = {
-    EMAIL: "email",
-    PRINTER: "printer",
-    TEXT: "text message"
-  }
+  companyDetails: ICompanyDetails = {};
+  ID_TYPES = CONST_ID_TYPES;
+  REWARDS_TYPE = CONST_REWARDS_TYPES;
+  REWARDS_PROCESSING_TYPE = CONST_REWARDS_PROCESSING_TYPE;
+  REWARDS_DISCOUNT_RULE = CONST_REWARDS_DISCOUNT_RULE;
+  REWARDS_DISCOUNT_TYPE = CONST_REWARDS_DISCOUNT_TYPE;
+  RECEIPT_TYPES = CONST_RECEIPT_TYPES;
   
   order: IOrder = { 
     purchaseItems: [], 
@@ -87,8 +83,8 @@ export class ProcessOrderPage extends BaseViewController {
       total: null, 
       rewardsSavings: 0,
       isSocialMediaUsed: false,
-      lkpSocialMediaTypeOid: null,
-      socialMediaDiscountAmount: 0,
+      socialMediaType: null,
+      socialMediaPointsBonus: 0,
       isEdited: false,
       editAmount: 0,
       reasonsForEdit: null,
@@ -121,7 +117,7 @@ export class ProcessOrderPage extends BaseViewController {
     numberOfFreeAddonsUntilCharged: null,
     addonsPriceAboveLimit: null
   };
-  quantities: Array<number> = this.utils.getNumbersList();
+  quantities: Array<number> = Utils.getNumbersList();
 
   isEditInProgress: any = {
     status: false,
@@ -138,11 +134,18 @@ export class ProcessOrderPage extends BaseViewController {
   currentProductImgSrc: string = null;
   backgroundImg: string = 'url(../../../img/family.png) no-repeat;';   // will need to change this
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public nativeNotifications: NativeNotifications, public appData: AppData, public dateUtils: DateUtils, public utils: Utils, public appUtils: AppUtils, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public receiptsTemplates: ReceiptTemplates) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
-
-    this.COMPANY_DETAILS = COMPANY_DETAILS;
-
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public barcodeScanner: BarcodeScanner,
+    public nativeNotifications: NativeNotifications, 
+    public API: API,
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController) {
+      super(alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ////////////////////////////////////////////////////////////// lifecycle methods //////////////////////////////////////////////////////////
@@ -189,7 +192,7 @@ export class ProcessOrderPage extends BaseViewController {
       if (this.order.purchaseItems.length) {
         if (isGoingBack) {
           this.order.transactionDetails.isRewardUsed = false;
-          this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+          this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
           this.order.transactionDetails.rewardsSavings = 0;
           this.order.transactionDetails.rewards = [...this.getIndividualRewards()];
           this.order.transactionDetails.isEdited = false;
@@ -233,19 +236,11 @@ export class ProcessOrderPage extends BaseViewController {
         .subscribe(
             (response) => {
               console.log('response.data: ', response.data);
-              this.COMPANY_DETAILS.ACCEPTS_PARTIAL_PAYMENTS = response.data.companyDetails.acceptsPartialPayments;
-              this.COMPANY_DETAILS.HAS_SOCIAL_MEDIA = response.data.companyDetails.hasSocialMedia;
-              this.COMPANY_DETAILS.SOCIAL_MEDIA_DISCOUNT_AMOUNT = response.data.companyDetails.socialMediaDiscountAmount; 
-              this.COMPANY_DETAILS.DOES_CHARGE_FOR_ADDONS = response.data.companyDetails.doesChargeForAddons; 
-              this.COMPANY_DETAILS.TAX_RATE = response.data.companyDetails.taxRate; 
-              this.COMPANY_DETAILS.HAS_PRINTER = response.data.companyDetails.hasPrinter;
+              this.companyDetails = response.data.companyDetails;
 
               this.getCategoriesAPI();
 
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   getCategoriesAPI() {
@@ -255,10 +250,7 @@ export class ProcessOrderPage extends BaseViewController {
               console.log('response.data: ', response.data);
               this.dismissLoading();
               this.categories = response.data.categories;
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },this.errorHandler(this.ERROR_TYPES.API));
     this.products = []; // reset products
   }
 
@@ -271,10 +263,7 @@ export class ProcessOrderPage extends BaseViewController {
               this.productDetails = this.clearProductDetails();
               this.purchaseItem = this.clearPurchaseItem();
               this.canViewProducts = true;
-            },  (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   onProductChangeGetProductInfoAPI(currentProductOid) {
@@ -292,15 +281,12 @@ export class ProcessOrderPage extends BaseViewController {
               if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
                 this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
               }
-            },  (err) => {
-              const shouldPopView = false, shouldDismissLoading = false;
-              this.errorHandler.call(this, err, shouldPopView, shouldDismissLoading)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
   }
 
-  getUserDataForProcessOrderAPI(ID, type, socialMediaOpts = {lkpSocialMediaTypeOid: null, isSocialMediaUsed: false}) {
+  getUserDataForProcessOrderAPI(userOidOrPaymentID, type, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
-    let toData = { ID: ID, companyOid: this.auth.companyOid, type};
+    let toData = { ID: userOidOrPaymentID, companyOid: this.auth.companyOid, type};
 
     // get user data
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
@@ -312,15 +298,16 @@ export class ProcessOrderPage extends BaseViewController {
             this.userData.balance = response.data.userData.balance;
             this.userData.companyOid = response.data.userData.companyOid;
             this.userData.email = response.data.userData.email;
-            this.userData.lkpSocialMediaTypeOid = socialMediaOpts.lkpSocialMediaTypeOid;
+            this.userData.socialMediaType = socialMediaOpts.socialMediaType;
             this.userData.isSocialMediaUsed = socialMediaOpts.isSocialMediaUsed;
 
             // do checks
             if (this.userData.balance < this.order.transactionDetails.total) {
-              if (this.COMPANY_DETAILS.ACCEPTS_PARTIAL_PAYMENTS) {
+              if (this.companyDetails.acceptsPartialPayments) {
                 if (this.userData.isSocialMediaUsed) {
-                  this.processSocialMediaDiscount();
-                }
+                    this.order.transactionDetails.isSocialMediaUsed = true;
+                    this.order.transactionDetails.socialMediaType = this.userData.socialMediaType;
+                } 
               } else {
                 this.showPopup({
                   title: 'Uh oh!', 
@@ -329,15 +316,8 @@ export class ProcessOrderPage extends BaseViewController {
                 });
                 this.sufficientFunds = false;
               }
-            } else {
-              if (this.userData.isSocialMediaUsed) {
-                this.processSocialMediaDiscount();
-              }
-            }
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView);
-          });
+            } 
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
 
@@ -348,7 +328,8 @@ export class ProcessOrderPage extends BaseViewController {
 
   presentReasonsForEditModal() {
     if (this.order.transactionDetails.reasonsForEdit && this.order.transactionDetails.reasonsForEdit.length) {
-      this.presentModal('ReasonsForEditPage', {reasons: this.order.transactionDetails.reasonsForEdit})
+      let modal = this.modalCtrl.create('ReasonsForEditPage', {reasons: this.order.transactionDetails.reasonsForEdit}, {enableBackdropDismiss: true, showBackdrop: true});
+      modal.present();
     }
   }
 
@@ -357,7 +338,7 @@ export class ProcessOrderPage extends BaseViewController {
     selectProductModal.onDidDismiss((data) => {
       if (data) {
         this.currentProductOid = data.oid;
-        this.currentProductImgSrc = this.appData.getDisplayImgSrc(data.img);
+        this.currentProductImgSrc = AppViewData.getDisplayImgSrc(data.img);
         this.purchaseItem.selectedProduct = {oid: data.oid, name: data.name, imgSrc: this.currentProductImgSrc };
         this.onProductChangeGetProductInfoAPI(data.oid);
       }
@@ -373,7 +354,7 @@ export class ProcessOrderPage extends BaseViewController {
       if (data) {
         this.currentCategoryOid = data.oid;
         this.currentCategoryName = data.name;
-        this.currentCategoryImgSrc = this.appData.getDisplayImgSrc(data.img);
+        this.currentCategoryImgSrc = AppViewData.getDisplayImgSrc(data.img);
         this.onCategoryChangeGetProductsAPI();
       }
     });
@@ -393,7 +374,7 @@ export class ProcessOrderPage extends BaseViewController {
         this.order.transactionDetails.subtotal = data.subtotal;
         this.order.transactionDetails.editAmount += editAmount;
         this.order.transactionDetails.reasonsForEdit = [...reasonsForEdit, {reason: data.reasonForEdit, amount: editAmount, priceDown}];
-        this.order.transactionDetails.taxes = this.calculateTaxes(this.order.transactionDetails.subtotal, this.COMPANY_DETAILS.TAX_RATE);
+        this.order.transactionDetails.taxes = this.calculateTaxes(this.order.transactionDetails.subtotal, this.companyDetails.taxRate);
         this.order.transactionDetails.total = this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.total);
       }
     });
@@ -440,7 +421,7 @@ export class ProcessOrderPage extends BaseViewController {
     } 
 
     // calculate subtotal
-    this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+    this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
   }
 
   setEditInProgress(index) {
@@ -500,18 +481,9 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
 
-  /* work is done here */
-
 
   selectDairyQuantity(purchaseItemIndex, quantity) {
     this.purchaseItem.dairy[purchaseItemIndex].quantity = quantity;
-
-    /*
-    this.dairyQuantities.forEach(() => {
-
-    })
-    obj.isSelected = true;
-    */
   }
   
 
@@ -521,17 +493,17 @@ export class ProcessOrderPage extends BaseViewController {
     let checks = this.doChecksPurchaseItem(this.purchaseItem);
     
     if (!checks.isValid) {
-      this.presentToast(false, {message: checks.errs.join(". "), position: "bottom", duration: 1500});
+      this.presentToast(false, checks.errs.join(". "));
     }
     else {
       // const purchaseItem = cloneDeep(this.purchaseItem);   // not using
-      this.presentToast(false, {message: "Added item!", position: "top", duration: 1500});
+      this.presentToast(false, "Added item!");
 
       // business logic
       this.purchaseItem.addonsCost = this.calculateAddonsCost(this.purchaseItem);
       this.purchaseItem.dairyCost = this.calculateDairyCost(this.purchaseItem);
       this.order.purchaseItems = [...this.order.purchaseItems, this.purchaseItem];
-      this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+      this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
 
       // clear
       this.purchaseItem = this.clearPurchaseItem();
@@ -550,7 +522,7 @@ export class ProcessOrderPage extends BaseViewController {
       this.purchaseItem = this.clearPurchaseItem();
       this.productDetails = this.clearProductDetails();
       this.isEditInProgress = this.clearEditInProgress(); 
-      this.order.transactionDetails.subtotal = this.utils.round(this.calculateSubtotal(this.order, this.COMPANY_DETAILS));
+      this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
 
     }
     
@@ -562,7 +534,7 @@ export class ProcessOrderPage extends BaseViewController {
     this.showPopup({
       title: "Please confirm",
       message: "Are you sure you want to remove this item?",
-      buttons: [{text: this.appData.getPopup().defaultCancelButtonText, handler: cancelFn}, {text: this.appData.getPopup().defaultConfirmButtonText, handler: confirmFn}]
+      buttons: [{text: AppViewData.getPopup().defaultCancelButtonText, handler: cancelFn}, {text: AppViewData.getPopup().defaultConfirmButtonText, handler: confirmFn}]
     });
 
   }
@@ -579,9 +551,9 @@ export class ProcessOrderPage extends BaseViewController {
   getEligibleRewards() {
     this.presentLoading();
 
-    const dateInfo = this.dateUtils.getCurrentDateInfo();
+    const dateInfo = DateUtils.getCurrentDateInfo();
     const toData = {
-      date: this.dateUtils.toLocalIsoString(dateInfo.date.toString()), // get all rewards where expiry date < date
+      date: DateUtils.toLocalIsoString(dateInfo.date.toString()), // get all rewards where expiry date < date
       day: dateInfo.day, 
       hours: dateInfo.hours,
       mins: dateInfo.mins, 
@@ -612,14 +584,11 @@ export class ProcessOrderPage extends BaseViewController {
               this.order = this.calculateFreePurchaseItem(this.order);
             }
 
-            this.order.transactionDetails.taxes = this.utils.round(this.calculateTaxes(this.order.transactionDetails.subtotal, this.COMPANY_DETAILS.TAX_RATE));
-            this.order.transactionDetails.total = this.utils.round(this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes));
+            this.order.transactionDetails.taxes = Utils.round(this.calculateTaxes(this.order.transactionDetails.subtotal, this.companyDetails.taxRate));
+            this.order.transactionDetails.total = Utils.round(this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes));
             this.dismissLoading();
 
-          },  (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   // this is optional- but helps with aggregating information about rewards used
@@ -628,45 +597,66 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
 
-
-
   // slide 2
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /// new
   onScanIndividualRewardBarcode() {
+    this.barcodeScanner.scan({resultDisplayDuration: 0}).then((barcodeData) => {
+      console.log("barcodeData: ", barcodeData);
 
-    /////////////////////////////////////
-    ///// cordova scan barcode //////////
-    /////////////////////////////////////
+      /*
+        // barcode data will only have rewardOid, isFreePurchaseItem, userOid
+        // i.e.: 139$1$28
+      */
+      if (!barcodeData.cancelled) {
+        if (barcodeData.text.indexOf("$") > -1) {
+          let barcodeRewardData: Array<string> = barcodeData.text.split("$");
+          this.barcodeRewardData = {
+            rewardOid: +barcodeRewardData[0],
+            isFreePurchaseItem: +barcodeRewardData[1] === 0 ? false : true,
+            userOid: +barcodeRewardData[2]
+          }
 
-
-    // either get these from barcode, or just get userOid and oid and look up info
-    // only individual rewards can be scanned, so safe here
-    let data = { 
-      rewardIndividualOid: 0, 
-      isFreePurchaseItem: true, 
-      name: "Name of individual reward", 
-      userOid: 4, 
-      type: this.REWARDS_TYPE.REWARDS_INDIVIDUAL,  
-      processingType: this.REWARDS_TYPE.REWARDS_INDIVIDUAL,
-      isUsed: true   // SETS TO TRUE b/c I will set to false explicitly if not used in algorithm below
-    };
-    this.dataFromRewardIndividualBarcodeScan = data;
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // add to rewards
-    this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, this.dataFromRewardIndividualBarcodeScan];
-    
-    if (this.dataFromRewardIndividualBarcodeScan.isFreePurchaseItem) {
-      this.order = this.calculateFreePurchaseItem(this.order); 
-    } else {
-      // do nothing: don't support any other option right now
-    }
+          // add to rewards
+          this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, {rewardOid: this.barcodeRewardData.rewardOid, isRewardAll: false, isFreePurchaseItem: true}];
+        
+          if (this.barcodeRewardData.isFreePurchaseItem) {
+            this.order = this.calculateFreePurchaseItem(this.order); 
+          } else {
+            // do nothing: don't support any other option right now
+          }
+        }
+      } 
+    }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
   }
 
+ 
+  onScanUserBarcode() {
+    this.barcodeScanner.scan({resultDisplayDuration: 0}).then((barcodeData) => {
+      console.log("barcodeData: ", barcodeData);
+
+      /*
+        // barcode data will have  userOid, companyOid, isSocialMediaUsed, socialMediaType: string separated by $
+        // i.e.:  148$12$0$17
+      */
+      if (!barcodeData.cancelled) {
+        if (barcodeData.text.indexOf("$") > -1) {
+          let barcodeUserData: Array<string> = barcodeData.text.split("$");
+          this.barcodeUserData = {
+            userOid: +barcodeUserData[0],
+            companyOid: +barcodeUserData[1],
+            isSocialMediaUsed: +barcodeUserData[2] === 0 ? false : true,
+            socialMediaType: +barcodeUserData[3]
+          }
+          this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType}); 
+        }
+      }
+    }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
+  }
 
   // manual entering paymentID
   presentEnterUserPaymentIDModal() {
@@ -683,26 +673,7 @@ export class ProcessOrderPage extends BaseViewController {
     enterUserPaymentIDModal.present();
   }
 
-  // barcode scanning
-  onScanUserBarcode() {
-
-    /////////////////////////////////////
-    // cordova scan barcode.... fake data
-    let data = { userOid: 4, email: "daniel@gmail.com", balance: 2.99, companyOid: 1, isSocialMediaUsed: true, lkpSocialMediaTypeOid: 2 };
-    this.userData = {
-      userOid: data.userOid, 
-      balance: data.balance, 
-      companyOid: data.companyOid, 
-      email: data.email,
-      isSocialMediaUsed: data.isSocialMediaUsed,
-      lkpSocialMediaTypeOid: data.lkpSocialMediaTypeOid
-    };
-    ////////////////////////////////
-
-    this.getUserDataForProcessOrderAPI(data.userOid, this.ID_TYPES.USER, {isSocialMediaUsed: data.isSocialMediaUsed, lkpSocialMediaTypeOid: data.lkpSocialMediaTypeOid});
-    
-  }
-
+/*
   processSocialMediaDiscount() {
     let socialMediaRewardsDiscount = this.COMPANY_DETAILS.SOCIAL_MEDIA_DISCOUNT_AMOUNT * this.order.transactionDetails.subtotal;
 
@@ -714,6 +685,7 @@ export class ProcessOrderPage extends BaseViewController {
     this.order.transactionDetails.total = this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes);
     this.order.transactionDetails.rewardsSavings += socialMediaRewardsDiscount;
   }
+  */
 
   calculateFreePurchaseItem(order: IOrder): IOrder {
     let highItem: IPurchaseItem = {
@@ -751,7 +723,7 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
 
-  calculateSubtotal(order: IOrder, COMPANY_DETAILS: ICompanyDetailsForProcessOrder): number {
+  calculateSubtotal(order: IOrder, COMPANY_DETAILS: ICompanyDetails): number {
       this.order.transactionDetails.subtotal = 0;
       order.purchaseItems.forEach((x, index) => {
           let addonsCost = x.addonsCost !== null ? x.addonsCost : 0;
@@ -762,13 +734,13 @@ export class ProcessOrderPage extends BaseViewController {
           order.transactionDetails.subtotal += (x.sizeAndOrPrice.price * x.quantity) + (addonsCost * x.quantity) + (x.dairyCost);
       });
       
-      return this.utils.round(order.transactionDetails.subtotal);
+      return Utils.round(order.transactionDetails.subtotal);
   }
 
   calculateAddonsCost(purchaseItem: IPurchaseItem): number {
     let addonsCost = 0;
     if (purchaseItem.addons && purchaseItem.addons.length) {
-      if (this.COMPANY_DETAILS.DOES_CHARGE_FOR_ADDONS && this.productDetails.numberOfFreeAddonsUntilCharged !== null) {
+      if (this.companyDetails.doesChargeForAddons && this.productDetails.numberOfFreeAddonsUntilCharged !== null) {
           if (purchaseItem.addons.length > this.productDetails.numberOfFreeAddonsUntilCharged) {
               let numberOfChargedAddons = purchaseItem.addons.length - this.productDetails.numberOfFreeAddonsUntilCharged;
               addonsCost = numberOfChargedAddons * this.productDetails.addonsPriceAboveLimit;
@@ -814,7 +786,7 @@ export class ProcessOrderPage extends BaseViewController {
     console.log("about to hit promise");
     return new Promise((resolve, reject) => {
 
-      let completeOrderConfirmationModal = this.modalCtrl.create('CompleteOrderConfirmationPage', { hasPrinter: this.COMPANY_DETAILS.HAS_PRINTER });
+      let completeOrderConfirmationModal = this.modalCtrl.create('CompleteOrderConfirmationPage', { hasPrinter: this.companyDetails.hasPrinter });
       completeOrderConfirmationModal.onDidDismiss((data) => {
         resolve(data);
       });
@@ -827,7 +799,7 @@ export class ProcessOrderPage extends BaseViewController {
   cordovaPrinter() {
 
       this.presentLoading("Printing...");
-      const receiptHTML = this.receiptsTemplates.generateReceiptHTML(this.order, this.auth);
+      const receiptHTML = ReceiptTemplates.generateReceiptHTML(this.order, this.auth);
       
        //////////////// Cordova printer plugin ///////////////////////////////
 
@@ -842,12 +814,14 @@ export class ProcessOrderPage extends BaseViewController {
         this.dismissLoading("Done!");
       }, 1000)
 
+      // this.errorHandler(this.ERROR_TYPES.PLUGIN.PRINTER)
+
       ////////////////// end cordova printer plugin ////////////////////////////
 
   }
 
   finishSubmit(navToReceiptPage = false) {
-    this.dismissLoading(this.appData.getLoading().complete);
+    this.dismissLoading(AppViewData.getLoading().complete);
 
     if (!navToReceiptPage) {
        this.navCtrl.setRoot('TabsPage');
@@ -862,7 +836,7 @@ export class ProcessOrderPage extends BaseViewController {
         console.log("dismissed and inside of .then");
         if (!data) return;
         if (data.isConfirmed) {
-          this.presentLoading(this.appData.getLoading().processing);
+          this.presentLoading(AppViewData.getLoading().processing);
 
           let toData = { 
             companyOid: this.auth.companyOid, 
@@ -872,7 +846,7 @@ export class ProcessOrderPage extends BaseViewController {
             isOrderAhead: false,
             eta: null,
             employeeComment: this.employeeComment,
-            purchaseDate: this.dateUtils.toLocalIsoString(new Date().toString()),
+            purchaseDate: DateUtils.toLocalIsoString(new Date().toString()),
             purchaseItems: this.order.purchaseItems,
             transactionDetails: this.order.transactionDetails
           };
@@ -889,7 +863,7 @@ export class ProcessOrderPage extends BaseViewController {
                       // send email
                       this.API.stack(ROUTES.generateReceipt, "POST", {
                             order: this.order, 
-                            date: this.dateUtils.toLocalIsoString(new Date().toString()), 
+                            date: DateUtils.toLocalIsoString(new Date().toString()), 
                             companyOid: this.auth.companyOid, 
                             email: this.auth.email, 
                             userOid: this.userData.userOid
@@ -898,22 +872,14 @@ export class ProcessOrderPage extends BaseViewController {
                           (response) => {
                             console.log("response: ", response.data);
                             this.finishSubmit();  
-                        },(err) => {
-                          console.log("err: ", err);
-                          const shouldPopView = false;
-                          this.errorHandler.call(this, err, shouldPopView);
-                        });  
+                        },this.errorHandler(this.ERROR_TYPES.API));  
                     } else if (data.receiptType === this.RECEIPT_TYPES.PRINTER) {
                       this.cordovaPrinter();
                     }
                   } else {
                     this.finishSubmit();
                   }
-                }, (err) => {
-                  console.log("err: ", err);
-                  const shouldPopView = false;
-                  this.errorHandler.call(this, err, shouldPopView);
-                });
+                },this.errorHandler(this.ERROR_TYPES.API));
         }
       });
         

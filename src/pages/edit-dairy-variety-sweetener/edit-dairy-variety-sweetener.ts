@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Authentication } from '../../global/authentication';
-import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
+import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 
@@ -19,8 +19,17 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
   values: Array<any>;
   editOid: number;
   selectedValue: any;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    private formBuilder: FormBuilder) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.compose([Validators.maxLength(45)])],
@@ -38,10 +47,7 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
           this.dismissLoading();
           console.log('response: ', response); 
           this.values = response.data.values;
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
 
   }
 
@@ -53,33 +59,27 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
   }
 
   remove(): void {
-    this.presentLoading(this.appData.getLoading().removing);
+    this.presentLoading(AppViewData.getLoading().removing);
     this.API.stack(ROUTES.removeDairyVarietySweetener + `/${this.type}/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(this.appData.getLoading().removed);
+          this.dismissLoading(AppViewData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
-        }, (err) => {
-          const shouldPopView = true;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-submit(myForm, isValid): void {
-    this.presentLoading(this.appData.getLoading().saving);
+  submit(myForm, isValid): void {
+    this.presentLoading(AppViewData.getLoading().saving);
 
     const toData: ToDataEditDairyVarietySweetener = {toData: myForm, editOid: this.editOid, companyOid: this.auth.companyOid, name: myForm.name };
     this.API.stack(ROUTES.editDairyVarietySweetener + `/${this.type}`, 'POST', toData)
       .subscribe(
         (response) => {
-          this.dismissLoading(this.appData.getLoading().saved);
+          this.dismissLoading(AppViewData.getLoading().saved);
           this.navCtrl.pop();
           console.log('response: ', response);
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 

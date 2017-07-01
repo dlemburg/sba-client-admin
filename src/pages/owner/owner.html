@@ -29,8 +29,8 @@
         <ion-col *ngFor="let x of pages" class="" col-6>
           <ion-card class="hover">
             <div (click)="nav(x.addComponent, x.type)">
-              <img *ngIf="!x.img" src="img/family.png" />
-              <img *ngIf="x.img" [src]="x.img"/>
+              <img *ngIf="!x.img" src="img/default.png" />
+              <img *ngIf="x.img" [src]="x.img" onError="this.src='img/default.png';"/>
 
               <div class="card-title">{{ x.name }}</div>
             </div>
@@ -48,8 +48,8 @@
       <ion-row style="border-bottom: 1px solid lightgray;">
         <ion-col *ngFor="let x of settings" class="" col-6>
           <ion-card class="hover" tappable (click)="nav(x.component, x.type)">
-            <img *ngIf="!x.img" src="img/family.png" />
-             <img *ngIf="x.img" [src]="x.img"/>
+            <img *ngIf="!x.img" src="img/default.png" />
+             <img *ngIf="x.img" [src]="x.img" onError="this.src='img/default.png';" />
             <div text-wrap class="card-title card-title-settings">{{ x.name }}</div>
           </ion-card>
         </ion-col>

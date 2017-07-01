@@ -2,13 +2,13 @@ import { Component } from '@angular/core';
 import { IonicPage, Platform, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { APP_IMGS, DEFAULT_IMG } from '../../global/global';
+import { CONST_APP_IMGS, DEFAULT_IMG } from '../../global/global';
 //import cloneDeep from 'lodash.cloneDeep';
 //import { DomSanitizer } from '@angular/platform-browser';
 
@@ -25,19 +25,19 @@ export class AppImagesPage extends BaseViewController {
   defaultImg: string = DEFAULT_IMG;
   currentIndex: number = null;
   values = [
-    {label: "'My Card'", name: APP_IMGS[0], img: null, imgSrc: null},
-    {label: "'Rewards'", name: APP_IMGS[1], img: null, imgSrc: null},
-    {label: "'Order Ahead'", name: APP_IMGS[2], img: null, imgSrc: null},
-    {label: "'Menu'", name: APP_IMGS[3], img: null, imgSrc: null},
-    {label: "Your Company Logo", name: APP_IMGS[4], img: null, imgSrc: null},
-    {label: "App Header Bar", name: APP_IMGS[5], img: null, imgSrc: null},
-    {label: "Default (fallback)", name: APP_IMGS[6], img: null, imgSrc: null},
-    {label: "Rewards (top of page)", name: APP_IMGS[7], img: null, imgSrc: null},
-    {label: "Login Background", name: APP_IMGS[8], img: null, imgSrc: null},
-    {label: "Order Complete Background", name: APP_IMGS[9], img: null, imgSrc: null},
-    {label: "Order Complete (middle of page)", name: APP_IMGS[10], img: null, imgSrc: null},
-    {label: "Mobile Card", name: APP_IMGS[11], img: null, imgSrc: null},
-    {label: "Added-To-Cart", name:APP_IMGS[12], img: null, imgSrc: null},
+    {label: "'My Card'", name: CONST_APP_IMGS[0], img: null, imgSrc: null},
+    {label: "'Rewards'", name: CONST_APP_IMGS[1], img: null, imgSrc: null},
+    {label: "'Order Ahead'", name: CONST_APP_IMGS[2], img: null, imgSrc: null},
+    {label: "'Menu'", name: CONST_APP_IMGS[3], img: null, imgSrc: null},
+    {label: "Your Company Logo", name: CONST_APP_IMGS[4], img: null, imgSrc: null},
+    {label: "App Header Bar", name: CONST_APP_IMGS[5], img: null, imgSrc: null},
+    {label: "Default (fallback)", name: CONST_APP_IMGS[6], img: null, imgSrc: null},
+    {label: "Rewards (top of page)", name: CONST_APP_IMGS[7], img: null, imgSrc: null},
+    {label: "Login Background", name: CONST_APP_IMGS[8], img: null, imgSrc: null},
+    {label: "Order Complete Background", name: CONST_APP_IMGS[9], img: null, imgSrc: null},
+    {label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], img: null, imgSrc: null},
+    {label: "Mobile Card", name: CONST_APP_IMGS[11], img: null, imgSrc: null},
+    {label: "Added-To-Cart", name:CONST_APP_IMGS[12], img: null, imgSrc: null},
 
 
   ];
@@ -45,7 +45,6 @@ export class AppImagesPage extends BaseViewController {
 
  constructor(public navCtrl: NavController, 
              public navParams: NavParams,
-             public appData: AppData, 
              public API: API, 
              public authentication: Authentication,
              public modalCtrl: ModalController, 
@@ -57,7 +56,7 @@ export class AppImagesPage extends BaseViewController {
              private file: File,
              private platform: Platform,
              /*private domSanitizer: DomSanitizer */) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl);
    
   }
 
@@ -68,6 +67,13 @@ export class AppImagesPage extends BaseViewController {
   editValueChange(value, index) {
     // do nothing right now
   }
+
+  navExplanations() {
+    let modal = this.modalCtrl.create('ExplanationsPage', {type: "app_images"}, {enableBackdropDismiss: true, showBackdrop: true})
+    modal.present();
+  }
+
+
 
 
   // cordova
@@ -92,20 +98,13 @@ export class AppImagesPage extends BaseViewController {
        // don't need sanitizer b/c used [src] in template instead of src
 
 
-        this.editValue.img = imageData;
-        this.editValue.imgSrc = this.editValue.name + `$` + this.auth.companyOid;
+        // sets name: $ acts as separator for server
+        this.editValue.img = this.editValue.name + `$` + this.auth.companyOid;
+        this.editValue.imgSrc = imageData;
         this.dismissLoading();
       })
     })
-    .catch((err) => {
-        let shouldPopView = false;
-        this.errorHandler.call(this, err, shouldPopView);
-        console.log("err: ", err);
-      });
-  }
-
-  navExplanations() {
-    this.presentModal('ExplanationsPage', {type: "app_images"});
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 
   uploadImg(editValue): Promise<any> {
@@ -113,14 +112,14 @@ export class AppImagesPage extends BaseViewController {
     return new Promise((resolve, reject) => {
         let options: FileUploadOptions = {
           fileKey: 'company-app-img',  // correlates to name in multer
-          fileName: editValue.img,        // correlates to name it will be saved as
+          fileName: editValue.img,        
           headers: {}
         };
         const fileTransfer: TransferObject = this.transfer.create();
         let res = resolve;
         let rej = reject;
 
-        fileTransfer.upload(editValue.imgSrc, ROUTES.uploadImg, options).then((data) => {
+        fileTransfer.upload(editValue.imgSrc, ROUTES.uploadCompanyAppImg, options).then((data) => {
           console.log("uploaded successfully... resolving now...");
           res(data);
         })
@@ -134,18 +133,14 @@ export class AppImagesPage extends BaseViewController {
 
   submit() {
     console.log("inside submit");
-    this.presentLoading(this.appData.getLoading().saving);
+    this.presentLoading(AppViewData.getLoading().saving);
     this.platform.ready().then(() => {
       this.uploadImg(this.editValue).then((data) => {
         this.editValue = { label: null, name: null, img: null, imgSrc: null };
-        this.dismissLoading(this.appData.getLoading().saved);
-      });
+        this.dismissLoading(AppViewData.getLoading().saved);
+      })
+      .catch(this.errorHandler(this.ERROR_TYPES.API));
     })
-    .catch((err) => {
-      console.log("err: ", err);
-      const shouldPopView = false;
-      this.errorHandler.call(this, err, shouldPopView);
-    });
   }
 }
 

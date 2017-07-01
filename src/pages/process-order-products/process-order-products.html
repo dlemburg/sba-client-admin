@@ -15,7 +15,7 @@
   <ion-row text-center>
     <ion-col *ngFor="let x of products" col-6 text-center>
       <ion-card tappable class="hover" tappable (click)="dismissWithData(x)" >
-        <img [src]="x.imgSrc" />
+        <img [src]="x.imgSrc" onError="this.src='img/default.png';" />
         <div class="card-title">{{ x.name }}</div>
       </ion-card>
     </ion-col>

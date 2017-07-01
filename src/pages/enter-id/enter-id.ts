@@ -8,6 +8,7 @@ import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angul
 })
 export class EnterIDPage {
   paymentID: number;
+  
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController) {}
 
   ionViewDidLoad() {

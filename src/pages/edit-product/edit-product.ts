@@ -4,10 +4,14 @@ import { Validation } from '../../utils/validation-utils';
 import { ILkp } from '../../models/models';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
-import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
-import { AuthUserInfo, INameOidCompanyOid, INameAndOid } from '../../models/models';
+import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
+import { AppViewData } from '../../global/app-data';
+import { AuthUserInfo, INameOidCompanyOid, INameAndOid, ICompanyDetails } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
+import { Camera, CameraOptions } from '@ionic-native/camera';
+import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { File } from '@ionic-native/file';
+import { CONST_APP_IMGS } from '../../global/global';
 
 @IonicPage()
 @Component({
@@ -33,32 +37,44 @@ export class EditProductPage extends BaseViewController {
   values: Array<INameAndOid> = [];
   originalValue: string = null;
   editOid: number = null;
-
   sizesAndPricesType: string = null;
   sizesAndPricesTypesArr: Array<string> = ["Fixed Price", "Sizes"];
-
-  COMPANY_DETAILS = {
-    HAS_DAIRY: false,
-    HAS_SWEETENER: false,
-    HAS_VARIETY: false,
-    HAS_ADDONS: false,
-    HAS_FLAVORS: false
-  };
+  companyDetails: ICompanyDetails = {};
 
   SIZES_AND_PRICES_TYPE = {
     FIXED_PRICE: "Fixed Price",
     SIZES: "Sizes"
   };
 
+  imgSrc: string = null;
+  img: string = null;
+  oldImg: string = null;
+  imgChanged: boolean = false;
+  failedUploadImgAttempts = 0;
 
-constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+
+
+constructor(
+  public navCtrl: NavController, 
+  public navParams: NavParams, 
+  public API: API, 
+  public authentication: Authentication, 
+  public modalCtrl: ModalController, 
+  public alertCtrl: AlertController, 
+  public toastCtrl: ToastController, 
+  public loadingCtrl: LoadingController, 
+  private formBuilder: FormBuilder,
+  private camera: Camera, 
+  private transfer: Transfer, 
+  private file: File,
+  private platform: Platform) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
       this.myForm = this.formBuilder.group({
         name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
         img: ['', Validators.required],
-        caloriesLow: ['', Validators.compose([this.validation.test('isAboveZero'), this.validation.test("isNumbersOnly")])],
-        caloriesHigh: ['', Validators.compose([this.validation.test("isAboveZero"), this.validation.test("isNumbersOnly")])],
+        caloriesLow: ['', Validators.compose([Validation.test('isAboveZero'), Validation.test("isNumbersOnly")])],
+        caloriesHigh: ['', Validators.compose([Validation.test("isAboveZero"), Validation.test("isNumbersOnly")])],
         description: ['', Validators.compose([Validators.required, Validators.maxLength(150)])],
         categoryOid: ['', Validators.required],
         flavors: [ [] ],
@@ -67,14 +83,14 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
         variety: [ [] ],
         sweetener: [ [] ],
         sizesAndPrices: this.formBuilder.array([]),   // init to empty  (could also build the group here if wanted)
-        fixedPrice: ['', this.validation.test("numbersOnly")],
-        numberOfFreeAddonsUntilCharged: [0, this.validation.test("numbersOnly")],
-        addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, this.validation.test("money")]) ],
+        fixedPrice: ['', Validation.test("numbersOnly")],
+        numberOfFreeAddonsUntilCharged: [0, Validation.test("numbersOnly")],
+        addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, Validation.test("money")]) ],
         lkpNutritionOid: ['', Validators.required],
         lkpSeasonOid: ['', Validators.required],
         keywords: ['', Validators.required],
         hasDefaultProductHealthWarning: [false]
-      }, {validator: this.validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')});
+      }, {validator: Validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')});
   }
 
   ionViewDidLoad() {
@@ -84,17 +100,8 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
     this.API.stack(ROUTES.getCompanyDetails, "POST", {companyOid: this.auth.companyOid})
       .subscribe(
           (response) => {
-
-            this.COMPANY_DETAILS.HAS_DAIRY = response.data.companyDetails.hasDairy;
-            this.COMPANY_DETAILS.HAS_SWEETENER = response.data.companyDetails.hasSweetener;
-            this.COMPANY_DETAILS.HAS_VARIETY = response.data.companyDetails.hasVariety;
-            this.COMPANY_DETAILS.HAS_ADDONS = response.data.companyDetails.hasAddons;
-            this.COMPANY_DETAILS.HAS_FLAVORS = response.data.companyDetails.hasFlavors;
-
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+            this.companyDetails = response.data.companyDetails;
+          },this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
 
     // already had top call made; doesn't need to be async
     this.API.stack(ROUTES.getProductsNameAndOid + `/${this.auth.companyOid}`, 'GET')
@@ -102,13 +109,8 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
           (response) => {
             console.log('response.data: ', response.data);
             this.values = response.data.products;
-
             this.getAllProductOptionsAPI();
-          }, (err) => {
-            const shouldPopView = false;
-            const shouldDismiss = false;
-            this.errorHandler.call(this, err, shouldPopView, shouldDismiss)
-          });
+          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
   }
 
   getAllProductOptionsAPI() {
@@ -130,10 +132,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
             
             console.log('response.data: ', response.data);
             this.dismissLoading(); // this one is needed first, so just dismiss here
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   editValueChange() {
@@ -170,15 +169,14 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
               });
 
               // init all values
+              this.imgSrc = AppViewData.getDisplayImgSrc(product.img);
+              this.oldImg = product.img;
               this.onSizeChange(product.sizesAndPrices);   // build formArray
               if (product.fixedPrice) this.sizesAndPricesType = this.SIZES_AND_PRICES_TYPE.FIXED_PRICE;
 
               this.dismissLoading();
             
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 
@@ -221,74 +219,117 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
       arr.push(this.formBuilder.group({
         name: x.name,
         oid: x.oid, 
-        price: [x.price || null, Validators.compose([Validators.required, this.validation.test("isMoney")])]
+        price: [x.price || null, Validators.compose([Validators.required, Validation.test("isMoney")])]
       }))
     });
   }
 
-  checkIfAllSelected(control: string): void {
-    let arr = this.myForm.controls[control].value;
-
-    const isAllChecked = (x) => {
-      return x.toLowerCase() === "all";
-    }
-      if (arr.find(isAllChecked)) {
-        this.myForm.controls[control].patchValue({[control]: this[control]});
-      }
-  }
-
-  navExplanations(): void {
-    this.presentModal('ExplanationsPage', {type: "Rewards"}, {enableBackdropDismiss: true, showBackdrop: true});
+   navExplanations() {
+    let modal = this.modalCtrl.create('ExplanationsPage', {type: "Products"}, {enableBackdropDismiss: true, showBackdrop: true})
+    modal.present();
   }
 
 
   remove(): void {
-    this.presentLoading(this.appData.getLoading().removing);
+    this.presentLoading(AppViewData.getLoading().removing);
     this.API.stack(ROUTES.removeProduct + `/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(this.appData.getLoading().removed);
+          this.dismissLoading(AppViewData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
-        }, (err) => {
-          const shouldPopView = true;
-          this.errorHandler.call(this, err, shouldPopView)
+        }, this.errorHandler(this.ERROR_TYPES.API));
+  }
+
+  getImgCordova() {
+    this.presentLoading("Retrieving...");
+    const options: CameraOptions = {
+      quality: 100,
+      targetHeight: 238,
+      targetWidth: 423,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+      sourceType: 2
+    }
+
+    this.platform.ready().then(() => {
+      this.camera.getPicture(options).then((imageData) => {
+        console.log("imageData, ", imageData);
+
+        this.imgChanged = true;
+        this.imgSrc = imageData;
+        this.img = CONST_APP_IMGS[18] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
+        this.myForm.patchValue({
+          img: this.img
         });
+        this.dismissLoading();
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+
+  uploadImg(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!this.imgChanged) {
+        resolve();
+      } else {
+        this.presentLoading(AppViewData.getLoading().savingImg);
+
+        let options: FileUploadOptions = {
+          fileKey: 'upload-img-and-unlink', 
+          fileName: this.img,        
+          headers: {}
+        };
+        const fileTransfer: TransferObject = this.transfer.create();
+
+        fileTransfer.upload(this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`, options).then((data) => {
+          console.log("uploaded successfully... ");
+          this.dismissLoading();
+          resolve();
+        })
+        .catch((err) => {
+          let message = "";
+          let shouldPopView = false;
+          this.failedUploadImgAttempts++;
+          this.dismissLoading();
+
+          if (this.failedUploadImgAttempts === 1) {
+            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+            reject(err);
+          } else {
+            message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+            resolve();
+          }
+          this.presentToast(shouldPopView, message);
+        });
+      }
+    });
   }
 
   submit(myForm, isValid: boolean): void {
-
-     // validate size -- this is a hack- should be cleaned up later
+    // validate size -- this is a hack- should be cleaned up later
     if (myForm.fixedPrice && myForm.sizesAndPrices.length) {
-      this.presentToast(false, {message: "Looks like you have values for fixed price and multiple sizes.", position: "middle", duration: 1000});
+      this.presentToast(false, "Looks like you have values for fixed price and multiple sizes.");
       return;
     }
 
-    /*** Package for submit ***/
-    this.presentLoading(this.appData.getLoading().saving);
-
-    // account for 'all' selected
-    /*
-    this.appData.checkAll().forEach((x) => {
-      this.checkIfAllSelected(x);
+    this.platform.ready().then(() => {
+      this.uploadImg().then(() => {
+        
+        /*** Package for submit ***/
+        this.presentLoading(AppViewData.getLoading().saving);
+        const toData: ToDataEditProduct = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
+            
+        this.API.stack(ROUTES.editProduct, "POST", toData)
+          .subscribe(
+              (response) => {
+                this.dismissLoading(AppViewData.getLoading().saved);
+                this.navCtrl.pop();
+                console.log('response: ', response);
+              },this.errorHandler(this.ERROR_TYPES.API));
+      });
     });
-    */
-
-    const toData: ToDataEditProduct = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
-    
-    console.log("toData: ", toData);
-    
-    this.API.stack(ROUTES.editProduct, "POST", toData)
-      .subscribe(
-          (response) => {
-            console.log('response: ', response);
-            this.dismissLoading(this.appData.getLoading().saved);
-            this.myForm.reset();
-            this.editOid = null;
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
   }
 }
 

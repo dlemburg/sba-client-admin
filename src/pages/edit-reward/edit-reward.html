@@ -34,11 +34,10 @@
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
 
-        <ion-item margin-top>
-          <ion-label floating>Img</ion-label>
-          <ion-input formControlName="img" type="file"></ion-input>
-        </ion-item>
-        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.img"></control-messages>
+        <!-- image -->
+        <Image (getImgCordova)="getImgCordova()" header="Reward Image" [imgSrc]="imgSrc"></Image>
+
+        
         <ion-item margin-top>
           <ion-label class="text-area-label" stacked>Description</ion-label>
           <ion-textarea formControlName="description"></ion-textarea>

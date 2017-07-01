@@ -32,7 +32,7 @@
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
 
-        <ion-item margin-vertical *ngIf="COMPANY_DETAILS.DOES_CHARGE_FOR_DAIRY">
+        <ion-item margin-vertical *ngIf="companyDetails.doesChargeForDairy">
           <ion-label floating>Price</ion-label>
           <ion-input type="tel" formControlName="price"></ion-input>
         </ion-item>

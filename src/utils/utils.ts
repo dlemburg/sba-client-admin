@@ -5,7 +5,7 @@ export class Utils {
     constructor() { }
 
 
-    public generateRandomString = (length = 8) => {
+    public static generateRandomString = (length = 8) => {
         let charset = "abcdefghijklmnpqrstuvwxyz",
             len = charset.length,
             retVal = "";
@@ -17,7 +17,7 @@ export class Utils {
         return retVal;
     };
 
-     public generateRandomNumber = (length = 4): number => {
+     public static generateRandomNumber = (length = 4): number => {
         let charset = "123456789",
             len = charset.length,
             retVal = "";
@@ -29,7 +29,7 @@ export class Utils {
         return +retVal;
     };
 
-     public getNumbersList(len: number = 25): Array<number> {
+     public static getNumbersList(len: number = 25): Array<number> {
         let arr = [];
         for (let i = 1; i < len + 1; i++) {
             arr.push(i);
@@ -38,24 +38,24 @@ export class Utils {
     }
 
 
-    public toArray(str: string): Array<any> {
+    public static toArray(str: string): Array<any> {
         let arr = str.split(",");
 
         return arr;
     }
 
-    public arrayToString(arr: Array<any>): string {
+    public static arrayToString(arr: Array<any>): string {
         let str = arr.join(",");
 
         return str;
     }
 
-    public round(num: number): number {
+    public static round(num: number): number {
         return +(Math.round(num * Math.pow(10,2)) / Math.pow(10,2)).toFixed(2);
     }
 
     // i.e.: 4.5   length (3 - 1 === 2), decimalIndex 1   becomes 4.50
-    public roundAndAppendZero(num: number): string {
+    public static roundAndAppendZero(num: number): string {
         let retNumber = (Math.round(num * Math.pow(10,2)) / Math.pow(10,2)).toFixed(2);
 
         let decimalIndex = retNumber.toString().indexOf("."); 

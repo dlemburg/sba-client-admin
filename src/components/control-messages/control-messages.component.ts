@@ -9,7 +9,7 @@ import { Validation } from '../../utils/validation-utils';
 export class ControlMessagesComponent implements OnInit {
   @Input() controlInstance: FormControl;  // form control has all kinds of methods and props
   @Input() isSubmitted: boolean;
-  constructor(public validation: Validation) { }
+  constructor() { }
 
   // two validation props:  
   // 1.) this.control.someFormName.valid
@@ -39,7 +39,7 @@ export class ControlMessagesComponent implements OnInit {
             validatorValue: this.controlInstance.errors[prop],  // for min and max length
             validatorOptions                                     // prop that container custom info
           }
-          let message = this.validation.getValidatorErrorMessage(args);
+          let message = Validation.getValidatorErrorMessage(args);
 
           return message;
         }

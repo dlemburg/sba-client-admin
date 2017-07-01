@@ -105,6 +105,9 @@ export const ROUTES = {
     getRewardsIndividualNameAndOid: '/api/cs/owner/getRewardsIndividualNameAndOid',
     getEligibleRewardsProcessingTypeAutomaticForTransaction: '/api/cs/rewards/getEligibleRewardsProcessingTypeAutomaticForTransaction',
     processTransaction: '/api/cs/shared/processTransaction',
+
+    processTransactionSimpleProcessing: '/api/cs/shared/processTransactionSimpleProcessing',
+    
     getCompanyDetailsForTransaction: '/api/cs/shared/getCompanyDetailsForTransaction',
     getActiveOrders: '/api/cs/owner/getActiveOrders',
     clearActiveOrderForOrderAhead: '/api/cs/ownwer/clearActiveOrderForOrderAhead',
@@ -137,7 +140,9 @@ export const ROUTES = {
     generateReceipt: '/api/node/emails/generateReceipt',
     downloadImg: `${global.SERVER_URL_NODE}/api/node/download/img`,
     getImgName: `/api/cs/shared/getImgName`,
-    uploadImg: `${global.SERVER_URL_NODE}/api/node/upload/img`,
+    uploadCompanyAppImg: `${global.SERVER_URL_NODE}/api/node/upload/img/companyAppImg`,
+    uploadImgNoCallback: `${global.SERVER_URL_NODE}/api/node/upload/img/noCallback`,
+    uploadImgAndUnlink: `${global.SERVER_URL_NODE}/api/node/upload/img/uploadAndUnlink`,
     saveAppImg: '/api/node/owner/saveAppImg',
 
 

@@ -7,27 +7,6 @@
 
 <ion-content padding  class="width-100">
   <div class="width-90 align-center">
-    <!--
-    <ion-item *ngIf="this.genericValues.length">
-      <ion-label>Choose from pre-loaded {{ type }} options (these will only be added if selected):</ion-label>
-      <ion-select [(ngModel)]="selectedValues" (ionChange)="selectedValueChange($event, x)" multiple="true">
-        <ion-option *ngFor="let x of genericValues; let i = index;" [value]="x">{{ x.name }}</ion-option>
-      </ion-select>
-    </ion-item>
-    <div *ngFor="let x of selectedValues; let i = index;">
-      <ion-item margin-top>
-        <ion-label floating>Name</ion-label>
-        <ion-input type="text" [(ngModel)]="x.name"></ion-input>
-      </ion-item>
-      <ion-item *ngIf="COMPANY_DETAILS.DOES_CHARGE_FOR_DAIRY">
-        <ion-label floating>Price</ion-label>
-        <ion-input type="tel" [(ngModel)]="x.price"></ion-input>
-      </ion-item>
-      <ion-item *ngIf="x.err">
-        <p class="error-msg">{{ x.err }}</p>
-      </ion-item>
-    </div>
-    -->
     <div margin-top>
       <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
         <ion-item margin-vertical>
@@ -36,7 +15,7 @@
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
 
-        <ion-item margin-vertical *ngIf="COMPANY_DETAILS.DOES_CHARGE_FOR_DAIRY">
+        <ion-item margin-vertical *ngIf="companyDetails.doesChargeForDairy">
           <ion-label floating>Price (if necessary)</ion-label>
           <ion-input type="tel" formControlName="price"></ion-input>
         </ion-item>
@@ -51,17 +30,3 @@
     </div>
   </div>
 </ion-content>
-
-
-
-
-<!-- submit button footer -->
-<!--
-<ion-footer class="align-center submit-footer-btn-container">
-  <ion-toolbar class="submit-footer-btn-container">
-    <ion-row text-center>
-        <button [disabled]="!manualValues.length && !selectedValues.length" class="submit-footer-btn align-center" type="button" (click)="submit()" color="primary" ion-button block margin-top>Submit</button>
-    </ion-row>
-  </ion-toolbar>
-</ion-footer>
--->

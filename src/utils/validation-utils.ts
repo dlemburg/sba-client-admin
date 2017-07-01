@@ -4,7 +4,7 @@ import { IValidatorInfo } from '../models/models';
 export class Validation {
 
     // control error messages
-    public getValidatorErrorMessage(args: IValidatorInfo) {
+    public static getValidatorErrorMessage(args: IValidatorInfo) {
 
         let len = args.validatorValue ? args.validatorValue.requiredLength : '';
         let options = args.validatorOptions ? args.validatorOptions : '';
@@ -48,7 +48,7 @@ export class Validation {
     }
 
 
-    private validatorOptions(): any {
+    private static validatorOptions(): any {
         return {
             email: 'email',
             product: 'product',
@@ -57,7 +57,7 @@ export class Validation {
     } 
 
     // checks for custom-validator
-    private regex(): any {
+    private static regex(): any {
         return {
             isNumbersOnly: /^[0-9]+$/,
             isLettersOnly: /[a-zA-Z ]*/,
@@ -75,7 +75,7 @@ export class Validation {
 
 
     // Validation.test("numbersOnly") inline
-    public test(testType): any {
+    public static test(testType): any {
         return (control: FormControl) => {
             if (!control.value) return null;
 
@@ -90,12 +90,12 @@ export class Validation {
 
     // specialized validators
 
-    public aboveZero(control: FormControl):any {
+    public static aboveZero(control: FormControl):any {
         if (control.value === 0 || control.value === "0") return {aboveZero: true};
         else return null;
     }
 
-    public isDiscountAmountInvalid(discountType, discountAmount): any {
+    public static isDiscountAmountInvalid(discountType, discountAmount): any {
         return (group: FormGroup) => {
             let amountCtrl = group.controls[discountAmount];
             let typeCtrl = group.controls[discountType];
@@ -130,7 +130,7 @@ export class Validation {
     // group validators
 
     // control1 === control2
-    public isMismatch(control1, control2): any {
+    public static isMismatch(control1, control2): any {
         return (group: FormGroup) => {
             if (!group.controls[control1].value) return null;
 
@@ -143,13 +143,13 @@ export class Validation {
     }
 
     // control2 must be greater than control1
-    public isLowerMustBeHigher(control1, control2): any {
+    public static isLowerMustBeHigher(control1, control2): any {
         return (group: FormGroup) => {
             if (!group.controls[control1].value) return null;
 
             let a = group.controls[control1];
             let b = group.controls[control2];
-            let options = this.validatorOptions();
+            let options = Validation.validatorOptions();
             let key = 'calories';   
                                         // sets errors on individual control b/c this is a group validator fn
                                         // calories high hardcoded for now
@@ -159,7 +159,7 @@ export class Validation {
     }
 
     // control2 must be a later date than control1
-    public isInvalidDate(control1, control2): any {
+    public static isInvalidDate(control1, control2): any {
          return (group: FormGroup) => {
             if (!group.controls[control1].value) return null;
 
@@ -174,7 +174,7 @@ export class Validation {
     }
 
     // control2 must be a later time than control1   (in string conver to number)
-    public isInvalidTime(control1, control2): any {
+    public static isInvalidTime(control1, control2): any {
         return (group: FormGroup) => {
             if (!group.controls[control1].value) return null;
 
@@ -202,67 +202,67 @@ export class Validation {
 
    /*
 
-    public isEmail(control: FormControl): any {
+    public static isEmail(control: FormControl): any {
         if (!control.value) return null;
 
         if (control.value.match(/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/)) return null;
         else return { isEmail: true };
     }
 
-    public isCreditCardCVV(control: FormControl): any {
+    public static isCreditCardCVV(control: FormControl): any {
         if (!control.value) return null;
 
         if (control.value.match(/^[0-9]{3,4}$/)) return null;
         else return { isCreditCardCVV: true };
     }
 
-    public isCreditCardExpiryDate(control: FormControl): any {
+    public static isCreditCardExpiryDate(control: FormControl): any {
         if (!control.value) return null;
 
         if (control.value.match(/^(0[1-9]|1[0-2])\/?(([0-9]{4}|[0-9]{2})$)/)) return null;
         else return { isCreditCardExpiryDate: true };
     }
 
-    public isCreditCard(control: FormControl): any {
+    public static isCreditCard(control: FormControl): any {
         if (!control.value) return null;
 
         if (control.value.match(/^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/)) return null;
         else return { isCreditCard: true };
     }
 
-    public isStreetAddress(control: FormControl): any {
+    public static isStreetAddress(control: FormControl): any {
         if (!control.value) return null;
 
         if (control.value.match(/^[a-zA-Z\s\d\/]*\d[a-zA-Z\s\d\/]*$/)) return null;
         else return { isStreetAddress: true };
     }
 
-    public isPhoneNumber(control: FormControl): any {
+    public static isPhoneNumber(control: FormControl): any {
         if (!control.value) return null;
 
         if (control.value.match(/^(([0-9]{1})*[- .(]*([0-9]{3})[- .)]*[0-9]{3}[- .]*[0-9]{4})+$/)) return null;
         else return { isPhoneNumber: true };
     }
 
-    public isState(control: FormControl): any {
+    public static isState(control: FormControl): any {
         if (!control.value) return null;
         if (control.value.match(/^(?:A[KLRZ]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|PA|RI|S[CD]|T[NX]|UT|V[AT]|W[AIVY])*$/)) return null;
         else return { isState: true };
     }
 
-    public isZipCode(control: FormControl): any {
+    public static isZipCode(control: FormControl): any {
         if (!control.value) return null;
         if (control.value.toString().match(/^[0-9]{5}(?:-[0-9]{4})?$/)) return null;
         else return { isZipCode: true };
     }
 
-    public isCity(control: FormControl):any {
+    public static isCity(control: FormControl):any {
         if (!control.value) return null;
         if (control.value.match(/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/)) return null;
         else return { isCity: true };
     }
     // checks for control-messages
-    public isNumbersOnly(control: FormControl):any {
+    public static isNumbersOnly(control: FormControl):any {
         if (!control.value) return null;
         if (Number.isInteger(control.value)) return null;
         else return { numbersOnly: true };
@@ -270,7 +270,7 @@ export class Validation {
     
     
 
-    public money(control: FormControl):any {
+    public static money(control: FormControl):any {
         if (!control.value) return null;
 
         let str = control.value.toString();
@@ -278,7 +278,7 @@ export class Validation {
         else return { money: true };
     }
 
-    public isAgeAllowed(control: FormControl): any {
+    public static isAgeAllowed(control: FormControl): any {
         return null;
     }
     */

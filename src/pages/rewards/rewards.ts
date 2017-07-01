@@ -5,8 +5,8 @@ import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController} from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
-import { AppData } from '../../global/app-data';
-import { APP_IMGS } from '../../global/global';
+import { AppViewData } from '../../global/app-data';
+import { CONST_APP_IMGS } from '../../global/global';
 
 @IonicPage()
 @Component({
@@ -17,14 +17,22 @@ export class RewardsPage extends BaseViewController {
   rewards: Array<IRewardForRewardsList> = [];
   auth: AuthUserInfo;
   rewardImgSrc: string = null;
-  logoImgSrc: string = this.appData.getImg().logoImgSrc;
+  logoImgSrc: string = AppViewData.getImg().logoImgSrc;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public dateUtils: DateUtils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ionViewDidLoad() {
-    const currentDate = this.dateUtils.toLocalIsoString(new Date().toString());
+    const currentDate = DateUtils.toLocalIsoString(new Date().toString());
     
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
@@ -33,24 +41,22 @@ export class RewardsPage extends BaseViewController {
             (response) => {
               this.rewards = response.data.rewards;
               this.rewards.forEach((x) => {
-                x.imgSrc = this.appData.getDisplayImgSrc(x.img);
+                x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
               });
               this.dismissLoading();
               console.log('response.data: ' ,response.data);
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },this.errorHandler(this.ERROR_TYPES.API));
 
-    const imgName = APP_IMGS[7];
+    const imgName = CONST_APP_IMGS[7];
     this.API.stack(ROUTES.getImgName + `/${this.auth.companyOid}/${imgName}`, "GET")
       .subscribe(
           (response) => {
             console.log('response: ', response);
             const img = response.data.img;
-            this.rewardImgSrc = this.appData.getDisplayImgSrc(img);
+            this.rewardImgSrc = AppViewData.getDisplayImgSrc(img);
           }, (err) => {
-            this.rewardImgSrc = this.appData.getDisplayImgSrc(null);
+            this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false})(err);
+            this.rewardImgSrc = AppViewData.getDisplayImgSrc(null);
           });
   }
 

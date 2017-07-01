@@ -20,8 +20,7 @@
           </ion-card>
         </div>
         <ion-card tappable class=" reward-card" (click)="navRewardDetails(x)" *ngFor="let x of rewards" no-padding no-margin>
-        <!--  <img src="{{x.img}}"/> -->
-          <img [src]="x.imgSrc"/>
+          <img [src]="x.imgSrc" onError="this.src='img/default.png';"/>
           <div class="reward-card-title">{{x.name}}</div>
           <div class="reward-card-expiry">
             <span>{{ x.startDate | date }} </span> --- <span> {{ x.expiryDate | date }}</span>

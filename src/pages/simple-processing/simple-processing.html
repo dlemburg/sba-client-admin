@@ -4,6 +4,11 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>Scan Barcodes</ion-title>
+    <ion-buttons end>
+      <button class="comment-icon" ion-button icon-only (click)="presentEnterUserPaymentIDModal()">
+        <ion-icon  ios="ios-unlock" md="md-unlock"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
@@ -16,15 +21,15 @@
     </ion-item>
     <ion-item margin-top>
       <ion-label class="text-area-label" stacked>Additional Comments</ion-label>
-      <ion-textarea [(ngModel)]="comments" type="text" ></ion-textarea>
+      <ion-textarea [(ngModel)]="employeeComments" type="text" ></ion-textarea>
     </ion-item>
     <div margin-top text-center class="width-100">
-      <button class="width-50" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
+      <button class="width-80" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
         <ion-icon class="icon-primary" ios="ios-trophy" md="ios-trophy"></ion-icon><span class="btn-text">Scan Reward Barcode</span>
       </button>
     </div>
     <div margin-top text-center class="width-100">
-      <button class="width-50" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
+      <button class="width-80" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
         <ion-icon ios="ios-barcode-outline" md="ios-barcode-outline"></ion-icon><span class="btn-text">Scan User Barcode</span>
       </button>
     </div>

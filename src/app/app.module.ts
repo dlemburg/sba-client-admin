@@ -14,7 +14,8 @@ import { Vibration } from '@ionic-native/vibration';
 import { NativeAudio } from '@ionic-native/native-audio';
 import { LocalNotifications } from '@ionic-native/local-notifications';
 import { BackgroundMode } from '@ionic-native/background-mode';
-
+import { GoogleMaps } from '@ionic-native/google-maps';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 // both admin and owner
 import { MyApp } from './app.component';
@@ -22,15 +23,7 @@ import { MyApp } from './app.component';
 // services
 import { Authentication } from '../global/authentication';    // holds all auth info
 import { API } from '../global/api';                          // holds routes and api call
-import { Validation } from '../utils/validation-utils';       // hold all validation methods
-import { AsyncValidation } from '../utils/validation-async-utils';   // holds async validation methods
-import { Utils } from '../utils/utils';                       // holds standard utility methods
-import { DateUtils } from '../utils/date-utils';              // holds date utility methods
-import { AppUtils } from '../utils/app-utils';                // holds utility methods specific to this app
-import { AppData } from '../global/app-data';                 // holds data about this app this is customizable (some constant right now)
-import { AppFeatures } from '../global/app-features';         // holds data about premium features
 import { SocketIO } from '../global/socket-io';     //  holds socket.io methods
-import { ReceiptTemplates } from '../global/receipt-templates';   // holds HTML receipt template
 import { NativeNotifications } from '../global/native-notifications';     // all native notification logic
 
 // Components && base-view-controller
@@ -66,19 +59,15 @@ import { SearchComponent } from '../components/search/search.component';
     NativeAudio,
     LocalNotifications,
     BackgroundMode,
+    GoogleMaps,
+    BarcodeScanner,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
+
+    // my providers
     Authentication,
     API,
-    Validation,
-    AsyncValidation,
-    AppData,
-    AppFeatures,
     SocketIO,
-    ReceiptTemplates,
-    Utils,
-    DateUtils,
-    AppUtils,
-    NativeNotifications
+    NativeNotifications,
   ]
 })
 export class AppModule {}

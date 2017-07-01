@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -10,13 +10,13 @@ import { AppData } from '../../global/app-data';
 export class ProcessOrderProductsPage {
   products: any;
 
- constructor(public viewCtrl: ViewController, public navCtrl: NavController, public appData: AppData, public navParams: NavParams) {}
+ constructor(public viewCtrl: ViewController, public navCtrl: NavController, public navParams: NavParams) {}
 
   ionViewDidLoad() {
     this.products = this.navParams.data.products;
 
     this.products.forEach((x) => {
-      x.imgSrc = this.appData.getDisplayImgSrc(x.img);
+      x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
     });
 
   }

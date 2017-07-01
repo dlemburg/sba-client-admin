@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { IonicPage, Events, NavController, NavParams, LoadingController, AlertController, ToastController, ModalController } from 'ionic-angular';
+import { IonicPage, Events, NavController, NavParams, LoadingController, AlertController, ToastController } from 'ionic-angular';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { IOrderAhead, AuthUserInfo } from '../../models/models';
 import { SocketIO } from '../../global/socket-io';
-import { AppData } from '../../global/app-data';
 //import { Observable } from 'rxjs/Observable';
 
 @IonicPage()
@@ -19,9 +18,18 @@ export class OrderAheadDashboardPage extends BaseViewController {
   loading: any;
   auth: AuthUserInfo;
   initHasRun: boolean = false;
-  connection;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public socketIO: SocketIO, public events: Events) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    public socketIO: SocketIO, 
+    public events: Events) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
     /* using ionic's events */
     this.events.subscribe(this.socketIO.socketEvents.incomingNewOrder, (data) => {
@@ -45,14 +53,12 @@ export class OrderAheadDashboardPage extends BaseViewController {
   ionViewDidEnter() {
     if (this.initHasRun) {
       this.getActiveOrders();
-    }
-    this.initHasRun = true;
+    } else this.initHasRun = true;
 
   }
 
   // fn callback for socket-events listener runs the orders through the same process as ionViewDidLoad
   onIncomingNewOrder(response) {
-     debugger;
      let data = response.data;
      let order: Array<IOrderAhead> = this.setArrivalDates([data]);  // the new order
      this.setTimerInterval();    // set arrival times
@@ -74,11 +80,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
               this.orders = this.sortOrders(response.data.activeOrders);
 
               this.dismissLoading();
-
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
 
@@ -156,16 +158,11 @@ export class OrderAheadDashboardPage extends BaseViewController {
             (response) => {
               this.orders[index].isProcessing = true;
               console.log('response.data: ' , response.data);
-            },  (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  onClearOrder(order, index) {
-    
-    // clear order server side
-    const toData = {
+  onSetIsActiveFalse(order, index) {
+        const toData = {
       transactionOid: order.transactionOid,
       userOid: order.userOid,
       companyOid: this.auth.companyOid
@@ -179,10 +176,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
                 return x.transactionOid !== order.transactionOid 
               });
               console.log('response.data: ', response.data);
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            }); 
+            }, this.errorHandler(this.ERROR_TYPES.API)); 
   }
 
   setOrderToIsExpired(order) {
@@ -196,10 +190,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
         .subscribe(
             (response) => {
               console.log('response.data: ' , response.data);
-            },  (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   ionViewDidLeave() {

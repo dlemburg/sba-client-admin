@@ -4,6 +4,7 @@ import { AppCustomizationsPage } from './app-customizations';
 
 //imports
 import { ControlMessagesComponentModule } from '../../components/control-messages/control-messages.component.module';
+import { ImageComponentModule } from '../../components/image/image.component.module';
 
  
 @NgModule({
@@ -12,7 +13,8 @@ import { ControlMessagesComponentModule } from '../../components/control-message
   ],
   imports: [
     IonicPageModule.forChild(AppCustomizationsPage),
-    ControlMessagesComponentModule
+    ControlMessagesComponentModule,
+    ImageComponentModule
   ],
   exports: [
     AppCustomizationsPage

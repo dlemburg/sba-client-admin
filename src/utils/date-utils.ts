@@ -6,12 +6,12 @@ export class DateUtils {
 
 constructor() { }
 
-    public getBeginningDateToday() {
+    public static getBeginningDateToday() {
         return new Date().setHours(0, 0, 1, 0);
     }
 
     // i.e.:  "09:00am" ->  9
-    public convertTimeStringToHours(timeString: string): number {
+    public static convertTimeStringToHours(timeString: string): number {
         let time = this.sliceZero(timeString);
         let hours = this.getHours(time);
 
@@ -19,7 +19,7 @@ constructor() { }
     }
 
     // i.e.: "18:00pm" -> "6:00pm""
-    public converMilitaryTimeStringToNormalTimeString(timeString: string): string {
+    public static converMilitaryTimeStringToNormalTimeString(timeString: string): string {
 
         let normalHours = this.to12Hour(this.getHours(timeString));
         let minutes = this.getMinutes(timeString);
@@ -31,7 +31,7 @@ constructor() { }
     }
 
     // comes in as military hours, keeps as military hours
-    public convertTimeStringToIsoString(timeString: string): string {
+    public static convertTimeStringToIsoString(timeString: string): string {
         let time = this.sliceZero(timeString);
         let hours = this.getHours(time);
         let minutes = this.getMinutes(time);
@@ -42,7 +42,7 @@ constructor() { }
 
     // i.e.: ISOString ->  "09:30am"  
     // keeps in military hours
-    public convertIsoStringToHoursAndMinutesString(IsoString: string): string {
+    public static convertIsoStringToHoursAndMinutesString(IsoString: string): string {
 
         // this accounts for closed days. should not be apart of re-usable utility fn
         if (IsoString === "closed" || IsoString === "Closed") return IsoString;
@@ -60,7 +60,7 @@ constructor() { }
     }
 
     // gets all relevant date information about client to send to server
-    public getCurrentDateInfo(): ICurrentDateInfo {
+    public static getCurrentDateInfo(): ICurrentDateInfo {
         let date = new Date();
 
         let hours = date.getHours();
@@ -71,7 +71,7 @@ constructor() { }
     }
 
     // accounts for timezone offset and converts to ISOString format
-    public toLocalIsoString(dateStr: string) {
+    public static toLocalIsoString(dateStr: string) {
         let date = new Date(dateStr);
         let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
         let ISOtime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0,-1); // gets rid of trailing Z
@@ -80,17 +80,17 @@ constructor() { }
     }
 
     // prepends ISOString type data at beginning
-    public patchStartTime(time: string): string {
+    public static patchStartTime(time: string): string {
         return time + "T00:00:00.000Z";
     }
 
     // appends ISOString type data to end
-    public patchEndTime(time: string): string {
+    public static patchEndTime(time: string): string {
         return time + "T23:59:59.000Z";
     }
 
     // gets rid of prefix zero   i.e. "09:00" ->  "9:00"
-    public sliceZero(time: string): string {
+    public static sliceZero(time: string): string {
         if (time.indexOf("0") === 0) {
             time = time.slice(1, time.length);
         }
@@ -98,14 +98,14 @@ constructor() { }
         return time;
     }
 
-    public prependZero(time: number): string {
+    public static prependZero(time: number): string {
 
         if (time < 10) return "0" + time;
         else return time.toString();
     }
 
     // converts military to 12 hour
-    public to12Hour(time: number): number {
+    public static to12Hour(time: number): number {
         if (time > 12) time = time - 12;
         if (time === 0) time = 12;
 
@@ -113,7 +113,7 @@ constructor() { }
     }
 
     // converts timeString   "09:00" ->  9
-    public getHours(time:string): number {
+    public static getHours(time:string): number {
         let index = time.indexOf(":");
         let isPm = time.indexOf("a") < 0 ? true : false;
 
@@ -125,7 +125,7 @@ constructor() { }
     }
 
     // gets minutes from timeString   i.e.  "09:30"  ->  30
-    public getMinutes(time:string): number {
+    public static getMinutes(time:string): number {
         let start = time.indexOf(":") + 1;
         //let amOrPm = time.indexOf("m");
         let minutes = time.slice(start, -2);
@@ -134,7 +134,7 @@ constructor() { }
     }
 
     // converts normal time to military time
-    public to24Hour(hours:string, isPm:boolean): number {
+    public static to24Hour(hours:string, isPm:boolean): number {
         let time = +hours;
         if (!isPm && time === 12) return 0;  // midnight
         else if (isPm && time !== 12) return time + 12;

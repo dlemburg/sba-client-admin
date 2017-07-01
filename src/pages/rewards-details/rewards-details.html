@@ -10,8 +10,7 @@
 <ion-content padding>
    <div class=" reward-card-container">
       <ion-card class=" reward-card" no-padding no-margin text-center>
-        <!-- <img src="{{rewardDetails.img}}"/> -->
-        <img [src]="reward.imgSrc" />
+        <img [src]="reward.imgSrc" onError="this.src='img/default.png';"/>
         <div class="reward-card-title">{{rewardDetails.name}}</div>
         <div margin-vertical class="reward-expiry">
             <span>{{ rewardDetails.startDate | date }} </span> -- <span> {{ rewardDetails.expiryDate | date }}</span>
@@ -23,7 +22,7 @@
       </ion-item>
   </div>
   <ion-card>
-    <ion-card-header text-center><div class="internal-info-header">Internal Information</div></ion-card-header>
+    <ion-card-header text-center><div class="internal-info-header">Internal Information (these details do not show up for the user)</div></ion-card-header>
     <ion-card-content class="internal-info-content">
       <ion-item no-lines><span>Processing Type: </span> {{ rewardDetails.processingType }} </ion-item>
       <ion-item no-lines *ngIf="rewardDetails.discountType"><span> Discount Type: </span> {{ rewardDetails.discountType }} </ion-item>

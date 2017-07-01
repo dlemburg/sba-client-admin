@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
 import { INameAndOid } from '../../models/models';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 
 
 @IonicPage()
@@ -14,13 +14,13 @@ export class ProcessOrderCategoriesPage {
   categories: any;
   categoryOid: number;
 
- constructor(public viewCtrl: ViewController, public navCtrl: NavController, public appData: AppData, public navParams: NavParams) {}
+ constructor(public viewCtrl: ViewController, public navCtrl: NavController, public navParams: NavParams) {}
 
   ionViewDidLoad() {
     this.categories = this.navParams.data.categories;
 
     this.categories.forEach((x) => {
-      x.imgSrc = this.appData.getDisplayImgSrc(x.img);
+      x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
     });
   }
   

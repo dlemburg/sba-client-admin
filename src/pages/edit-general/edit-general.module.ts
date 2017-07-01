@@ -3,6 +3,7 @@ import { IonicPageModule } from 'ionic-angular';
 import { EditGeneralPage } from './edit-general';
 
 import { ControlMessagesComponentModule } from '../../components/control-messages/control-messages.component.module';
+import { ImageComponentModule } from '../../components/image/image.component.module';
 
  
 @NgModule({
@@ -11,7 +12,8 @@ import { ControlMessagesComponentModule } from '../../components/control-message
   ],
   imports: [
     IonicPageModule.forChild(EditGeneralPage),
-    ControlMessagesComponentModule
+    ControlMessagesComponentModule,
+    ImageComponentModule
   ],
   exports: [
     EditGeneralPage

@@ -4,7 +4,9 @@ import { IonicModule } from 'ionic-angular';  // to use ionic components
 import { DollarIconComponent } from './dollar-icon.component';
 
 @NgModule({
-  declarations: [DollarIconComponent],
+  declarations: [
+    DollarIconComponent,
+],
   imports: [IonicModule],
   exports: [DollarIconComponent]
 })

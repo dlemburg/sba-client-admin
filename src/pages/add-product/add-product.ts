@@ -1,12 +1,17 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
-import { INameOidCompanyOid, ILkp,  IPopup, AuthUserInfo  } from '../../models/models';
+import { INameOidCompanyOid, ILkp,  IPopup, AuthUserInfo, ICompanyDetails  } from '../../models/models';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
-import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
+import { AppViewData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
+import { Camera, CameraOptions } from '@ionic-native/camera';
+import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { File } from '@ionic-native/file';
+import { CONST_APP_IMGS } from '../../global/global';
+
 
 @IonicPage()
 @Component({
@@ -31,28 +36,38 @@ export class AddProductPage extends BaseViewController {
   count: number = 0;
   sizesAndPricesType: string = null;
   sizesAndPricesTypesArr: Array<string> = ["Fixed Price", "Sizes"];
+  img: string = null;
+  imgSrc: string = null;
+  failedUploadImgAttempts: number = 0;
 
-  COMPANY_DETAILS = {
-    HAS_DAIRY: false,
-    HAS_SWEETENER: false,
-    HAS_VARIETY: false,
-    HAS_ADDONS: false,
-    HAS_FLAVOR: false
-  };
+  companyDetails: ICompanyDetails = {};
+
   SIZES_AND_PRICES_TYPE = {
     FIXED_PRICE: "Fixed Price",
     SIZES: "Sizes"
   };
 
-
-  constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController,
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    private formBuilder: FormBuilder,
+    private camera: Camera, 
+    private transfer: Transfer, 
+    private file: File,
+    private platform: Platform) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
-      img: ['', Validators.required],
-      caloriesLow: ['', Validators.compose([this.validation.test("isAboveZero"), this.validation.test("isNumbersOnly")])],
-      caloriesHigh: ['', Validators.compose([this.validation.test("isAboveZero"), this.validation.test("isNumbersOnly")])],
+      img: [null],
+      caloriesLow: ['', Validators.compose([Validation.test("isAboveZero"), Validation.test("isNumbersOnly")])],
+      caloriesHigh: ['', Validators.compose([Validation.test("isAboveZero"), Validation.test("isNumbersOnly")])],
       description: ['', Validators.compose([Validators.required, Validators.maxLength(500)])],
       categoryOid: ['', Validators.required],
       flavors: [ [] ],
@@ -61,14 +76,14 @@ export class AddProductPage extends BaseViewController {
       variety: [ [] ],
       sweetener: [ [] ],
       sizesAndPrices: this.formBuilder.array([]),   // init to empty  (could also build the group here if wanted)
-      fixedPrice: ['', this.validation.test("isMoney")],
-      numberOfFreeAddonsUntilCharged: [0, this.validation.test("isNumbersOnly")],
-      addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, this.validation.test("isMoney")]) ],
+      fixedPrice: ['', Validation.test("isMoney")],
+      numberOfFreeAddonsUntilCharged: [0, Validation.test("isNumbersOnly")],
+      addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, Validation.test("isMoney")]) ],
       lkpNutritionOid: ['', Validators.required],
       lkpSeasonOid: ['', Validators.required],
       keywords: ['', Validators.required],
       hasDefaultProductHealthWarning: [false]
-    }, {validator: Validators.compose([this.validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')])});
+    }, {validator: Validators.compose([Validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')])});
 
     this.auth = this.authentication.getCurrentUser();
   }
@@ -79,19 +94,9 @@ export class AddProductPage extends BaseViewController {
     this.API.stack(ROUTES.getCompanyDetails, "POST", {companyOid: this.auth.companyOid})
       .subscribe(
           (response) => {
+            this.companyDetails = response.data.companyDetails;
 
-            this.COMPANY_DETAILS.HAS_DAIRY = response.data.companyDetails.hasDairy;
-            this.COMPANY_DETAILS.HAS_SWEETENER = response.data.companyDetails.hasSweetener;
-            this.COMPANY_DETAILS.HAS_VARIETY = response.data.companyDetails.hasVariety;
-            this.COMPANY_DETAILS.HAS_ADDONS = response.data.companyDetails.hasAddons;
-            this.COMPANY_DETAILS.HAS_FLAVOR = response.data.companyDetails.hasFlavors;
-          //  this.COMPANY_DETAILS.DEFAULT_PRODUCT_HEALTH_WARNING = response.data.companyDetails.defaultProductHealthWarning;
-
-          }, (err) => {
-            const shouldPopView = false;
-            const shouldDismiss = false;
-            this.errorHandler.call(this, err, shouldPopView, shouldDismiss)
-          });
+          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
     
     // doesn't need to be async
     this.API.stack(ROUTES.getAllProductOptions + `/${this.auth.companyOid}`, "GET")
@@ -114,19 +119,14 @@ export class AddProductPage extends BaseViewController {
 
             this.dismissLoading();
             
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  onSizesAndPricesTypeChange() {
-
-
-  }
+  onSizesAndPricesTypeChange() {}
   
-  seeExplanations() {
-    this.presentModal('ExplanationsPage', {type: "Products"}, {enableBackdropDismiss: true, showBackdrop: true});
+  navExplanations() {
+    let modal = this.modalCtrl.create('ExplanationsPage', {type: "Products"}, {enableBackdropDismiss: true, showBackdrop: true})
+    modal.present();
   }
 
 
@@ -148,57 +148,99 @@ export class AddProductPage extends BaseViewController {
         arr.push(this.formBuilder.group({
           name: x.name,
           oid: x.oid,
-          price: [null, Validators.compose([Validators.required, this.validation.test("isMoney")])]
+          price: [null, Validators.compose([Validators.required, Validation.test("isMoney")])]
         }))
       })
   }
 
-  /*** take care of "all" here ***/
-  checkIfAllSelected(control: string): void {
-    let arr = this.myForm.controls[control].value;
+  getImgCordova() {
+    this.presentLoading("Retrieving...");
+    const options: CameraOptions = {
 
-    const isAllChecked = (x) => {
-      return x.toLowerCase() === "all";
+      // used lower quality for speed
+      quality: 100,
+      targetHeight: 238,
+      targetWidth: 423,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+      sourceType: 2
     }
 
-    if (arr.length) {
-      if (arr.find(isAllChecked)) {
-        this.myForm.controls[control].patchValue({[control]: this[control]});
-      }
-    }
+    this.platform.ready().then(() => {
+      this.camera.getPicture(options).then((imageData) => {
+        console.log("imageData, ", imageData);
+
+        this.imgSrc = imageData;
+        this.img = CONST_APP_IMGS[15] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
+        this.myForm.patchValue({
+          img: this.img
+        });
+        this.dismissLoading();
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
+
+  uploadImg(): Promise<any> {
+    this.presentLoading(AppViewData.getLoading().savingImg);
+
+    return new Promise((resolve, reject) => {
+        let options: FileUploadOptions = {
+          fileKey: 'upload-img-no-callback', 
+          fileName: this.img,        
+          headers: {}
+        };
+        const fileTransfer: TransferObject = this.transfer.create();
+
+        fileTransfer.upload(this.imgSrc, ROUTES.uploadImgNoCallback, options).then((data) => {
+          console.log("uploaded successfully... ");
+          this.dismissLoading();
+          resolve();
+        })
+        .catch((err) => {
+            let message = "";
+            let shouldPopView = false;
+            this.failedUploadImgAttempts++;
+            this.dismissLoading();
+
+            if (this.failedUploadImgAttempts === 1) {
+               message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+               reject(err);
+            } else {
+              message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+              resolve();
+            }
+            this.presentToast(shouldPopView, message);
+        });
+    });
+  }
+
 
   submit(myForm, isValid: boolean): void {
 
     // validate size -- this is a hack- should be cleaned up later
     if (myForm.fixedPrice && myForm.sizesAndPrices.length) {
-      this.presentToast(false, {message: "Looks like you have values for fixed price and multiple sizes.", position: "middle", duration: 1000});
+      this.presentToast(false, "Looks like you have values for fixed price and multiple sizes.");
       return;
     }
 
-    // account for 'all' selected
-    /*
-    AppDataService.checkAll().forEach((x) => {
-      this.checkIfAllSelected(x);
-    });
-    */
-    
     /*** Package for submit ***/
-    this.presentLoading(this.appData.getLoading().saving);
     const toData: ToDataSaveProduct = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
-
-    console.log("toData: ", toData);
-
-    this.API.stack(ROUTES.saveProduct, "POST", toData)
-      .subscribe(
-          (response) => {
-            
-            this.dismissLoading(this.appData.getLoading().saved);
-            this.navCtrl.pop();
-          },  (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+    this.platform.ready().then(() => {
+      this.uploadImg().then(() => {
+        this.presentLoading(AppViewData.getLoading().saving);
+        this.API.stack(ROUTES.saveProduct, "POST", toData)
+          .subscribe(
+              (response) => {
+                this.dismissLoading(AppViewData.getLoading().saved);
+                this.myForm.reset();
+                this.img = null;
+                this.imgSrc = null;
+                this.failedUploadImgAttempts = 0;
+              }, this.errorHandler(this.ERROR_TYPES.API));
+      });
+    });
   }
 }
 interface ToDataSaveProduct {

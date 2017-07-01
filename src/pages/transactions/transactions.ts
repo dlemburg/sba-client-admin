@@ -4,7 +4,7 @@ import { AuthUserInfo } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 import { DateUtils } from '../../utils/date-utils';
 
 @IonicPage()
@@ -22,14 +22,22 @@ export class TransactionsPage extends BaseViewController {
   selectedLocation: any = "*";  // defaults to "*"
   auth: AuthUserInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public dateUtils: DateUtils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams,
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.startDate = this.dateUtils.toLocalIsoString(this.dateUtils.getBeginningDateToday().toString());     // set start date to today 12:01a
-    this.endDate = this.dateUtils.toLocalIsoString(new Date().toString());       // set end date to today   now
+    this.startDate = DateUtils.toLocalIsoString(DateUtils.getBeginningDateToday().toString());     // set start date to today 12:01a
+    this.endDate = DateUtils.toLocalIsoString(new Date().toString());       // set end date to today   now
 
     // doesn't need to be async, bc first query defaults the location to "*"
     this.getLocations();
@@ -48,10 +56,7 @@ export class TransactionsPage extends BaseViewController {
               this.joinTransactionProductsArray();
               this.dismissLoading();
               
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },this.errorHandler(this.ERROR_TYPES.API));
   }
 
   getLocations(): void {
@@ -59,10 +64,7 @@ export class TransactionsPage extends BaseViewController {
         .subscribe(
             (response) => {
              this.locations = response.data.locations;
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   filterChange(): void {

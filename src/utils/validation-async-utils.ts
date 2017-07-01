@@ -5,7 +5,7 @@ import { API, ROUTES } from '../global/api';
 @Injectable()
 export class AsyncValidation {
 
-// had to allow inheritance (no static methods) to work with my existing API service
+// had to allow inheritance (no methods) to work with my existing API service
 constructor(private API: API) { }
 
 

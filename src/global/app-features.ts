@@ -6,16 +6,16 @@ export class AppFeatures {
 
 constructor() { }
 
-    private _features = {
+    private static _features = {
         hasProcessOrder: false
     }
 
-    public getFeatures() {
-        return this._features;
+    public static getFeatures() {
+        return AppFeatures._features;
     }
 
-    public setFeatures(args) {
-        this._features = {
+    public static setFeatures(args) {
+        AppFeatures._features = {
             hasProcessOrder: args.hasProcessOrder
         }
     }

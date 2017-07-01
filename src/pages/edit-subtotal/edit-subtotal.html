@@ -12,7 +12,7 @@
     <div>Current subtotal: {{ cacheSubtotal | currency:symbolDisplay:true }}</div>
   </ion-item>
   <ion-item margin-top class="width-50">
-    <ion-label stacked><dollar-icon></dollar-icon>New subtotal</ion-label>
+    <ion-label stacked><dollar-icon></dollar-icon>New {{ type }}</ion-label>
     <ion-input [(ngModel)]="subtotal" type="tel"></ion-input>
   </ion-item>
    <ion-item margin-top>
@@ -24,10 +24,10 @@
   <ion-toolbar>
     <ion-row text-center>
       <ion-col col-6>
-        <button class="width-80" ion-button (click)="dismissBack()">Back</button>
+        <button class="width-80" ion-button (click)="dismiss()">Back</button>
       </ion-col>
       <ion-col col-6>
-        <button ion-button class="width-80" (click)="dismissWithNewSubtotal()">Submit</button>
+        <button ion-button class="width-80" (click)="dismissWithNewAmount()">Submit</button>
       </ion-col>
     </ion-row>
   </ion-toolbar>

@@ -15,12 +15,11 @@
         <ion-label floating>{{type}} Name</ion-label>
         <ion-input type="text" formControlName="name"></ion-input>
       </ion-item>
+
       <div *ngIf="type === 'Categories'">
-        <ion-item>
-          <ion-label floating>Img</ion-label>
-          <ion-input type="text" formControlName="img"></ion-input>
-        </ion-item>
+          <Image (getImgCordova)="getImgCordova()" header="Category Image" [imgSrc]="imgSrc"></Image>
       </div>
+      
       <button color="primary" [disabled]="!myForm.valid" ion-button block margin-top>Submit</button>
     </form>
   </div>

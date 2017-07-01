@@ -12,7 +12,7 @@
     <ion-list>
         <ion-item>
           <ion-label>Select the {{type}} to edit</ion-label>
-          <ion-select [disabled]="!values.length" [(ngModel)]="selectedValue" (ionChange)="selectedValueChange($event, x)">
+          <ion-select [disabled]="!values.length" [(ngModel)]="editValue" (ionChange)="editValueChange($event, x)">
             <ion-option *ngFor="let x of values; let i = index;" [value]="x">{{x.name}}</ion-option>
           </ion-select>
         </ion-item>
@@ -24,10 +24,7 @@
           <ion-input type="text" formControlName="name"></ion-input>
         </ion-item>
         <div *ngIf="type === 'Category'">
-          <ion-item>
-            <ion-label floating>Img</ion-label>
-            <ion-input type="text" formControlName="img"></ion-input>
-          </ion-item>
+            <Image (getImgCordova)="getImgCordova()" header="Category Image" [imgSrc]="imgSrc"></Image>
         </div>
         <button color="primary" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
       </form>

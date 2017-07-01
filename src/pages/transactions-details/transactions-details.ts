@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
 import { ITransactionDetailsOwner, AuthUserInfo } from '../../models/models';
 import { Authentication } from '../../global/authentication';
-import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -42,8 +42,15 @@ export class TransactionsDetailsPage extends BaseViewController {
     isSocialMediaDiscount: null
   };
  
-  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
     this.auth = this.authentication.getCurrentUser();
   }
 
@@ -55,10 +62,7 @@ export class TransactionsDetailsPage extends BaseViewController {
             (response) => {
               console.log('response.data: ', response.data);
               this.order = response.data.transactionDetails;
-            },  (err) => {
-              const shouldPopView = true;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },  this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navReward(reward): void {
@@ -88,10 +92,7 @@ export class TransactionsDetailsPage extends BaseViewController {
             (response) => {
               console.log('response.data: ', response.data);
               this.rewards = response.data.rewards
-            },  (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 }

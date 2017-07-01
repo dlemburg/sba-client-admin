@@ -5,7 +5,6 @@ import { BaseViewController } from '../base-view-controller/base-view-controller
 import { API } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { Utils } from '../../utils/utils';
-import { AppData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -16,18 +15,31 @@ export class EditSubtotalPage extends BaseViewController {
   subtotal: number;
   cacheSubtotal: number;
   reasonForEdit: string;
-  constructor(public navCtrl: NavController, public navParams: NavParams, public utils: Utils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, public viewCtrl: ViewController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  type: string;
+  
+  constructor(
+    public navCtrl: NavController,
+    public navParams: NavParams, 
+    public utils: Utils, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    public viewCtrl: ViewController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
   }
   ionViewDidLoad() {
-    this.subtotal = this.utils.round(this.navParams.data.subtotal);
-    this.cacheSubtotal = this.utils.round(this.navParams.data.subtotal);
+    this.subtotal = Utils.round(this.navParams.data.subtotal);
+    this.cacheSubtotal = Utils.round(this.navParams.data.subtotal);
+    this.type = this.navParams.data.type || "subtotal";
   }
 
-  dismissWithNewSubtotal() {
-   let checks = this.doChecks(this.subtotal, this.reasonForEdit);
+  dismissWithNewAmount() {
+   let doChecks = this.doChecks(this.subtotal, this.reasonForEdit);
 
-   if (checks.isValid) {
+   if (doChecks.isValid) {
     this.viewCtrl.dismiss({
      isEdited: true, 
      subtotal: +this.subtotal, 
@@ -35,11 +47,11 @@ export class EditSubtotalPage extends BaseViewController {
      reasonForEdit: this.reasonForEdit
     });
    } else {
-      this.presentToast(false, {message: checks.errs.join(". "), position: "bottom", duration: 1500});
+      this.presentToast(false, doChecks.errs.join(". "));
    }
   }
 
-  dismissBack() {
+  dismiss() {
     this.viewCtrl.dismiss({
       isEdited: false, 
       subtotal: this.cacheSubtotal,

@@ -1,8 +1,8 @@
 // operation constants
-export const env = { development: false };
-export const SERVER_URL_NODE = env.development ? 'http://192.168.1.76:2800' : 'http://localhost:2800';   /* 'http://localhost:2800' : 'http://192.168.1.76:2800'; */
-export const SERVER_URL_CSHARP = env.development ?  'http://192.168.1.254:2345'  : 'http://localhost:2345'   /* 'http://localhost:60158' :  'http://192.168.1.76:60158'; */
-export const TOKEN_NAME = "sba-admin";
+export const ENV = { development: true };
+export const SERVER_URL_NODE = ENV.development ? 'http://localhost:2800' : null   /* 'http://localhost:2800' : 'http://192.168.1.76:2800'; */
+export const SERVER_URL_CSHARP = ENV.development ? 'http://localhost:2345' : null   /* 'http://localhost:60158' :  'http://192.168.1.76:60158'; */
+export const CONST_TOKEN_NAME = "sba-admin";
 
 
 // app constants
@@ -11,31 +11,48 @@ export const DEFAULT_IMG = 'img/default.png';
 
 
 // app data constants
-export const PASSWORD_TYPES = {
+
+export const CONST_ID_TYPES = {
+    PAYMENT: "payment",
+    USER: "user"
+}
+
+export const CONST_PROCESSING_TYPE: any = {
+    AUTOMATIC: 'Automatic', 
+    MANUAL: 'Manual'
+};
+ export const CONST_DISCOUNT_TYPE: any = {
+    MONEY: 'Money',
+    NEWPRICE: 'New Price',
+    PERCENT: 'Percent'
+};
+export const CONST_DISCOUNT_RULE: any = {  
+    PRODUCT: 'Product',
+    DATE: 'Date-Time-Range'
+};
+export const CONST_PASSWORD_TYPES = {
     OWNER: "Owner",
     ADMIN: "Admin",
     PIN: "Pin"
 }
-
-export const ID_TYPES = {
-    PAYMENT: "payment",
-    USER: "user"
+export const CONST_REWARDS_PROCESSING_TYPE = {
+    AUTOMATIC: "Automatic",
+    MANUAL: "Manual"
+};
+export const CONST_REWARDS_DISCOUNT_RULE = {
+    DATE_TIME_RANGE: "Date-Time-Range",
+    PRODUCT: "Product"
+};
+export const CONST_REWARDS_DISCOUNT_TYPE = {
+    MONEY: "Money",
+    NEW_PRICE: "New Price",
+    PERCENT: "Percent"
 }
-export const COMPANY_DETAILS = {
-    HAS_DAIRY: false,
-    HAS_VARIETY: false,
-    HAS_SWEETENER: false,
-    HAS_FLAVORS: false,
-    HAS_ADDONS: false,
-    HAS_SOCIAL_MEDIA : false,
-    ACCEPTS_PARTIAL_PAYMENTS : false,
-    SOCIAL_MEDIA_DISCOUNT_AMOUNT : 0,
-    TAX_RATE: 0,
-    DOES_CHARGE_FOR_ADDONS: false,
-    HAS_PRINTER: false
+export const CONST_REWARDS_TYPES = {
+    REWARDS_INDIVIDUAL: "rewards_individual",
+    REWARDS_ALL: "rewards_all"
 }
-
-export const APP_IMGS = {
+export const CONST_APP_IMGS = {
     0: 'homeMyCardImg',
     1: 'homeRewardsImg',
     2: 'homeOrderAheadImg',
@@ -48,6 +65,17 @@ export const APP_IMGS = {
     9: 'orderCompleteBackgroundImg',
     10: 'orderCompleteMiddleOfPageImg',
     11: 'mobileCardImg',
-    12: 'addedToCartBackgroundImg'
-
+    12: 'addedToCartBackgroundImg',
+    13: 'socialMediaImg',
+    14: 'categoryImg',
+    15: 'productImg',
+    16: 'rewardImg',
+    17: 'rewardIndividualImg',
+    18: 'locationImg'
 }
+
+export const CONST_RECEIPT_TYPES = {
+    EMAIL: "email",
+    PRINTER: "printer",
+    TEXT: "text message"
+  }

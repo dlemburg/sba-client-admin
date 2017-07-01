@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 import { AppFeatures } from '../../global/app-features';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
@@ -28,8 +28,6 @@ export class LoginPage extends BaseViewController {
     public navCtrl: NavController, 
     public navParams: NavParams, 
     public backgroundMode: BackgroundMode, 
-    public appFeatures: AppFeatures,  
-    public appData: AppData, 
     public API: API, 
     public authentication: Authentication, 
     public modalCtrl: ModalController, 
@@ -39,7 +37,7 @@ export class LoginPage extends BaseViewController {
     private formBuilder: FormBuilder, 
     public socketService: SocketIO) { 
       
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl);
   
     this.myForm = this.formBuilder.group({
       email: [null, Validators.required],
@@ -48,7 +46,7 @@ export class LoginPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
-    //this.bgroundImg = this.appData.getImg().loginBackgroundImgSrc;
+    //this.bgroundImg = AppViewData.getImg().loginBackgroundImgSrc;
   }
 
   navForgotPassword(): void {
@@ -71,19 +69,16 @@ export class LoginPage extends BaseViewController {
             (response) => {
               const defaultImg = response.data.imgs.defaultImg;
 
-              this.appData.setImgs({
+              AppViewData.setImgs({
                 logoImgSrc: `${ROUTES.downloadImg}?img=${response.data.imgs.logoImg}`,
                 defaultImgSrc: defaultImg ? `${ROUTES.downloadImg}?img=${defaultImg}` : "img/default.png"
               });
-              this.appFeatures.setFeatures({
+              AppFeatures.setFeatures({
                 hasProcessOrder: response.data.appFeatures.hasProcessOrder
               });
 
               this.finishInitialization(data.role);
-            }, (err) => {
-              console.log("error on login: ", err);
-              this.finishInitialization(data.role);
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
 
     } else {
         // do nothing yet
@@ -122,9 +117,9 @@ export class LoginPage extends BaseViewController {
             // incorrect login password or email
             if (response.code === 2) {
               this.showPopup({
-                title: this.appData.getPopup().defaultErrorTitle, 
+                title: AppViewData.getPopup().defaultErrorTitle, 
                 message: response.message || "Sorry, the password or email you entered is incorrect.", 
-                buttons: [{text: this.appData.getPopup().defaultConfirmButtonText}]
+                buttons: [{text: AppViewData.getPopup().defaultConfirmButtonText}]
               });
             } else {
               preliminaryToken = response.data.preliminaryCompanyTokenPayload;
@@ -134,9 +129,6 @@ export class LoginPage extends BaseViewController {
               this.presentSelectLocationPage(preliminaryToken, locations);  
 
             }
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+          },this.errorHandler(this.ERROR_TYPES.API));
   }
 }

@@ -5,7 +5,7 @@ import { Authentication } from '../../global/authentication';
 import { IPurchaseItem, AuthUserInfo} from '../../models/models';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -22,7 +22,7 @@ export class ProductsDetailsPage extends BaseViewController {
     varietyToClient: [],
     dairyToClient: []
   };
-  quantities: Array<number> = this.utils.getNumbersList(25);
+  quantities: Array<number> = Utils.getNumbersList(25);
   purchaseItem: IPurchaseItem = {
     selectedProduct: {oid: null, name: null, imgSrc: null},
     sizeAndOrPrice: { oid: null, name: null, price: null},
@@ -37,14 +37,22 @@ export class ProductsDetailsPage extends BaseViewController {
   productImg: string;
   productOid: number;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public utils: Utils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams,     
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
     this.productImg = this.navParams.data.product.img;
-    this.productImgSrc = this.appData.getDisplayImgSrc(this.navParams.data.product.img);
+    this.productImgSrc = AppViewData.getDisplayImgSrc(this.navParams.data.product.img);
     this.productOid = this.navParams.data.product.oid;
     this.presentLoading();
 
@@ -60,9 +68,6 @@ export class ProductsDetailsPage extends BaseViewController {
                if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
                 this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
                }
-            }, (err) => {
-              const shouldPopView = true;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },this.errorHandler(this.ERROR_TYPES.API));
   }
 }

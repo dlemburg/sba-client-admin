@@ -47,8 +47,8 @@ export interface ITransactionDetails {
     taxes: number;
     rewardsSavings: number;
     isSocialMediaUsed: boolean;
-    lkpSocialMediaTypeOid: number;
-    socialMediaDiscountAmount: number;
+    socialMediaType: string;
+    socialMediaPointsBonus: number;
     isEdited: boolean;
     editAmount: number;
     reasonsForEdit: Array<any>;
@@ -71,12 +71,16 @@ export interface IEditSubtotalDismiss {
 export interface ICompanyDetailsForProcessOrder {
     HAS_SOCIAL_MEDIA: boolean;
     ACCEPTS_PARTIAL_PAYMENTS: boolean;
-    SOCIAL_MEDIA_DISCOUNT_AMOUNT: number;
+    SOCIAL_MEDIA_POINTS_BONUS: number;
     TAX_RATE: number;
     DOES_CHARGE_FOR_ADDONS: boolean;
     HAS_PRINTER: boolean;
     //NUMBER_OF_ADDONS_UNTIL_CHARGED: number;
     //ADDONS_PRICE_ABOVE_LIMIT: number;
+}
+
+export interface ICompanyDetails {
+
 }
 
 export interface IDiscountApplied {
@@ -346,5 +350,47 @@ export interface IUserDataForProcessOrder {
     email: string;
     companyOid: number;
     isSocialMediaUsed?: boolean;
-    lkpSocialMediaTypeOid?: number;
+    socialMediaType?: string;
+}
+
+
+export interface IBarcodeRewardData {
+  rewardOid: number;
+  isFreePurchaseItem: boolean;
+  userOid: number;
+}
+
+export interface IBarcodeUserData {
+    userOid: number; 
+    companyOid: number;
+    isSocialMediaUsed: boolean;
+    socialMediaType: number;
+}
+
+
+export interface IErrorHandlerOpts {
+  shouldPopView?: boolean
+  shouldDismissLoading?: boolean
+}
+
+export interface ICompanyDetails {
+    doesChargeForDairy?: boolean;
+    doesChargeForAddons?: boolean;
+    hasDairy?: boolean;
+    hasVariety?: boolean;
+    hasSweetener?: boolean;
+    hasAddons?: boolean;
+    hasFlavors?: boolean;
+    acceptsPartialPayments?: boolean;
+    taxRate?: number;
+    hasPrinter?: boolean;
+    hasSocialMediaRewards?: boolean;
+    hasFacebook?: boolean;
+    hasTwitter?: boolean;
+    hasInstagram?: boolean;
+    socialMediaPointsBonus?: boolean;
+    socialMediaMessage?: string;
+    socialMediaImg?: string;
+    allowsCommentsOnOrderAhead?: boolean;
+    
 }

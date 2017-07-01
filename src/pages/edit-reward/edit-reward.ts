@@ -5,10 +5,14 @@ import { AppUtils } from '../../utils/app-utils';
 import { INameAndOid, AuthUserInfo } from '../../models/models';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
-import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
+import { AppViewData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
+import { Camera, CameraOptions } from '@ionic-native/camera';
+import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { File } from '@ionic-native/file';
+import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 
 @IonicPage()
 @Component({
@@ -26,19 +30,9 @@ export class EditRewardPage extends BaseViewController {
   days: Array<string>;
   myForm: any;
   products: Array<INameAndOid> = [];
-  PROCESSING_TYPE: any = {
-    AUTOMATIC: 'Automatic', 
-    MANUAL: 'Manual'
-  };
-  DISCOUNT_TYPE: any = {
-    MONEY: 'Money',
-    NEWPRICE: 'New Price',
-    PERCENT: 'Percent'
-  };
-  DISCOUNT_RULE: any = {
-    PRODUCT: 'Product',
-    DATE: 'Date-Time-Range'
-  };
+  PROCESSING_TYPE = CONST_PROCESSING_TYPE;
+  DISCOUNT_TYPE = CONST_DISCOUNT_TYPE;
+  DISCOUNT_RULE = CONST_DISCOUNT_RULE;
   lkps: any = {
     discountType: [],
     discountRule: []
@@ -49,9 +43,28 @@ export class EditRewardPage extends BaseViewController {
     shortDescription: 'This description will appear on the rewards list page.'
   };
   originalValue: string = null;
+  imgSrc: string = null;
+  img: string = null;
+  oldImg: string = null;
+  imgChanged: boolean = false;
+  failedUploadImgAttempts = 0;
 
-constructor(public navCtrl: NavController, public navParams: NavParams, public dateUtils: DateUtils, public appUtils: AppUtils, public validation: Validation, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+
+constructor(
+  public navCtrl: NavController, 
+  public navParams: NavParams, 
+  public API: API, 
+  public authentication: Authentication, 
+  public modalCtrl: ModalController, 
+  public alertCtrl: AlertController, 
+  public toastCtrl: ToastController, 
+  public loadingCtrl: LoadingController, 
+  private formBuilder: FormBuilder,
+  private camera: Camera, 
+  private transfer: Transfer, 
+  private file: File,
+  private platform: Platform) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
      this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
@@ -68,7 +81,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
       dateRuleTimeEnd: [null],
       startDate: ['', Validators.required],
       expiryDate: ['', Validators.required ],
-    }, {validator: Validators.compose([this.validation.isDiscountAmountInvalid('lkpDiscountTypeOid', 'discountAmount'), this.validation.isInvalidDate('startDate', 'expiryDate'), this.validation.isInvalidDate('dateRuleTimeStart', 'dateRuleTimeEnd')])});
+    }, {validator: Validators.compose([Validation.isDiscountAmountInvalid('lkpDiscountTypeOid', 'discountAmount'), Validation.isInvalidDate('startDate', 'expiryDate'), Validation.isInvalidDate('dateRuleTimeStart', 'dateRuleTimeEnd')])});
   }
 
 
@@ -77,7 +90,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
     /*** going to have to do something with dateRuleTimeStart and dateRuleTimeEnd- 
      * coming in as number (changed it to make server call easier), need to get it to ISO string for client***/
     
-    this.days = this.appUtils.getDays();
+    this.days = AppUtils.getDays();
     this.auth = this.authentication.getCurrentUser();
 
     // SUBSCRIBE TO FORM
@@ -92,11 +105,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
               this.values = response.data.values;
               console.log('response.data: ', response.data);
               
-            }, (err) => {
-              const shouldPopView = false;
-              const shouldDismiss = false;
-              this.errorHandler.call(this, err, shouldPopView, shouldDismiss)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
 
      // get lkps- doesn't need to be async
     this.API.stack(ROUTES.getProcessingAndDiscountLkps, "GET")
@@ -109,15 +118,14 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
               console.log('response.data: ', response.data);
               this.dismissLoading();
               
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  navExplanations(): void {
-    this.presentModal('ExplanationsPage', {type: "Rewards"});
+  navExplanations() {
+    let modal = this.modalCtrl.create('ExplanationsPage', {type: "Rewards"}, {enableBackdropDismiss: true, showBackdrop: true})
+    modal.present();
   }
+
 
   onFormChanged(data) {}
 
@@ -143,8 +151,8 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
                   discountAmount: reward.discountAmount,
                   productOid: reward.productOid,
                   dateRuleDays: reward.dateRuleDays ? reward.dateRuleDays.split(",") : null,
-                  dateRuleTimeStart: reward.dateRuleTimeStart !== null ? this.dateUtils.convertTimeStringToIsoString(reward.dateRuleTimeStart) : null,
-                  dateRuleTimeEnd: reward.dateRuleTimeEnd !== null ? this.dateUtils.convertTimeStringToIsoString(reward.dateRuleTimeEnd) : null,
+                  dateRuleTimeStart: reward.dateRuleTimeStart !== null ? DateUtils.convertTimeStringToIsoString(reward.dateRuleTimeStart) : null,
+                  dateRuleTimeEnd: reward.dateRuleTimeEnd !== null ? DateUtils.convertTimeStringToIsoString(reward.dateRuleTimeEnd) : null,
                   startDate: reward.startDate,
                   expiryDate: reward.expiryDate,
                 });
@@ -152,6 +160,8 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
                 console.log("response.data.reward: ", response.data.reward);
 
                 // init everything with value to init dynamic value changes
+                this.imgSrc = AppViewData.getDisplayImgSrc(reward.img);
+                this.oldImg = reward.img;
                 this.originalValue = reward.name;
                 this.onProcessingTypeChanged(reward.processingType);
                 this.currentDiscountRule = this.setCurrentDiscountRule(reward.lkpDiscountRuleOid);
@@ -168,16 +178,9 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
                           this.products = response.data.products;
                           
                           console.log('response.data: ', response.data);
-                        }, (err) => {
-                          const shouldPopView = false;
-                          this.errorHandler.call(this, err, shouldPopView)
-                        });
+                        }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false} ));
                 }
-                
-              }, (err) => {
-                const shouldPopView = false;
-                this.errorHandler.call(this, err, shouldPopView)
-              });
+              },this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 
@@ -244,48 +247,111 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public d
   }
 
   remove(): void {
-    this.presentLoading(this.appData.getLoading().removing);
+    this.presentLoading(AppViewData.getLoading().removing);
     this.API.stack(ROUTES.removeReward + `/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(this.appData.getLoading().removed);
+          this.dismissLoading(AppViewData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
+
+    getImgCordova() {
+      this.presentLoading("Retrieving...");
+      const options: CameraOptions = {
+
+        // used lower quality for speed
+        quality: 100,
+        targetHeight: 200,
+        targetWidth: 300,
+        destinationType: this.camera.DestinationType.FILE_URI,
+        encodingType: this.camera.EncodingType.JPEG,
+        mediaType: this.camera.MediaType.PICTURE,
+        sourceType: 2
+      }
+
+      this.platform.ready().then(() => {
+        this.camera.getPicture(options).then((imageData) => {
+          console.log("imageData, ", imageData);
+
+          this.imgChanged = true;
+          this.imgSrc = imageData;
+          this.img = CONST_APP_IMGS[16] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
+          this.myForm.patchValue({
+            img: this.img
+          });
+          this.dismissLoading();
+        })
+      })
+      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+    }
+
+  uploadImg(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        if (!this.imgChanged) {
+          resolve();
+        } else {
+          this.presentLoading(AppViewData.getLoading().savingImg);
+
+          let options: FileUploadOptions = {
+            fileKey: 'upload-img-and-unlink', 
+            fileName: this.img,        
+            headers: {}
+          };
+          const fileTransfer: TransferObject = this.transfer.create();
+
+          fileTransfer.upload(this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`, options).then((data) => {
+            console.log("uploaded successfully... ");
+            this.dismissLoading();
+            resolve();
+          })
+          .catch((err) => {
+              let message = "";
+              let shouldPopView = false;
+              this.failedUploadImgAttempts++;
+              this.dismissLoading();
+
+              if (this.failedUploadImgAttempts === 1) {
+                message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+                reject(err);
+              } else {
+                message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+                resolve();
+              }
+              this.presentToast(shouldPopView, message);
+          });
+        }
+    });
+  }
+
 
   submit(myForm): void {
     let expiryDate = this.myForm.controls.expiryDate.value.toString();
     let startDate = this.myForm.controls.startDate.value.toString();
 
-
     /*** Package for submit ***/
-    this.presentLoading(this.appData.getLoading().saving);
     this.myForm.patchValue({
-      startDate: expiryDate.indexOf("T23:59:59") < 0 ? this.dateUtils.patchStartTime(myForm.startDate) : expiryDate,
-      expiryDate: startDate.indexOf("T00:00:00") < 0 ? this.dateUtils.patchEndTime(myForm.expiryDate) : startDate,
-      dateRuleTimeStart: myForm.dateRuleTimeStart ? this.dateUtils.getHours(myForm.dateRuleTimeStart) : null,
-      dateRuleTimeEnd: myForm.dateRuleTimeEnd ? this.dateUtils.getHours(myForm.dateRuleTimeEnd) : null,
+      startDate: expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchStartTime(myForm.startDate) : expiryDate,
+      expiryDate: startDate.indexOf("T00:00:00") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : startDate,
+      dateRuleTimeStart: myForm.dateRuleTimeStart ? DateUtils.getHours(myForm.dateRuleTimeStart) : null,
+      dateRuleTimeEnd: myForm.dateRuleTimeEnd ? DateUtils.getHours(myForm.dateRuleTimeEnd) : null,
       dateRuleDays: myForm.dateRuleDays ? myForm.dateRuleDays.split(","): null
     });
-
     const toData: ToDataEditReward = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
-    debugger;
-    console.log("toData: ", toData);
-    
-    this.API.stack(ROUTES.editReward, "POST", toData)
-      .subscribe(
-          (response) => {
-            this.dismissLoading(this.appData.getLoading().saved);
-            //this.navCtrl.pop();
-            console.log('response: ', response);            
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+
+    this.platform.ready().then(() => {
+      this.uploadImg().then(() => {
+        this.presentLoading(AppViewData.getLoading().saving);
+        this.API.stack(ROUTES.editReward, "POST", toData)
+          .subscribe(
+              (response) => {
+                this.dismissLoading(AppViewData.getLoading().saved);
+                this.navCtrl.pop();
+                console.log('response: ', response);            
+              },this.errorHandler(this.ERROR_TYPES.API));
+      });
+    });
   }
 
 }

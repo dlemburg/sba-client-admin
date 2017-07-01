@@ -4,11 +4,15 @@ import { API, ROUTES } from '../../global/api';
 import { Validation } from '../../utils/validation-utils';
 import { AppUtils } from '../../utils/app-utils';
 import { Authentication } from '../../global/authentication';
-import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
+import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
+import { Camera, CameraOptions } from '@ionic-native/camera';
+import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { File } from '@ionic-native/file';
+import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 
 @IonicPage()
 @Component({
@@ -22,32 +26,40 @@ export class AddRewardPage extends BaseViewController {
   days: Array<string>;
   myForm: any;
   products: Array<any> = [];
-  PROCESSING_TYPE: any = {
-    AUTOMATIC: 'Automatic', 
-    MANUAL: 'Manual'
-  };
-  DISCOUNT_TYPE: any = {
-    MONEY: 'Money',
-    NEWPRICE: 'New Price',
-    PERCENT: 'Percent'
-  };
-  DISCOUNT_RULE: any = {
-    PRODUCT: 'Product',
-    DATE: 'Date-Time-Range'
-  };
+  PROCESSING_TYPE = CONST_PROCESSING_TYPE;
+  DISCOUNT_TYPE = CONST_DISCOUNT_TYPE;
+  DISCOUNT_RULE = CONST_DISCOUNT_RULE;
+  
   lkps: any = {
     discountType: [],
     discountRule: []
   }
   doCallGetProducts: boolean = true;
   isSubmitted: boolean;
+  img: string = null;
+  imgSrc: string = null;
+  failedUploadImgAttempts: number = 0;
   
-  constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public dateUtils: DateUtils, public appUtils: AppUtils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    private formBuilder: FormBuilder,
+    private camera: Camera, 
+    private transfer: Transfer, 
+    private file: File,
+    private platform: Platform) { 
+
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
      this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
-      img: [''],
+      img: [null],
       description: ['', Validators.compose([Validators.required, Validators.maxLength(200)])],
       exclusions: ['', Validators.compose([Validators.maxLength(200)])],
       processingType: [this.PROCESSING_TYPE.MANUAL],
@@ -62,13 +74,13 @@ export class AddRewardPage extends BaseViewController {
       expiryDate: ['', Validators.required ],
       type: ["rewards_all"],
 
-    }, {validator: Validators.compose([this.validation.isDiscountAmountInvalid('lkpDiscountTypeOid', 'discountAmount'), this.validation.isInvalidDate('startDate', 'expiryDate'), this.validation.isInvalidTime('dateRuleTimeStart', 'dateRuleTimeEnd')])});
+    }, {validator: Validators.compose([Validation.isDiscountAmountInvalid('lkpDiscountTypeOid', 'discountAmount'), Validation.isInvalidDate('startDate', 'expiryDate'), Validation.isInvalidTime('dateRuleTimeStart', 'dateRuleTimeEnd')])});
   }
 
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.days = this.appUtils.getDays();
+    this.days = AppUtils.getDays();
     this.presentLoading();
 
     // SUBSCRIBE TO FORM
@@ -88,19 +100,17 @@ export class AddRewardPage extends BaseViewController {
               this.dismissLoading();
               console.log('response.data: ', response.data);
               
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navExplanations() {
-    this.presentModal('ExplanationsPage', {type: "Rewards"});
+    let modal = this.modalCtrl.create('ExplanationsPage', {type: "Rewards"}, {enableBackdropDismiss: true, showBackdrop: true})
+    modal.present();
   }
 
+
   getCurrentDiscountRule(event): string {
-    debugger;
-     let lkpObj = this.lkps.discountRule.find((x) => {
+    let lkpObj = this.lkps.discountRule.find((x) => {
         return x.oid === event;
     });
     return lkpObj.value;
@@ -120,10 +130,7 @@ export class AddRewardPage extends BaseViewController {
               this.products = products;
               
               console.log('response.data: ' ,response.data);
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 
@@ -173,34 +180,101 @@ export class AddRewardPage extends BaseViewController {
     });
   }
 
-  submit(myForm): void {
-    /*** package ***/
-    this.myForm.patchValue({
-      startDate: this.dateUtils.patchStartTime(myForm.startDate),
-      expiryDate: this.dateUtils.patchEndTime(myForm.expiryDate)
-    });
-    if (myForm.dateRuleDays) {
-      this.myForm.patchValue({
-        dateRuleDays: myForm.dateRuleDays.join(","),  // convert to string
-        dateRuleTimeStart: this.dateUtils.getHours(myForm.dateRuleTimeStart),
-        dateRuleTimeEnd: this.dateUtils.getHours(myForm.dateRuleTimeEnd),
-      });
+  getImgCordova() {
+    this.presentLoading("Retrieving...");
+    const options: CameraOptions = {
+
+      // used lower quality for speed
+      quality: 100,
+      targetHeight: 423,
+      targetWidth: 238,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+      sourceType: 2
     }
 
+    this.platform.ready().then(() => {
+      this.camera.getPicture(options).then((imageData) => {
+        console.log("imageData, ", imageData);
 
-    this.presentLoading(this.appData.getLoading().saving);
-    const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
+        this.imgSrc = imageData;
+        this.img = CONST_APP_IMGS[16] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
+        this.myForm.patchValue({
+          img: this.img
+        });
+        this.dismissLoading();
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+
+  uploadImg(): Promise<any> {
+    this.presentLoading(AppViewData.getLoading().savingImg);
+
+    return new Promise((resolve, reject) => {
+        let options: FileUploadOptions = {
+          fileKey: 'upload-img-no-callback', 
+          fileName: this.img,        
+          headers: {}
+        };
+        const fileTransfer: TransferObject = this.transfer.create();
+
+        fileTransfer.upload(this.imgSrc, ROUTES.uploadImgNoCallback, options).then((data) => {
+          console.log("uploaded successfully... ");
+          this.dismissLoading();
+          resolve();
+        })
+        .catch((err) => {
+            let message = "";
+            let shouldPopView = false;
+            this.failedUploadImgAttempts++;
+            this.dismissLoading();
+
+            if (this.failedUploadImgAttempts === 1) {
+               message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+               reject(err);
+            } else {
+              message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+              resolve();
+            }
+            this.presentToast(shouldPopView, message);
+        });
+    });
+  }
+
+
+  submit(myForm): void {    
     
-    console.log("toData: ", toData);
-    
-    this.API.stack(ROUTES.saveReward, "POST", toData)
-      .subscribe(
-          (response) => {
-            this.dismissLoading(this.appData.getLoading().saved);
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
+    this.platform.ready().then(() => {
+      this.uploadImg().then(() => {
+
+        this.presentLoading(AppViewData.getLoading().saving);
+        /*** package ***/
+        this.myForm.patchValue({
+          startDate: DateUtils.patchStartTime(myForm.startDate),
+          expiryDate: DateUtils.patchEndTime(myForm.expiryDate)
+        });
+        if (myForm.dateRuleDays) {
+          this.myForm.patchValue({
+            dateRuleDays: myForm.dateRuleDays.join(","),  // convert to string
+            dateRuleTimeStart: DateUtils.getHours(myForm.dateRuleTimeStart),
+            dateRuleTimeEnd: DateUtils.getHours(myForm.dateRuleTimeEnd),
           });
+        }
+        const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
+
+        this.API.stack(ROUTES.saveReward, "POST", toData)
+          .subscribe(
+              (response) => {
+                this.dismissLoading(AppViewData.getLoading().saved);
+                this.myForm.reset();
+                this.img = null;
+                this.imgSrc = null;
+                this.failedUploadImgAttempts = 0;
+              }, this.errorHandler(this.ERROR_TYPES.API));
+        });
+      });
   }
 }
 interface ToDataSaveOrEditReward {

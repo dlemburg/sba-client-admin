@@ -4,11 +4,17 @@ import { Validation } from '../../utils/validation-utils';
 import { API, ROUTES } from '../../global/api';
 import { AppUtils } from '../../utils/app-utils';
 import { Authentication } from '../../global/authentication';
-import { IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
+import { AppViewData } from '../../global/app-data';
 import { INameAndOid, AuthUserInfo, ILocation } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
+import { Camera, CameraOptions } from '@ionic-native/camera';
+import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { File } from '@ionic-native/file';
+import { CONST_APP_IMGS } from '../../global/global';
+import { AppStorage } from '../../global/app-storage';
+
 
 @IonicPage()
 @Component({
@@ -19,30 +25,49 @@ export class EditLocationPage extends BaseViewController {
   didPasswordChange: boolean = false;
   editValue: any = null;
   editOid: number = null;
-  days: Array<string> = this.appUtils.getDays();
+  days: Array<string> = AppUtils.getDays();
   values: Array<INameAndOid> = [];
   myForm: FormGroup;
   selectedLocation: ILocation;
   isSubmitted: boolean;
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
-  states: Array<string> = this.appUtils.getStates();
+  states: Array<string> = AppUtils.getStates();
   locations: Array<ILocation> = [];
   isCoordsSet: boolean = false;
   originalValue: string = null;
+  imgSrc: string = null;
+  img: string = null;
+  oldImg: string = null;
+  imgChanged: boolean = false;
+  failedUploadImgAttempts = 0;
+  initHasRun: boolean = false;
 
-constructor(public navCtrl: NavController, public navParams: NavParams, public validation: Validation, public dateUtils: DateUtils, public appUtils: AppUtils, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+constructor(
+  public navCtrl: NavController, 
+  public navParams: NavParams, 
+  public API: API, 
+  public authentication: Authentication, 
+  public modalCtrl: ModalController, 
+  public alertCtrl: AlertController, 
+  public toastCtrl: ToastController, 
+  public loadingCtrl: LoadingController, 
+  private formBuilder: FormBuilder,
+  private camera: Camera, 
+  private transfer: Transfer, 
+  private file: File,
+  private platform: Platform) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.required],
-      address: [null, Validators.compose([Validators.required, this.validation.test('isStreetAddress')])],
+      address: [null, Validators.compose([Validators.required, Validation.test('isStreetAddress')])],
       city: [null, Validators.required],
       state: [null, Validators.required],
-      zipcode: [null, Validators.compose([Validators.required, this.validation.test('isZipcode')])],
-      phoneNumber: [null, Validators.compose([Validators.required, this.validation.test('isPhoneNumber')])],
-      coordsLat: [],
-      coordsLong: [],
+      zipcode: [null, Validators.compose([Validators.required, Validation.test('isZipcode')])],
+      phoneNumber: [null, Validators.compose([Validators.required, Validation.test('isPhoneNumber')])],
+      coordsLat: [null],
+      coordsLong: [null],
       sundayOpen: [null, Validators.required],
       sundayClose: [null, Validators.required],
       mondayOpen: [null, Validators.required],
@@ -59,7 +84,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
       saturdayClose: [null, Validators.required],
       password: [null],
       password2: [null]
-    }, {validator: this.validation.isMismatch('password', 'password2')});
+    }, {validator: Validation.isMismatch('password', 'password2')});
     this.auth = this.authentication.getCurrentUser();
   }
 
@@ -72,15 +97,33 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
             console.log('response: ', response);
             this.locations = response.data.locations;
             this.values = response.data.locations;         // did this b/c already had call made and didn't want to do another call
-          },  (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+          }, this.errorHandler(this.ERROR_TYPES.API));
+  }
+
+  // coords are set in a service b/c nav and subsequent pop of MapPage
+  ionViewDidEnter() {
+    if (this.initHasRun) {
+      const latAndLong = AppStorage.getLatAndLong();
+      if (latAndLong.coordsLat || latAndLong.coordsLong) {
+        this.myForm.patchValue({
+          coordsLat: latAndLong.coordsLat,
+          coordsLong: latAndLong.coordsLong
+        });
+      }
+    } else this.initHasRun = true;  
+  }
+
+  ionViewDidLeave() {
+    AppStorage.setLatAndLong(null);
+  }
+
+  /* google maps */
+  navMap() {
+    this.navCtrl.push('MapPage');
   }
 
   // this is different b/c i had the call to get all location data already made, so just used it to save time
   editValueChange(): void {
-    
     if (this.editValue && this.editValue.name) {
       this.myForm.patchValue({
         name: this.editValue.name,
@@ -92,8 +135,12 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
         coordsLat: this.editValue.coordsLat,
         coordsLong: this.editValue.coordsLong,
         password: this.editValue.password,
-        password2: this.editValue.password2
+        password2: this.editValue.password2,
+        img: this.editValue.img
       });
+
+      this.imgSrc = AppViewData.getDisplayImgSrc(this.editValue.img);
+      this.oldImg = this.editValue.img;
 
       // edit value (location to edit) changed:  convert timeString to ISOString
       let days: any = {
@@ -114,7 +161,6 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
         };
         this.setTimesToIsoString(days);
     }
-      //this.originalValue = this.editValue.name;
   }
 
   populateTimesWithAnotherLocation(): void {
@@ -144,7 +190,7 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
   }
   
   setTimesToIsoString(days): void {
-    let daysOfWeek = this.appUtils.getDays();
+    let daysOfWeek = AppUtils.getDays();
 
     // loop through open/close
     daysOfWeek.forEach((x, index) => {
@@ -158,28 +204,17 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
         })
       } else {
         this.myForm.patchValue({
-          [dayOpenKey]: this.dateUtils.convertTimeStringToIsoString(days[dayOpenKey]),
-          [dayCloseKey]: this.dateUtils.convertTimeStringToIsoString(days[dayCloseKey])
+          [dayOpenKey]: DateUtils.convertTimeStringToIsoString(days[dayOpenKey]),
+          [dayCloseKey]: DateUtils.convertTimeStringToIsoString(days[dayCloseKey])
         });
       }
       
     });
   }
 
-/* google maps */
- getCoords() {
-   /* 
-   this.myForm.patchValue({
-     coordsLat: response.lat,
-     coordsLong: response.long
-   });
-
-   this.isCoordsSet = true;
-   */
- }
 
   closedToggle(event, index): void {
-    let days = this.appUtils.getDays();
+    let days = AppUtils.getDays();
     let ctrlOpen = days[index].toLowerCase() + "Open";
     let ctrlClose = days[index].toLowerCase() + "Close";
 
@@ -207,56 +242,118 @@ constructor(public navCtrl: NavController, public navParams: NavParams, public v
   }
 
   remove() {
-    this.presentLoading(this.appData.getLoading().removing);
+    this.presentLoading(AppViewData.getLoading().removing);
     this.API.stack(ROUTES.removeLocation + `/${this.editOid}/${this.auth.companyOid}`, 'POST')
       .subscribe(
         (response) => {
-          this.dismissLoading(this.appData.getLoading().removed);
+          this.dismissLoading(AppViewData.getLoading().removed);
           this.navCtrl.pop();
           console.log('response: ', response); 
-        }, (err) => {
-          const shouldPopView = true;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
+
+  getImgCordova() {
+    this.presentLoading("Retrieving...");
+    const options: CameraOptions = {
+
+      // used lower quality for speed
+      quality: 100,
+      targetHeight: 200,
+      targetWidth: 300,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+      sourceType: 2
+    }
+
+    this.platform.ready().then(() => {
+      this.camera.getPicture(options).then((imageData) => {
+        console.log("imageData, ", imageData);
+
+        this.imgChanged = true;
+        this.imgSrc = imageData;
+        this.img = CONST_APP_IMGS[18] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
+        this.myForm.patchValue({
+          img: this.img
+        });
+        this.dismissLoading();
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+
+  uploadImg(): Promise<any> {
+    return new Promise((resolve, reject) => {
+        if (!this.imgChanged) {
+          resolve();
+        } else {
+          this.presentLoading(AppViewData.getLoading().savingImg);
+
+          let options: FileUploadOptions = {
+            fileKey: 'upload-img-and-unlink', 
+            fileName: this.img,        
+            headers: {}
+          };
+          const fileTransfer: TransferObject = this.transfer.create();
+
+          fileTransfer.upload(this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`, options).then((data) => {
+            console.log("uploaded successfully... ");
+            this.dismissLoading();
+            resolve();
+          })
+          .catch((err) => {
+              let message = "";
+              let shouldPopView = false;
+              this.failedUploadImgAttempts++;
+              this.dismissLoading();
+
+              if (this.failedUploadImgAttempts === 1) {
+                message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+                reject(err);
+              } else {
+                message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+                resolve();
+              }
+              this.presentToast(shouldPopView, message);
+          });
+        }
+    });
+  }
+
 
   submit(myForm, isValid: boolean): void {    
 
-
-    /*** Package for submit ***/
-     this.presentLoading(this.appData.getLoading().saving);
-    
-    
     // convert iso string back to time string. this always needs to happen before submitting.
     // 2 ways to create open/close time:   1.) pre-populate, 2.) choose from datepicker.  both need to be converted ISOString -> timeString
-    
-      myForm.sundayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
-      myForm.sundayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
-      myForm.mondayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
-      myForm.mondayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayClose),
-      myForm.tuesdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayOpen),
-      myForm.tuesdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayClose),
-      myForm.wednesdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayOpen),
-      myForm.wednesdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayClose),
-      myForm.thursdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayOpen),
-      myForm.thursdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayClose),
-      myForm.fridayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayOpen),
-      myForm.fridayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
-      myForm.saturdayOpen = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
-      myForm.saturdayClose = this.dateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
+      myForm.sundayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
+      myForm.sundayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
+      myForm.mondayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
+      myForm.mondayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayClose),
+      myForm.tuesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayOpen),
+      myForm.tuesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayClose),
+      myForm.wednesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayOpen),
+      myForm.wednesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayClose),
+      myForm.thursdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayOpen),
+      myForm.thursdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayClose),
+      myForm.fridayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayOpen),
+      myForm.fridayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
+      myForm.saturdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
+      myForm.saturdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
 
       const toData: ToDataEditLocation = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editValue.oid, didPasswordChange: this.didPasswordChange};
-      this.API.stack(ROUTES.editLocation, "POST", toData )
-        .subscribe(
-            (response) => {
-              this.dismissLoading(this.appData.getLoading().saved);
-              this.navCtrl.pop();
-              console.log('response: ', response);
-            },  (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
-
+     
+      this.platform.ready().then(() => {
+        this.uploadImg().then(() => {
+          this.presentLoading(AppViewData.getLoading().saving);
+          this.API.stack(ROUTES.editLocation, "POST", toData )
+            .subscribe(
+                (response) => {
+                  this.dismissLoading(AppViewData.getLoading().saved);
+                  this.navCtrl.pop();
+                  console.log('response: ', response);
+                }, this.errorHandler(this.ERROR_TYPES.API));
+          });
+      });
   }
 }
 interface ToDataEditLocation {

@@ -3,9 +3,10 @@ import { API, ROUTES } from '../../global/api';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
+import { ICompanyDetails } from '../../models/models';
 
 @IonicPage()
 @Component({
@@ -19,17 +20,24 @@ export class AddDairyVarietySweetenerPage extends BaseViewController {
   type: string;
   auth: AuthUserInfo;
 
-  COMPANY_DETAILS = {
-    DOES_CHARGE_FOR_DAIRY: false
-  }
-  TYPEs = {
+  companyDetails: ICompanyDetails = {};
+  TYPES = {
     DAIRY: "Dairy",
     SWEETENER: "Sweetener",
     VARIETY: "Variety"
   }
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController, private formBuilder: FormBuilder) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams, 
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController, 
+    private formBuilder: FormBuilder) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.compose([Validators.maxLength(45), Validators.required])],
@@ -57,25 +65,19 @@ export class AddDairyVarietySweetenerPage extends BaseViewController {
         .subscribe(
             (response) => {
               this.dismissLoading();
-              this.COMPANY_DETAILS.DOES_CHARGE_FOR_DAIRY = response.data.companyDetails.doesChargeForDairy;
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+              this.companyDetails = response.data.companyDetails;
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   submit(myForm, isValid) {
-    this.presentLoading(this.appData.getLoading().saving);
+    this.presentLoading(AppViewData.getLoading().saving);
     this.API.stack(ROUTES.saveDairyVarietySweetenerValues, 'POST', {name: myForm.name, type: this.type, companyOid: this.auth.companyOid})
       .subscribe(
         (response) => {
           console.log('response: ', response);
-          this.dismissLoading(this.appData.getLoading().saved);
+          this.dismissLoading(AppViewData.getLoading().saved);
           this.myForm.reset();
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
 }

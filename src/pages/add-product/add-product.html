@@ -5,7 +5,7 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-buttons end>
-      <button ion-button icon-only (click)="seeExplanations()">
+      <button ion-button icon-only (click)="navExplanations()">
         <ion-icon ios="ios-help" md="ios-help"></ion-icon>
       </button>
     </ion-buttons>
@@ -24,11 +24,9 @@
       </ion-item>
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
 
-      <ion-item>
-        <ion-label floating>Img</ion-label>
-        <ion-input type="text" formControlName="img"></ion-input>
-      </ion-item>
-      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.img"></control-messages>
+      <!-- image -->
+      <Image (getImgCordova)="getImgCordova()" header="Product Image" [imgSrc]="imgSrc"></Image>
+
 
       <ion-item margin-top>
         <ion-label floating>Calories Low</ion-label>
@@ -67,7 +65,7 @@
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.categoryOid"></control-messages>
 
       <!-- flavors -->
-      <ion-list *ngIf="COMPANY_DETAILS_HAS_FLAVORS">
+      <ion-list *ngIf="companyDetails.hasFlavors">
         <ion-item>
           <ion-label>Flavors (optional)</ion-label>
           <ion-select formControlName="flavors" multiple="true">
@@ -79,7 +77,7 @@
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.flavors"></control-messages>
 
       <!-- addons -->
-      <ion-list *ngIf="COMPANY_DETAILS.HAS_ADDONS">
+      <ion-list *ngIf="companyDetails.hasAddons">
         <ion-item>
           <ion-label>Add-Ons (optional)</ion-label>
           <ion-select formControlName="addons" multiple="true">
@@ -91,7 +89,7 @@
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.addons"></control-messages>
 
       <!-- dairy -->
-      <ion-list *ngIf="COMPANY_DETAILS.HAS_DAIRY">
+      <ion-list *ngIf="companyDetails.hasDairy">
         <ion-item>
           <ion-label>Dairy (optional)</ion-label>
           <ion-select formControlName="dairy" multiple="true">
@@ -103,7 +101,7 @@
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dairy"></control-messages>
 
       <!-- variety -->
-      <ion-list *ngIf="COMPANY_DETAILS.HAS_VARIETY">
+      <ion-list *ngIf="companyDetails.hasVariety">
         <ion-item>
           <ion-label>Variety (optional)</ion-label>
           <ion-select formControlName="variety" multiple="true">
@@ -115,7 +113,7 @@
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.variety"></control-messages>
 
       <!-- sweetener -->
-      <ion-list *ngIf="this.COMPANY_DETAILS.HAS_SWEETENER">
+      <ion-list *ngIf="companyDetails.hasSweetener">
         <ion-item>
           <ion-label>Sweetener (optional)</ion-label>
           <ion-select formControlName="sweetener" multiple="true">

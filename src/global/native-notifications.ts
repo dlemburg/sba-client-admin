@@ -12,9 +12,9 @@ export class NativeNotifications {
 
 types: any;
 events: any;
-constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public utils: Utils, public localNotifications: LocalNotifications) { 
+constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public localNotifications: LocalNotifications) { 
 
-     this.types = {
+    this.types = {
         vibrate: "vibrate",
         localNotification: "localNotification",
         sound: "sound"
@@ -32,10 +32,10 @@ constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public
 
         // simple sound only
         sound: () => {
-            return (timeIncrement = 2000, times = 3, file = 'assets/audio/alert.mp3') => {
+            return (file = 'assets/audio/alert.mp3', timeIncrement = 2000, times = 3) => {
             
                 let count = 0;
-                let id = this.utils.generateRandomString();
+                let id = Utils.generateRandomString();
 
                 this.nativeAudio.preloadSimple(id, file).then(() => {
                    // this.nativeAudio.play(id); first tick?
@@ -55,7 +55,7 @@ constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public
         },
         localNotification: () => {
             return (title = "Incoming Order-Ahead", text: "") => {
-                let id: number = this.utils.generateRandomNumber();
+                let id: number = Utils.generateRandomNumber();
 
                 this.localNotifications.schedule([{
                     id: id,
@@ -72,6 +72,8 @@ constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public
         return this.events[notificationType]();
     }
 
+
+    // handlers
     private soundLoadErrorHandler(err) {
         console.log("load sound file error: ", err);
     }

@@ -35,11 +35,9 @@
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
 
-        <ion-item>
-          <ion-label floating>Img</ion-label>
-          <ion-input type="text" formControlName="img"></ion-input>
-        </ion-item>
-        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.img"></control-messages>
+        <!-- image -->
+        <Image (getImgCordova)="getImgCordova()" header="Product Image" [imgSrc]="imgSrc"></Image>
+
 
         <ion-item margin-top>
           <ion-label floating>Calories Low</ion-label>

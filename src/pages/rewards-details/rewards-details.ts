@@ -4,7 +4,7 @@ import { IRewardDetailsOwner, AuthUserInfo } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppData } from '../../global/app-data';
+import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -39,14 +39,22 @@ export class RewardsDetailsPage extends BaseViewController {
   };
   auth: AuthUserInfo;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public appData: AppData, public API: API, public authentication: Authentication, public modalCtrl: ModalController, public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController) { 
-    super(appData, modalCtrl, alertCtrl, toastCtrl, loadingCtrl);
+  constructor(
+    public navCtrl: NavController, 
+    public navParams: NavParams,
+    public API: API, 
+    public authentication: Authentication, 
+    public modalCtrl: ModalController, 
+    public alertCtrl: AlertController, 
+    public toastCtrl: ToastController, 
+    public loadingCtrl: LoadingController) { 
+    super(alertCtrl, toastCtrl, loadingCtrl);
   }
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
     this.rewardImg = this.navParams.data.rewardImg;
-    this.rewardImgSrc = this.appData.getDisplayImgSrc(this.navParams.data.rewardImg);
+    this.rewardImgSrc = AppViewData.getDisplayImgSrc(this.navParams.data.rewardImg);
     this.rewardOid = this.navParams.data.rewardOid;
     this.presentLoading();
 
@@ -56,10 +64,7 @@ export class RewardsDetailsPage extends BaseViewController {
               console.log('response.data: ' ,response.data);
               this.loading.dismiss();
               this.rewardDetails = response.data.rewardDetails;
-            }, (err) => {
-              const shouldPopView = true;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
+            },this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navRewardsBarcode() {

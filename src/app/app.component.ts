@@ -5,7 +5,7 @@ import { StatusBar } from "@ionic-native/status-bar";
 import { BackgroundMode } from '@ionic-native/background-mode';
 import { Authentication } from '../global/authentication';
 import { SocketIO } from '../global/socket-io';
-import { AppData } from '../global/app-data';
+import { AppViewData } from '../global/app-data';
 import { AppFeatures } from '../global/app-features';
 import { API, ROUTES } from '../global/api';
 
@@ -26,8 +26,6 @@ export class MyApp {
     public splashScreen: SplashScreen, 
     public backgroundMode: BackgroundMode, 
     public API: API, 
-    public appFeatures: AppFeatures, 
-    public appData: AppData, 
     private authentication: Authentication, 
     public socketIO: SocketIO) {
       
@@ -60,11 +58,11 @@ export class MyApp {
 
           console.log("response.data: ", response.data);
           
-          this.appData.setImgs({
+          AppViewData.setImgs({
             logoImgSrc: `${ROUTES.downloadImg}?img=${response.data.imgs.logoImg}`,
             defaultImgSrc: defaultImg ? `${ROUTES.downloadImg}?img=${defaultImg}` : "img/default.png"
           });
-          this.appFeatures.setFeatures({
+          AppFeatures.setFeatures({
             hasProcessOrder: response.data.appFeatures.hasProcessOrder
           });
 
@@ -103,8 +101,8 @@ export class MyApp {
 
     // clean up providers that hold state here
 
-    //this.appData.cleanup();
-    //this.appFeatures.cleanup();
+    //AppViewData.cleanup();
+    //AppFeatures.cleanup();
 
     let navLogin = setTimeout(() => {
       this.nav.setRoot('LoginPage');

@@ -2,33 +2,36 @@ import { Injectable } from '@angular/core';
 import { ROUTES } from './api';
 
 @Injectable()
-export class AppData {
+export class AppViewData {
 
 constructor() { }
 
-    private _storageDirectory = null;
-    private toast = {
-        defaultToastDuration: 5000,
+    private static _storageDirectory = null;
+    private static toast = {
+        defaultToastDuration: 3000,
         defaultToastPosition: "bottom",
-        defaultErrorMessage: "Sorry, there was an unexpected error. We will work hard to get it fixed soon."
+        defaultErrorMessage: "Sorry, there was an unexpected error. We will work hard to get it fixed soon.",
+        imgUploadErrorMessageFirstAttempt: "Sorry, there was an error uploading your image. Try submitting again.",
+        imgUploadErrorMessageSecondAttempt: ""
     }
-    private img = {
+    private static img = {
         logoImgSrc: null,
         defaultImgSrc: "img/default.png",
     }
-    private loading = {
-        default: this.getLoadingInnerHtml(`Loading...`),
-        saving: this.getLoadingInnerHtml(`Saving...`),
-        processing: this.getLoadingInnerHtml(`Processing...`),
-        complete: this.getLoadingInnerHtml(`Complete!`),
-        saved: this.getLoadingInnerHtml(`Saved!`),
-        removing: this.getLoadingInnerHtml(`Removing...`),
-        removed: this.getLoadingInnerHtml(`Removed!`),
+    private static loading = {
+        default: AppViewData.getLoadingInnerHtml(`Loading...`),
+        saving: AppViewData.getLoadingInnerHtml(`Saving...`),
+        processing: AppViewData.getLoadingInnerHtml(`Processing...`),
+        complete: AppViewData.getLoadingInnerHtml(`Complete!`),
+        saved: AppViewData.getLoadingInnerHtml(`Saved!`),
+        removing: AppViewData.getLoadingInnerHtml(`Removing...`),
+        removed: AppViewData.getLoadingInnerHtml(`Removed!`),
+        savingImg: AppViewData.getLoadingInnerHtml(`Saving image first...`)
     }
-    private rewards = {
+    private static rewards = {
         rewardTypeIndividualMessage: "Just for you!"
     }
-    private popup = {
+    private static popup = {
         defaultMissingInfoMessage: "Looks like you forgot to fill in everything!",
         defaultEditSuccessMessage: "Edit Successful",
         defaultSaveMessage: "Save Successful",
@@ -39,57 +42,56 @@ constructor() { }
         defaultSuccessMessage: "Success!"
     }
 
-   
     /* storage directory sets on app load */
-    public setStorageDirectory(dir) {
-        this._storageDirectory = dir;
+    public static setStorageDirectory(dir) {
+        AppViewData._storageDirectory = dir;
     }
-    public get getStorageDirectory(): any {
-        return this._storageDirectory;
+    public static get getStorageDirectory(): any {
+        return AppViewData._storageDirectory;
     }
 
     // if img == null, set imgSrc to the default img
-    public getDisplayImgSrc(img: string = null): string {
-        const defaultImgSrc = this.getImg().defaultImgSrc;
+    public static getDisplayImgSrc(img: string = null): string {
+        const defaultImgSrc = AppViewData.getImg().defaultImgSrc;
         const imgSrc = img ? `${ROUTES.downloadImg}?img=${img}` : defaultImgSrc;
 
         return imgSrc;
     }
 
-    public setImgs(args) {
-        this.img = {
+    public static setImgs(args) {
+        AppViewData.img = {
             defaultImgSrc: args.defaultImgSrc,
             logoImgSrc: args.logoImgSrc
         };
     }
     
-    public getPopup() {
-        return this.popup;
+    public static getPopup() {
+        return AppViewData.popup;
     }
 
-    public getToast() {
-        return this.toast;
+    public static getToast() {
+        return AppViewData.toast;
     }
 
-    public getImg() {
-        return this.img;
+    public static getImg() {
+        return AppViewData.img;
     }
 
-    public getLoading() {
-        return this.loading;
+    public static getLoading() {
+        return AppViewData.loading;
     }
 
-    public getRewards() {
-        return this.rewards;
+    public static getRewards() {
+        return AppViewData.rewards;
     }
 
-    private getLoadingInnerHtml(message) {
+    private static getLoadingInnerHtml(message) {
         return `<div class="custom-spinner-container">
                   <div class="custom-spinner-box">${message}</div>
                 </div>`
     }
 
-    public cleanup() {
+    public static cleanup() {
 
     }
 

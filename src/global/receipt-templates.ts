@@ -4,14 +4,14 @@ import { Utils } from '../utils/utils';
 @Injectable()
 export class ReceiptTemplates {
 
-constructor(public utils: Utils) { }
+    constructor() { }
 
-    public generateReceiptHTML(order, auth) {
+    public static generateReceiptHTML(order, auth) {
         const date = new Date().toLocaleString();
-        const subtotal = this.utils.roundAndAppendZero(order.transactionDetails.subtotal);
-        const total = this.utils.roundAndAppendZero(order.transactionDetails.total);
-        const taxes = this.utils.roundAndAppendZero(order.transactionDetails.taxes);
-        const discounts = this.utils.roundAndAppendZero(order.transactionDetails.editAmount + order.transactionDetails.rewardsSavings);
+        const subtotal = Utils.roundAndAppendZero(order.transactionDetails.subtotal);
+        const total = Utils.roundAndAppendZero(order.transactionDetails.total);
+        const taxes = Utils.roundAndAppendZero(order.transactionDetails.taxes);
+        const discounts = Utils.roundAndAppendZero(order.transactionDetails.editAmount + order.transactionDetails.rewardsSavings);
 
         const purchaseItemsHTML =this.loopOverPurchaseItems(order.purchaseItems);
         console.log("auth: ", auth);
@@ -72,7 +72,7 @@ constructor(public utils: Utils) { }
             </html>`;
     }
 
-    private loopOverPurchaseItems(purchaseItems) {
+    private static loopOverPurchaseItems(purchaseItems) {
         let innerHTML = "";
         const getSize = (name) => {
             if (name) return `<span> ${name}</span>`;
@@ -81,7 +81,7 @@ constructor(public utils: Utils) { }
 
         purchaseItems.forEach((x, index) => {
             let size = "";
-            let displayPriceWithoutDiscounts = this.utils.roundAndAppendZero(x.displayPriceWithoutDiscounts);
+            let displayPriceWithoutDiscounts = Utils.roundAndAppendZero(x.displayPriceWithoutDiscounts);
 
             innerHTML += 
                 `<tr style="width:100%">
