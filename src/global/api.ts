@@ -4,7 +4,7 @@ import * as global from './global';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
-import { Authentication } from '../global/authentication.service';
+import { Authentication } from '../global/authentication';
 import { Ihttp } from '../models/models';
 
 @Injectable()
@@ -16,15 +16,17 @@ export class API {
             // this.headers.append( 'Content-Type', 'application/json' )
 
     */
-
-    headers = new Headers({ 'Content-Type': 'application/json' }); 
+    token = this.authentication.getToken();
+    headers = new Headers({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}`});
     options = new RequestOptions({ headers: this.headers });
     
-    constructor(private http: Http) {}
+    constructor(private http: Http, public authentication: Authentication) {}
 
   
     public stack(route: string, verb: string, body: any = {}): Observable<any> {
-      //  let {toData, method, route} = args;
+        
+        // conditionally add Bearer token (if needed)
+        //this.headers.append("Authorization", "Bearer " +  this.authentication.getToken());
 
         let url: string = route.indexOf('/api/node/') > -1 ? global.SERVER_URL_NODE : global.SERVER_URL_CSHARP;
             url += route;

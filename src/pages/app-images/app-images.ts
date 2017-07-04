@@ -25,23 +25,23 @@ export class AppImagesPage extends BaseViewController {
   defaultImg: string = DEFAULT_IMG;
   currentIndex: number = null;
   values = [
-    {label: "'My Card'", name: CONST_APP_IMGS[0], img: null, imgSrc: null},
-    {label: "'Rewards'", name: CONST_APP_IMGS[1], img: null, imgSrc: null},
-    {label: "'Order Ahead'", name: CONST_APP_IMGS[2], img: null, imgSrc: null},
-    {label: "'Menu'", name: CONST_APP_IMGS[3], img: null, imgSrc: null},
-    {label: "Your Company Logo", name: CONST_APP_IMGS[4], img: null, imgSrc: null},
-    {label: "App Header Bar", name: CONST_APP_IMGS[5], img: null, imgSrc: null},
-    {label: "Default (fallback)", name: CONST_APP_IMGS[6], img: null, imgSrc: null},
-    {label: "Rewards (top of page)", name: CONST_APP_IMGS[7], img: null, imgSrc: null},
-    {label: "Login Background", name: CONST_APP_IMGS[8], img: null, imgSrc: null},
-    {label: "Order Complete Background", name: CONST_APP_IMGS[9], img: null, imgSrc: null},
-    {label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], img: null, imgSrc: null},
-    {label: "Mobile Card", name: CONST_APP_IMGS[11], img: null, imgSrc: null},
-    {label: "Added-To-Cart", name:CONST_APP_IMGS[12], img: null, imgSrc: null},
+    {label: "'My Card'", name: CONST_APP_IMGS[0], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "'Rewards'", name: CONST_APP_IMGS[1], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "'Order Ahead'", name: CONST_APP_IMGS[2], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "'Menu'", name: CONST_APP_IMGS[3], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Your Company Logo", name: CONST_APP_IMGS[4], img: null, imgSrc: null, targetWidth: 450,targetHeight: 150},
+    {label: "App Header Bar", name: CONST_APP_IMGS[5], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Default (fallback)", name: CONST_APP_IMGS[6], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Rewards (top of page)", name: CONST_APP_IMGS[7], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Login Background", name: CONST_APP_IMGS[8], img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
+    {label: "Order Complete Background", name: CONST_APP_IMGS[9], img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
+    {label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Mobile Card", name: CONST_APP_IMGS[11], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Added-To-Cart", name:CONST_APP_IMGS[12], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
 
 
   ];
-  editValue = {label: null, name: null, img: null, imgSrc: null};
+  editValue = {label: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
 
  constructor(public navCtrl: NavController, 
              public navParams: NavParams,
@@ -74,15 +74,15 @@ export class AppImagesPage extends BaseViewController {
   }
 
 
-
-
+  //  TODO
+  // this.editValue.targetWidth, this.editValue.targetHeight
   // cordova
   getImgCordova() {
     this.presentLoading("Retrieving...");
     const options: CameraOptions = {
 
       // used lower quality for speed
-      quality: 50,
+      quality: 100,
       targetHeight: 400,
       targetWidth: 600,
       destinationType: this.camera.DestinationType.FILE_URI,
@@ -135,8 +135,8 @@ export class AppImagesPage extends BaseViewController {
     console.log("inside submit");
     this.presentLoading(AppViewData.getLoading().saving);
     this.platform.ready().then(() => {
-      this.uploadImg(this.editValue).then((data) => {
-        this.editValue = { label: null, name: null, img: null, imgSrc: null };
+        this.uploadImg(this.editValue).then((data) => {
+        this.editValue = {label: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
         this.dismissLoading(AppViewData.getLoading().saved);
       })
       .catch(this.errorHandler(this.ERROR_TYPES.API));
@@ -144,125 +144,3 @@ export class AppImagesPage extends BaseViewController {
   }
 }
 
-//////////////////////////////// attempt 1 /////////////////////////////////////////////
-
-/*
-  getImgSrcChanges(appImgs, appImgsClone) {
-    return appImgs.filter((x, index) => {
-      return x.imgSrc !== appImgsClone[index].imgSrc;
-    });
-  }
-  */
-
-
-/*
-    let appImgs: Array<any> = this.getImgSrcChanges(this.appImgs, this.appImgsClone);
-    
-    this.uploadAsyncImgsArr(appImgs).then((data) => {
-      this.API.stack(ROUTES.saveAppImgs, "POST", {appImgs, companyOid: this.auth.companyOid})
-        .subscribe(
-            (response) => {
-              console.log("response: ", response);
-            }, (err) => {
-              console.log("err: ", err);
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
-    })
-    .catch((err) => {
-      let shouldPopView = false;
-      this.errorHandler.call(this, err, shouldPopView)
-    });
-  }
-
-
-upload(http:Http, file:Blob, name:string, url:string){
-    let formData: FormData = new FormData();
-    formData.append("somevariable", this.myextravar);
-    formData.append("photo", file, name);
-    this.subscription = http.post(url, formData, {withCredentials: true}).map(o => o.json()).subscribe(o => {
-        console.log('uploaded', o); 
-    }, (err) => {
-        console.error('upload err', err);
-    })
-}
-
-    this.API.stack(ROUTES.getAppImgs + `/${this.auth.companyOid}`, "GET")
-        .subscribe(
-            (response) => {
-              this.appImgs = response.data.appImgs;
-              this.appImgsClone = cloneDeep(response.data.appImgs);
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
-   // this.getImgs(this.appImgs);
-
-
-  getImgs(appImgs) {
-    
-    if (appImgs.length) {
-      appImgs.forEach((x) => {
-      // x.imgSrc = this.downloadImgAPI(x.img);
-      this.downloadImgAPI(x);
-      });
-    }
-  }
-
-
-
-  uploadAsyncImgsArr(appImgs: Array<any>): Promise<any> {
-    return new Promise((reject, resolve) => {
-      appImgs.forEach((x, i) => {
-        let options: FileUploadOptions = {
-          fileKey: 'company-app-imgs',  // correlates to name in multer
-          fileName: x.img,             // correlates to name it will be saved as
-          headers: {}
-        };
-        const fileTransfer: TransferObject = this.transfer.create();
-        
-        fileTransfer.upload(x.imgSrc, ROUTES.uploadImg, options).then((data) => {
-          if (appImgs.length - 1 === i) resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
-        });
-      });
-    });
-  }
-*/
-
-
-//////////////////////////////// attempt 2 ///////////////////////////////////////////
-
-
-/*
-  getImg() {
-    this.API.stack(ROUTES.getAppImg + `/${this.auth.companyOid}/${this.editValue.name}`, "GET")
-        .subscribe(
-            (response) => {
-              console.log("response.data: ", response.data);
-              if (response.data.appImg) {
-                this.appImg.img = response.data.img;
-              }
-            }, (err) => {
-              const shouldPopView = false;
-              this.errorHandler.call(this, err, shouldPopView)
-            });
-  }
-
-  // CORDOVA download from node server
-  downloadImg(appImg) {
-    const fileTransfer: TransferObject = this.transfer.create();
-    const url = ROUTES.downloadImg + `?img=${appImg.img}`;
-
-    fileTransfer.download(url, AppDataService.getStorageDirectory + `/${appImg.img}`).then((entry) => {
-      console.log('download complete: ' + entry.toURL());
-      appImg.imgSrc = entry.toURL();
-      // return entry.toURL();
-    }, (err) => {
-      const shouldPopView = false;
-      this.errorHandler.call(this, err, shouldPopView);
-    });
-  }
-*/

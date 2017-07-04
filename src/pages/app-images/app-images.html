@@ -25,11 +25,12 @@
         </ion-item>
       </ion-list>
 
-      <ion-row margin-top *ngIf="editValue.name" class="width-100 align-center">>
-        <ion-col col-6 class="width-60 align-center">>
+      <ion-row margin-top *ngIf="editValue.name" class="width-100 align-center">
+        <ion-col col-6 class=" align-center">
           <ion-item>
             <ion-card tappable (click)="getImgCordova()" item-start>
               <div text-wrap class="label"> {{ editValue.label }}</div>
+              <div margin-bottom text-wrap class="dimensions">Optimal dimensions:  &nbsp; Width: {{ editValue.targetWidth }}px, Height: {{ editValue.targetHeight }}px</div>
               <img *ngIf="editValue.imgSrc" class="img" [src]="editValue.imgSrc" onError="this.src='img/default.png';" />
               <img *ngIf="!editValue.imgSrc" class="img" [src]="defaultImg" onError="this.src='img/default.png';" />
             </ion-card>

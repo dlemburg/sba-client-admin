@@ -22,7 +22,7 @@ import { ReceiptTemplates } from '../../global/receipt-templates';
 import { CONST_ID_TYPES, CONST_RECEIPT_TYPES, CONST_REWARDS_TYPES, CONST_REWARDS_DISCOUNT_RULE, CONST_REWARDS_DISCOUNT_TYPE, CONST_REWARDS_PROCESSING_TYPE } from '../../global/global';
 import { NativeNotifications } from '../../global/native-notifications';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
-
+import { Printer, PrintOptions } from '@ionic-native/printer';
 
 // cloneDeep(this.purchaseItem)
 // would rather copy by value with cloneDeep, but ionic?angular doesnt properly populate inputs with correct values
@@ -138,6 +138,7 @@ export class ProcessOrderPage extends BaseViewController {
     public navCtrl: NavController, 
     public navParams: NavParams, 
     public barcodeScanner: BarcodeScanner,
+    public printer: Printer,
     public nativeNotifications: NativeNotifications, 
     public API: API,
     public authentication: Authentication, 
@@ -797,27 +798,31 @@ export class ProcessOrderPage extends BaseViewController {
 
 
   cordovaPrinter() {
-
-      this.presentLoading("Printing...");
-      const receiptHTML = ReceiptTemplates.generateReceiptHTML(this.order, this.auth);
-      
-       //////////////// Cordova printer plugin ///////////////////////////////
-
-       //this.showReceiptModalWhilePrinting();
-       
-       /* inside printer promise
-        //  this.dismissLoading("Done!");
-        // this.navCtrl.setRoot(TabsPage);
-       */
-
-      setTimeout(() => {
-        this.dismissLoading("Done!");
-      }, 1000)
-
-      // this.errorHandler(this.ERROR_TYPES.PLUGIN.PRINTER)
-
-      ////////////////// end cordova printer plugin ////////////////////////////
-
+    this.presentLoading("Printing...");
+    const receiptHTML = ReceiptTemplates.generateReceiptHTML(this.order, this.auth);
+    
+    this.printer.isAvailable().then(() => {
+      return this.printer.check();
+    })
+    .then(() => {
+      return this.printer.pick();
+    })
+    .then((data) => {
+      let options: PrintOptions = {
+        name: 'Receipt',
+        //printerId: 'printer007',
+        duplex: true,
+        landscape: true,
+        grayscale: true
+      };
+      return this.printer.print(receiptHTML, options)
+    })
+    .then(() => {
+      console.log("printer success");
+      this.dismissLoading("Done Printing!");
+      this.navCtrl.setRoot("TabsPage");
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.PRINTER));
   }
 
   finishSubmit(navToReceiptPage = false) {

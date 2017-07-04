@@ -10,7 +10,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS } from '../../global/global';
-
+import { ImageUtility } from '../../global/image-utility';
 
 @IonicPage()
 @Component({
@@ -24,7 +24,7 @@ export class AddGeneralPage extends BaseViewController {
   img: string = null;
   imgSrc: string = null;
   failedUploadImgAttempts: number = 0;
-
+  ImageUtility: ImageUtility;
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams, 
@@ -47,39 +47,51 @@ export class AddGeneralPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
     this.type = this.navParams.data.type;
     this.auth = this.authentication.getCurrentUser();
   }
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    const options: CameraOptions = {
-
-      quality: 100,
-      targetHeight: 238,
-      targetWidth: 423,
-      destinationType: this.camera.DestinationType.FILE_URI,
-      encodingType: this.camera.EncodingType.JPEG,
-      mediaType: this.camera.MediaType.PICTURE,
-      sourceType: 2
-    }
-
-    this.platform.ready().then(() => {
-      this.camera.getPicture(options).then((imageData) => {
-        console.log("imageData, ", imageData);
-
-        this.imgSrc = imageData;
-        this.img = CONST_APP_IMGS[14] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
-        this.myForm.patchValue({
-          img: this.img
-        });
-        this.dismissLoading();
+    this.ImageUtility.getImgCordova().then((data) => {
+      this.dismissLoading();
+      this.imgSrc = data.imageData;
+      this.myForm.patchValue({
+        img: `${CONST_APP_IMGS[14]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
       })
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 
   uploadImg(): Promise<any> {
+    let failedUploadImgAttempts = 0;
+
+    this.presentLoading(AppViewData.getLoading().savingImg);
+    return new Promise((resolve, reject) => {
+      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        this.dismissLoading();
+        resolve(data.message);
+      })
+      .catch((err) => {
+        failedUploadImgAttempts++
+        let message = "";
+        this.dismissLoading();
+
+        if (this.failedUploadImgAttempts === 1) {
+            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+            reject(err);
+        } else {
+          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+          resolve();
+        }
+        this.presentToast(false, message);
+      })
+    })
+  }
+
+/*
+  uploadImgOLD(): Promise<any> {
     this.presentLoading(AppViewData.getLoading().savingImg);
 
     return new Promise((resolve, reject) => {
@@ -113,17 +125,47 @@ export class AddGeneralPage extends BaseViewController {
     });
   }
 
+  getImgCordovaOLD() {
+    this.presentLoading("Retrieving...");
+    const options: CameraOptions = {
+
+      quality: 100,
+      targetHeight: 238,
+      targetWidth: 423,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+      sourceType: 2
+    }
+
+    this.platform.ready().then(() => {
+      this.camera.getPicture(options).then((imageData) => {
+        console.log("imageData, ", imageData);
+
+        this.imgSrc = imageData;
+        this.img = CONST_APP_IMGS[14] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
+        this.myForm.patchValue({
+          img: this.img
+        });
+        this.dismissLoading();
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+  */
+
+
 
 
   submit(myForm, isValid): void {
     let type: string = this.type.toLowerCase();
 
     if (type === "categories") {
-      this.platform.ready().then(() => {
+     // this.platform.ready().then(() => {
         this.uploadImg().then(() => {
           this.finishSubmit(type, myForm);
         });
-      });
+    //  });
 
     } else {
       this.finishSubmit(type, myForm);

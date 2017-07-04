@@ -38,19 +38,29 @@ export class BaseViewController {
   // app-wide error-handler
   public errorHandler(errorType = "No type given", message = AppViewData.getToast().defaultErrorMessage, opts: IErrorHandlerOpts = {}) {
     return (err) => {
+      let toastOpts = {duration: 1500, position: "bottom"};
       if (opts.shouldDismissLoading === undefined) opts.shouldDismissLoading = true;
       if (opts.shouldPopView === undefined) opts.shouldPopView = false;
 
-      switch(errorType) {
-        case this.ERROR_TYPES.API:
-        case this.ERROR_TYPES.UNHANDLED_EXCEPTION:
-          message = message;
-          break;
-        default: 
-          message = this.ERROR_TYPES.PLUGIN[errorType];
+      if (parseInt(err.status) === 401) {
+            message = `Sorry, there was an error validating your credentials. Please try signing out and then signing back in.`;
+            toastOpts.duration = 5000;
+      } else {
+        switch(errorType) {
+          case this.ERROR_TYPES.API:
+          case this.ERROR_TYPES.UNHANDLED_EXCEPTION:
+            message = message;
+            break;
+          case this.ERROR_TYPES.PLUGIN[errorType]:
+            message = this.ERROR_MESSAGES[errorType];
+          default: 
+            message = message;
+        }
       }
 
-      this.presentToast(opts.shouldPopView, message);
+      
+
+      this.presentToast(opts.shouldPopView, message, toastOpts.position, toastOpts.duration);
       opts.shouldDismissLoading && this.dismissLoading();
 
       console.log("err: ", err);
