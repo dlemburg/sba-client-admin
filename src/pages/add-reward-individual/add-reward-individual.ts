@@ -1,19 +1,19 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
 import { API, ROUTES } from '../../global/api';
-import { AppUtils } from '../../utils/app-utils';
 import { Authentication } from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { DateUtils } from '../../utils/date-utils';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
-
+import { DateUtils } from '../../utils/date-utils';
+import { AppUtils } from '../../utils/app-utils';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -127,125 +127,43 @@ export class AddRewardIndividualPage extends BaseViewController {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
-        img: `${CONST_APP_IMGS[17]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
+        img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
       })
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 
-  uploadImg(): Promise<any> {
-    let failedUploadImgAttempts = 0;
-
-    this.presentLoading(AppViewData.getLoading().savingImg);
+  uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
-        this.dismissLoading();
-        resolve(data.message);
+      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        resolve();
       })
       .catch((err) => {
-        failedUploadImgAttempts++
-        let message = "";
-        this.dismissLoading();
-
-        if (this.failedUploadImgAttempts === 1) {
-            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
-            reject(err);
-        } else {
-          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
-          resolve();
-        }
-        this.presentToast(false, message);
+        console.log("catch from upload img");
+        reject(err);
       })
     })
   }
 
 
-/*
-    getImgCordova() {
-      this.presentLoading("Retrieving...");
-      const options: CameraOptions = {
-
-        // used lower quality for speed
-        quality: 100,
-        targetHeight: 423,
-        targetWidth: 238,
-        destinationType: this.camera.DestinationType.FILE_URI,
-        encodingType: this.camera.EncodingType.JPEG,
-        mediaType: this.camera.MediaType.PICTURE,
-        sourceType: 2
-      }
-
-      this.platform.ready().then(() => {
-        this.camera.getPicture(options).then((imageData) => {
-          console.log("imageData, ", imageData);
-
-          this.imgSrc = imageData;
-          this.img = CONST_APP_IMGS[17] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
-          this.myForm.patchValue({
-            img: this.img
-          });
-          this.dismissLoading();
-        })
-      })
-      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
-  }
-
-  uploadImg(): Promise<any> {
-    this.presentLoading(AppViewData.getLoading().savingImg);
-
-    return new Promise((resolve, reject) => {
-        let options: FileUploadOptions = {
-          fileKey: 'upload-img-no-callback', 
-          fileName: this.img,        
-          headers: {}
-        };
-        const fileTransfer: TransferObject = this.transfer.create();
-
-        fileTransfer.upload(this.imgSrc, ROUTES.uploadImgNoCallback, options).then((data) => {
-          console.log("uploaded successfully... ");
-          this.dismissLoading();
-          resolve();
-        })
-        .catch((err) => {
-            let message = "";
-            let shouldPopView = false;
-            this.failedUploadImgAttempts++;
-            this.dismissLoading();
-
-            if (this.failedUploadImgAttempts === 1) {
-               message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
-               reject(err);
-            } else {
-              message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
-              resolve();
-            }
-            this.presentToast(shouldPopView, message);
-        });
-    });
-  }
-  */
-
 
   submit(myForm): void {
-    this.platform.ready().then(() => {
-      this.uploadImg().then(() => {
+    /*** package ***/
+    if (myForm.hasExpiryDate) this.myForm.patchValue({expiryDate: DateUtils.patchEndTime(this.myForm.controls.expiryDate.value)});
+    const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid};
+    this.presentLoading(AppViewData.getLoading().saving);
 
-        /*** package ***/
-        if (myForm.hasExpiryDate) this.myForm.patchValue({expiryDate: DateUtils.patchEndTime(this.myForm.controls.expiryDate.value)});
-        this.presentLoading(AppViewData.getLoading().saving);
-        const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid};
-        
-        this.API.stack(ROUTES.saveRewardIndividual, "POST", toData)
-          .subscribe(
-              (response) => {
-                this.dismissLoading(AppViewData.getLoading().saved);
-                this.myForm.reset();
-                this.img = null;
-                this.imgSrc = null;
-                this.failedUploadImgAttempts = 0;
-              }, this.errorHandler(this.ERROR_TYPES.API));
-      });
-    });
+    this.uploadImg(myForm).then(() => {
+      this.API.stack(ROUTES.saveRewardIndividual, "POST", toData)
+        .subscribe(
+            (response) => {
+              this.dismissLoading(AppViewData.getLoading().saved);
+              this.myForm.reset();
+              this.img = null;
+              this.imgSrc = null;
+            }, this.errorHandler(this.ERROR_TYPES.API));
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
 }
 interface ToDataSaveOrEditReward {

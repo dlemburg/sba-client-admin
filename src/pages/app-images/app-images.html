@@ -30,14 +30,17 @@
           <ion-item>
             <ion-card tappable (click)="getImgCordova()" item-start>
               <div text-wrap class="label"> {{ editValue.label }}</div>
-              <div margin-bottom text-wrap class="dimensions">Optimal dimensions:  &nbsp; Width: {{ editValue.targetWidth }}px, Height: {{ editValue.targetHeight }}px</div>
               <img *ngIf="editValue.imgSrc" class="img" [src]="editValue.imgSrc" onError="this.src='img/default.png';" />
               <img *ngIf="!editValue.imgSrc" class="img" [src]="defaultImg" onError="this.src='img/default.png';" />
             </ion-card>
           </ion-item>
+          <ion-item>
+            <div margin-bottom text-wrap class="dimensions">Optimal dimensions:  &nbsp; Width: {{ editValue.targetWidth }}px, Height: {{ editValue.targetHeight }}px</div>
+          </ion-item>
+
         </ion-col>
       </ion-row>
       
-      <button color="primary"  [disabled]="!appImg || !appImg.imgSrc" (click)="submit()" ion-button block margin-top>Submit</button>
+      <button class="width-60 app-btn align-center" color="primary"  [disabled]="!appImg || !appImg.imgSrc" (click)="submit()" ion-button block margin-top>Submit</button>
   </div>
 </ion-content>

@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { CONST_APP_IMGS } from '../global/global';
+import { DateUtils } from './date-utils';
 
 @Injectable()
 export class Utils {
@@ -28,6 +30,17 @@ export class Utils {
 
         return +retVal;
     };
+
+    public static generateImgName = (data: {appImgIndex: number, name: string, companyOid: number}): string => {
+        let isoDate = DateUtils.toLocalIsoString(new Date().toString());
+        isoDate = isoDate.slice(0, isoDate.indexOf(".")).replace(/:/g, "-");
+
+        console.log("isoDate: ", isoDate);
+        return `${CONST_APP_IMGS[data.appImgIndex]}$${data.name}$${data.companyOid}$${Utils.generateRandomString(3)}$${isoDate}.jpg`.replace(/\s+/g, '');
+
+        // i.e.:  categoriesImg$muffins$12$ai39vl5z$2017-07-14T15-28-12
+
+    }
 
      public static getNumbersList(len: number = 25): Array<number> {
         let arr = [];

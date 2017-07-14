@@ -85,7 +85,7 @@
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.expiryDate"></control-messages>
         </div> -->
-        <button color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
+        <button class="width-60 app-btn align-center" color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
       </form>
     </div>
     <div *ngIf="editOid" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>

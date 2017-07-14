@@ -26,7 +26,10 @@ import { Authentication } from '../global/authentication';    // holds all auth 
 import { API } from '../global/api';                          // holds routes and api call
 import { SocketIO } from '../global/socket-io';     //  holds socket.io methods
 import { NativeNotifications } from '../global/native-notifications';     // all native notification logic
+
+// classes
 import { ImageUtility } from '../global/image-utility';
+import { CustomErrorHandler } from '../global/custom-error-handler';
 
 // Components && base-view-controller
 import { BaseViewController } from '../pages/base-view-controller/base-view-controller';
@@ -64,6 +67,7 @@ import { SearchComponent } from '../components/search/search.component';
     GoogleMaps,
     BarcodeScanner,
     Printer,
+    //{ provide: ErrorHandler, useClass: CustomErrorHandler },
     {provide: ErrorHandler, useClass: IonicErrorHandler},
 
     // my providers

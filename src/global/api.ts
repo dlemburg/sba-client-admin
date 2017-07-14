@@ -144,5 +144,5 @@ export const ROUTES = {
     uploadImgAndUnlink: `${global.SERVER_URL_NODE}/api/node/upload/img/uploadAndUnlink`,
     saveAppImg: '/api/node/owner/saveAppImg',
 
-
+    logError: '/api/node/appAnalytics/logError'
 }

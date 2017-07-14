@@ -52,11 +52,11 @@ export class ImageUtility {
             fileTransfer.upload(imgSrc, route, options).then((data) => {
                 console.log("uploaded successfully... ");
                 resolve({message});
-            })
+            }).catch((err) => {
+                console.log("rejecting from uploadImg");
+                reject(err);
+            });
         })
-        .catch((err) => {
-            reject(err);
-        });
     });
   }
 

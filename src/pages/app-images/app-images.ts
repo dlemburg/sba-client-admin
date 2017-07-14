@@ -25,10 +25,10 @@ export class AppImagesPage extends BaseViewController {
   defaultImg: string = DEFAULT_IMG;
   currentIndex: number = null;
   values = [
-    {label: "'My Card'", name: CONST_APP_IMGS[0], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "'Rewards'", name: CONST_APP_IMGS[1], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "'Order Ahead'", name: CONST_APP_IMGS[2], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "'Menu'", name: CONST_APP_IMGS[3], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "My Card", name: CONST_APP_IMGS[0], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Rewards", name: CONST_APP_IMGS[1], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Order Ahead", name: CONST_APP_IMGS[2], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Menu", name: CONST_APP_IMGS[3], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Your Company Logo", name: CONST_APP_IMGS[4], img: null, imgSrc: null, targetWidth: 450,targetHeight: 150},
    // {label: "App Header Bar", name: CONST_APP_IMGS[5], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Default (fallback)", name: CONST_APP_IMGS[6], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},

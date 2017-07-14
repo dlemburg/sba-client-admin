@@ -126,8 +126,8 @@
               <ion-datetime displayFormat="hh a" pickerFormat="hh a" formControlName="dateRuleTimeEnd"></ion-datetime>
             </ion-item>
             <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeEnd"></control-messages>
+          </div>
         </div>
-    </div>
         <h4 text-center>Reward Start and Expiration Date</h4>
         <ion-item>
           <ion-label>Reward Start Date (if today, enter today's date)</ion-label>
@@ -137,9 +137,11 @@
           <ion-label>Reward Expiration Date (if today, enter today's date)</ion-label>
           <ion-datetime displayFormat="MMM DD, YYYY" pickerFormat="YYYY MMMM DD" formControlName="expiryDate" hoursValues="11" minuteValues="59"></ion-datetime>
         </ion-item>
-      <button color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
+        <button class="width-60 app-btn align-center" color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
       </form>
     </div>
-    <div *ngIf="editOid" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>
+    <div *ngIf="editOid" margin-top text-center>
+      <button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button>
+    </div>
   </div>
 </ion-content>

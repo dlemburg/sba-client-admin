@@ -10,18 +10,15 @@ import { AppFeatures } from '../../global/app-features';
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
-  tab1aRoot: Component = 'ProcessOrderPage';
-  tab1bRoot = 'SimpleProcessingPage';
-  tab2Root: Component = 'OrderAheadDashboardPage';
-  tab3Root: Component = 'OwnerPage';
-  isOwner: boolean = false;
-  auth: AuthUserInfo;
-  hasProcessOrderFeature: boolean = true;
+  hasProcessOrderFeature: boolean = AppFeatures.getFeatures().hasProcessOrder;
+  auth: AuthUserInfo = this.authentication.getCurrentUser();
+  tab1Root: Component = 'ProcessOrderPage';
+  tab2Root = 'SimpleProcessingPage';
+  tab3Root: Component = 'OrderAheadDashboardPage';
+  tab4Root: Component = 'OwnerPage';
+  isOwner: boolean = this.auth.role === "Owner" ? true : false;
 
   constructor(private authentication: Authentication) {
-      this.auth = this.authentication.getCurrentUser();
-      this.auth.role === "Owner" ? this.isOwner = true : this.isOwner = false;
-      this.hasProcessOrderFeature = AppFeatures.getFeatures().hasProcessOrder;
   }
 
   ionViewDidLoad() {

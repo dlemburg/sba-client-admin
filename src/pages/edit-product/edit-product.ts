@@ -13,6 +13,7 @@ import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/trans
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -250,129 +251,46 @@ constructor(
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
-        img: `${CONST_APP_IMGS[15]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
+        img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
       })
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 
-  uploadImg(): Promise<any> {
-    let failedUploadImgAttempts = 0;
-
-    this.presentLoading(AppViewData.getLoading().savingImg);
+  uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
-        this.dismissLoading();
-        resolve(data.message);
+      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        resolve();
       })
       .catch((err) => {
-        failedUploadImgAttempts++
-        let message = "";
-        this.dismissLoading();
-
-        if (this.failedUploadImgAttempts === 1) {
-            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
-            reject(err);
-        } else {
-          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
-          resolve();
-        }
-        this.presentToast(false, message);
+        console.log("catch from upload img");
+        reject(err);
       })
     })
   }
-
-/*
-  getImgCordova() {
-    this.presentLoading("Retrieving...");
-    const options: CameraOptions = {
-      quality: 100,
-      targetHeight: 238,
-      targetWidth: 423,
-      destinationType: this.camera.DestinationType.FILE_URI,
-      encodingType: this.camera.EncodingType.JPEG,
-      mediaType: this.camera.MediaType.PICTURE,
-      sourceType: 2
-    }
-
-    this.platform.ready().then(() => {
-      this.camera.getPicture(options).then((imageData) => {
-        console.log("imageData, ", imageData);
-
-        this.imgChanged = true;
-        this.imgSrc = imageData;
-        this.img = CONST_APP_IMGS[18] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
-        this.myForm.patchValue({
-          img: this.img
-        });
-        this.dismissLoading();
-      })
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
-  }
-
-  uploadImg(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      if (!this.imgChanged) {
-        resolve();
-      } else {
-        this.presentLoading(AppViewData.getLoading().savingImg);
-
-        let options: FileUploadOptions = {
-          fileKey: 'upload-img-and-unlink', 
-          fileName: this.img,        
-          headers: {}
-        };
-        const fileTransfer: TransferObject = this.transfer.create();
-
-        fileTransfer.upload(this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`, options).then((data) => {
-          console.log("uploaded successfully... ");
-          this.dismissLoading();
-          resolve();
-        })
-        .catch((err) => {
-          let message = "";
-          let shouldPopView = false;
-          this.failedUploadImgAttempts++;
-          this.dismissLoading();
-
-          if (this.failedUploadImgAttempts === 1) {
-            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
-            reject(err);
-          } else {
-            message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
-            resolve();
-          }
-          this.presentToast(shouldPopView, message);
-        });
-      }
-    });
-  }
-  */
 
   submit(myForm, isValid: boolean): void {
+    this.presentLoading(AppViewData.getLoading().saving);
+
+    /*** Package for submit ***/
+    const toData: ToDataEditProduct = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
+
     // validate size -- this is a hack- should be cleaned up later
     if (myForm.fixedPrice && myForm.sizesAndPrices.length) {
       this.presentToast(false, "Looks like you have values for fixed price and multiple sizes.");
       return;
     }
 
-    this.platform.ready().then(() => {
-      this.uploadImg().then(() => {
-        
-        /*** Package for submit ***/
-        this.presentLoading(AppViewData.getLoading().saving);
-        const toData: ToDataEditProduct = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
-            
-        this.API.stack(ROUTES.editProduct, "POST", toData)
-          .subscribe(
-              (response) => {
-                this.dismissLoading(AppViewData.getLoading().saved);
-                this.navCtrl.pop();
-                console.log('response: ', response);
-              },this.errorHandler(this.ERROR_TYPES.API));
-      });
-    });
+    this.uploadImg(myForm).then(() => {            
+      this.API.stack(ROUTES.editProduct, "POST", toData)
+        .subscribe(
+            (response) => {
+              this.dismissLoading(AppViewData.getLoading().saved);
+              this.navCtrl.pop();
+              console.log('response: ', response);
+            }, this.errorHandler(this.ERROR_TYPES.API));
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
 }
 

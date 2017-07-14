@@ -24,13 +24,15 @@ export class BaseViewController {
       PRINTER: "PRINTER"
     },
     API: "API",
+    IMG_UPLOAD: "IMG UPLOAD",
     UNHANDLED_EXCEPTION: "UNHANDLED EXCEPTION"
   }
   public APPEND_DEFAULT_ERR_MESSAGE: "We will work hard to ensure that this is not a problem on our end"
   public ERROR_MESSAGES = {
     CAMERA: `Sorry, there was an error retrieving your photo.  ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
     BARCODE: `sorry, there was an error accessing the scanner. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
-    PRINTER: `Sorry, there was an error either finding a printer or printing. ${this.APPEND_DEFAULT_ERR_MESSAGE}`
+    PRINTER: `Sorry, there was an error either finding a printer or printing. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
+    IMG_UPLOAD: `Sorry, there was an error uploading your image. ${this.APPEND_DEFAULT_ERR_MESSAGE}`
   }
   constructor(public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController ) {
   }
@@ -87,7 +89,7 @@ export class BaseViewController {
   public presentToast(shouldPopView: Boolean, message = AppViewData.getToast().defaultErrorMessage, position = AppViewData.getToast().defaultToastPosition, duration = AppViewData.getToast().defaultToastDuration) {
     let toast = this.toastCtrl.create({
       message: message,
-      duration: duration || 1500,
+      duration: duration || 4000,
       position: position || "bottom"
     });
 
@@ -101,14 +103,6 @@ export class BaseViewController {
 
     toast.present();
   }
-
-  // modal
-  /*
-  presentModal(page: Component, params: any = {}, opts: any = {}) {
-    let modal = this.modalCtrl.create(page, params, opts)
-    modal.present();
-  }  
-  */
 
   // app-wide popup
   public showPopup(args) {

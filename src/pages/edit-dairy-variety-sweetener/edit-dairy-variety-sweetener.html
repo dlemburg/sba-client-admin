@@ -24,9 +24,11 @@
         <ion-label floating>{{type}} Name</ion-label>
         <ion-input type="text" formControlName="name"></ion-input>
       </ion-item>
-      <button color="primary" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
+      <button class="width-60 app-btn align-center" color="primary" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
     </form>
   </div>
-  <div *ngIf="editOid" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>
+  <div *ngIf="editOid" margin-top text-center>
+    <button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button>
+  </div>
 
 </ion-content>

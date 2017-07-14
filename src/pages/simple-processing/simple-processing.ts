@@ -8,6 +8,7 @@ import { CONST_ID_TYPES, CONST_REWARDS_TYPES } from '../../global/global';
 import { IUserDataForProcessOrder, IErrChecks, IBarcodeUserData, IBarcodeRewardData, ICompanyDetails } from '../../models/models';
 import { NativeNotifications } from '../../global/native-notifications';
 import { DateUtils } from '../../utils/date-utils';
+import { Utils } from '../../utils/utils';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 @IonicPage()
@@ -27,6 +28,7 @@ export class SimpleProcessingPage extends BaseViewController {
     balance: 0
   };
   total: number = null;
+  taxes: number = 0;
   reasonForEdit: string = null;
   rewards: Array<any> = [];
   rewardOid: number;
@@ -69,6 +71,21 @@ export class SimpleProcessingPage extends BaseViewController {
               this.companyDetails = response.data.companyDetails;
               this.dismissLoading();
             }, this.errorHandler(this.ERROR_TYPES.API));
+  }
+
+  calculateTaxes() {
+    if (!isNaN(+this.total)) {
+      this.taxes = Utils.round(+this.total * this.companyDetails.taxRate);
+      this.total = Utils.round(+this.total + (this.taxes));
+    }
+  }
+
+  onKeypressTotal(e) {
+    const allowedKeys = "0123456789.";
+    
+    if (allowedKeys.indexOf(e.key) > -1 || e.keyCode === 13) return;
+    else e.preventDefault();
+
   }
 
   onScanIndividualRewardBarcode() {

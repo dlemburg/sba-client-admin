@@ -14,6 +14,7 @@ import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/trans
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -102,25 +103,24 @@ constructor(
     this.presentLoading();
     // get name and oid of all rewards
     this.API.stack(ROUTES.getRewardsNameAndOid + `/${this.auth.companyOid}`, "GET")
-        .subscribe(
-            (response) => {
-              this.values = response.data.values;
-              console.log('response.data: ', response.data);
-              
-            }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+      .subscribe(
+          (response) => {
+            this.values = response.data.values;
+            console.log('response.data: ', response.data);
+            
+          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
 
      // get lkps- doesn't need to be async
     this.API.stack(ROUTES.getProcessingAndDiscountLkps, "GET")
-        .subscribe(
-            (response) => {
-              let { discountType, discountRule } = response.data.processingAndDiscountLkps;
-              this.lkps.discountType = discountType;
-              this.lkps.discountRule = discountRule;
+      .subscribe(
+          (response) => {
+            let { discountType, discountRule } = response.data.processingAndDiscountLkps;
+            this.lkps.discountType = discountType;
+            this.lkps.discountRule = discountRule;
 
-              console.log('response.data: ', response.data);
-              this.dismissLoading();
-              
-            },this.errorHandler(this.ERROR_TYPES.API));
+            console.log('response.data: ', response.data);
+            this.dismissLoading();
+          },this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navExplanations() {
@@ -137,52 +137,51 @@ constructor(
       this.presentLoading();
 
       this.API.stack(ROUTES.getRewardToEdit + `/${this.editOid}`, "GET")
-          .subscribe(
-              (response) => {
-                this.dismissLoading();
-                let {reward} = response.data;
+          .subscribe((response) => {
+            this.dismissLoading();
+            let {reward} = response.data;
 
-                this.myForm.patchValue({
-                  name: reward.name,
-                  img: reward.img,
-                  description: reward.description,
-                  exclusions: reward.exclusions,
-                  processingType: reward.processingType,
-                  lkpDiscountTypeOid: reward.lkpDiscountTypeOid,
-                  lkpDiscountRuleOid: reward.lkpDiscountRuleOid,
-                  discountAmount: reward.discountAmount,
-                  productOid: reward.productOid,
-                  dateRuleDays: reward.dateRuleDays ? reward.dateRuleDays.split(",") : null,
-                  dateRuleTimeStart: reward.dateRuleTimeStart !== null ? DateUtils.convertTimeStringToIsoString(reward.dateRuleTimeStart) : null,
-                  dateRuleTimeEnd: reward.dateRuleTimeEnd !== null ? DateUtils.convertTimeStringToIsoString(reward.dateRuleTimeEnd) : null,
-                  startDate: reward.startDate,
-                  expiryDate: reward.expiryDate,
-                });
+            this.myForm.patchValue({
+              name: reward.name,
+              img: reward.img,
+              description: reward.description,
+              exclusions: reward.exclusions,
+              processingType: reward.processingType,
+              lkpDiscountTypeOid: reward.lkpDiscountTypeOid,
+              lkpDiscountRuleOid: reward.lkpDiscountRuleOid,
+              discountAmount: reward.discountAmount,
+              productOid: reward.productOid,
+              dateRuleDays: reward.dateRuleDays ? reward.dateRuleDays.split(",") : null,
+              dateRuleTimeStart: reward.dateRuleTimeStart !== null ? DateUtils.convertTimeStringToIsoString(reward.dateRuleTimeStart) : null,
+              dateRuleTimeEnd: reward.dateRuleTimeEnd !== null ? DateUtils.convertTimeStringToIsoString(reward.dateRuleTimeEnd) : null,
+              startDate: reward.startDate,
+              expiryDate: reward.expiryDate,
+            });
 
-                console.log("response.data.reward: ", response.data.reward);
+            console.log("response.data.reward: ", response.data.reward);
 
-                // init everything with value to init dynamic value changes
-                this.imgSrc = AppViewData.getDisplayImgSrc(reward.img);
-                this.oldImg = reward.img;
-                this.originalValue = reward.name;
-                this.onProcessingTypeChanged(reward.processingType);
-                this.currentDiscountRule = this.setCurrentDiscountRule(reward.lkpDiscountRuleOid);
-                this.currentDiscountType = this.setCurrentDiscountType(reward.lkpDiscountTypeOid);
+            // init everything with value to init dynamic value changes
+            this.imgSrc = AppViewData.getDisplayImgSrc(reward.img);
+            this.oldImg = reward.img;
+            this.originalValue = reward.name;
+            this.onProcessingTypeChanged(reward.processingType);
+            this.currentDiscountRule = this.setCurrentDiscountRule(reward.lkpDiscountRuleOid);
+            this.currentDiscountType = this.setCurrentDiscountType(reward.lkpDiscountTypeOid);
 
 
-                // call once
-                if (this.doCallGetProducts) { // reward.productOid !== null
-                  this.API.stack(ROUTES.getProductsNameAndOid + `/${this.auth.companyOid}`, "GET")
-                    .subscribe(
-                        (response) => {
-                          //this.dismissLoading();
-                          this.doCallGetProducts = false;
-                          this.products = response.data.products;
-                          
-                          console.log('response.data: ', response.data);
-                        }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false} ));
-                }
-              },this.errorHandler(this.ERROR_TYPES.API));
+            // call once
+            if (this.doCallGetProducts) { // reward.productOid !== null
+              this.API.stack(ROUTES.getProductsNameAndOid + `/${this.auth.companyOid}`, "GET")
+                .subscribe(
+                    (response) => {
+                      //this.dismissLoading();
+                      this.doCallGetProducts = false;
+                      this.products = response.data.products;
+                      
+                      console.log('response.data: ', response.data);
+                    }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false} ));
+            }
+          },this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 
@@ -268,110 +267,28 @@ constructor(
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
-        img: `${CONST_APP_IMGS[16]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
+        img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
       })
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 
-  uploadImg(): Promise<any> {
-    let failedUploadImgAttempts = 0;
-
-    this.presentLoading(AppViewData.getLoading().savingImg);
+  uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
-        this.dismissLoading();
-        resolve(data.message);
+      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        resolve();
       })
       .catch((err) => {
-        failedUploadImgAttempts++
-        let message = "";
-        this.dismissLoading();
-
-        if (this.failedUploadImgAttempts === 1) {
-            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
-            reject(err);
-        } else {
-          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
-          resolve();
-        }
-        this.presentToast(false, message);
+        console.log("catch from upload img");
+        reject(err);
       })
     })
   }
 
-/*
-    getImgCordova() {
-      this.presentLoading("Retrieving...");
-      const options: CameraOptions = {
-
-        // used lower quality for speed
-        quality: 100,
-        targetHeight: 200,
-        targetWidth: 300,
-        destinationType: this.camera.DestinationType.FILE_URI,
-        encodingType: this.camera.EncodingType.JPEG,
-        mediaType: this.camera.MediaType.PICTURE,
-        sourceType: 2
-      }
-
-      this.platform.ready().then(() => {
-        this.camera.getPicture(options).then((imageData) => {
-          console.log("imageData, ", imageData);
-
-          this.imgChanged = true;
-          this.imgSrc = imageData;
-          this.img = CONST_APP_IMGS[16] + this.myForm.controls["name"].value + `$` + this.auth.companyOid;
-          this.myForm.patchValue({
-            img: this.img
-          });
-          this.dismissLoading();
-        })
-      })
-      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
-    }
-
-  uploadImg(): Promise<any> {
-    return new Promise((resolve, reject) => {
-        if (!this.imgChanged) {
-          resolve();
-        } else {
-          this.presentLoading(AppViewData.getLoading().savingImg);
-
-          let options: FileUploadOptions = {
-            fileKey: 'upload-img-and-unlink', 
-            fileName: this.img,        
-            headers: {}
-          };
-          const fileTransfer: TransferObject = this.transfer.create();
-
-          fileTransfer.upload(this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`, options).then((data) => {
-            console.log("uploaded successfully... ");
-            this.dismissLoading();
-            resolve();
-          })
-          .catch((err) => {
-              let message = "";
-              let shouldPopView = false;
-              this.failedUploadImgAttempts++;
-              this.dismissLoading();
-
-              if (this.failedUploadImgAttempts === 1) {
-                message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
-                reject(err);
-              } else {
-                message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
-                resolve();
-              }
-              this.presentToast(shouldPopView, message);
-          });
-        }
-    });
-  }
-  */
-
 
   submit(myForm): void {
+    this.presentLoading(AppViewData.getLoading().saving);
+
     let expiryDate = this.myForm.controls.expiryDate.value.toString();
     let startDate = this.myForm.controls.startDate.value.toString();
 
@@ -385,20 +302,17 @@ constructor(
     });
     const toData: ToDataEditReward = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
 
-    this.platform.ready().then(() => {
-      this.uploadImg().then(() => {
-        this.presentLoading(AppViewData.getLoading().saving);
-        this.API.stack(ROUTES.editReward, "POST", toData)
-          .subscribe(
-              (response) => {
-                this.dismissLoading(AppViewData.getLoading().saved);
-                this.navCtrl.pop();
-                console.log('response: ', response);            
-              },this.errorHandler(this.ERROR_TYPES.API));
-      });
-    });
+    this.uploadImg(myForm).then(() => {
+      this.API.stack(ROUTES.editReward, "POST", toData)
+        .subscribe(
+            (response) => {
+              this.dismissLoading(AppViewData.getLoading().saved);
+              this.navCtrl.pop();
+              console.log('response: ', response);            
+            },this.errorHandler(this.ERROR_TYPES.API));
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
-
 }
 
 interface ToDataEditReward {

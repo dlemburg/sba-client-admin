@@ -31,7 +31,6 @@ export class MyApp {
     public socketIO: SocketIO) {
       
     platform.ready().then(() => {
-
       if (this.authentication.isLoggedIn()) {
         this.initializeApp();
       } else {
