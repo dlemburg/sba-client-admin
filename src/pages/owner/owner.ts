@@ -16,8 +16,8 @@ import { ICompanyDetails } from '../../models/models';
 export class OwnerPage extends BaseViewController {
   addPages: Array<any> = [];
   pages: Array<any> = [
-    {name: 'Reward: All', img: null, addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
-    {name: 'Reward: Individual', img: null, addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
+    {name: 'Reward - All', img: null, addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
+    {name: 'Reward - Individual', img: null, addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
     {name: 'Categories', img: null, type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
     {name: 'Products', img: 'img/products.jpeg', addComponent: 'AddProductPage', editComponent: 'EditProductPage'},
     {name: 'Sizes', type: 'Sizes', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
@@ -102,8 +102,8 @@ constructor(
     return pages;
   }
 
-  nav(component, type) {
-    this.navCtrl.push(component, {type: type ? type : null});
+  nav(component, theType) {
+    this.navCtrl.push(component, {type: theType ? theType : null});
   }
 
 }

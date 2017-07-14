@@ -21,7 +21,7 @@ export class TabsPage {
   constructor(private authentication: Authentication) {
       this.auth = this.authentication.getCurrentUser();
       this.auth.role === "Owner" ? this.isOwner = true : this.isOwner = false;
-      this.hasProcessOrderFeature = true // AppFeatures.getFeatures().hasProcessOrder;
+      this.hasProcessOrderFeature = AppFeatures.getFeatures().hasProcessOrder;
   }
 
   ionViewDidLoad() {

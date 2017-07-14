@@ -25,9 +25,6 @@ export class API {
   
     public stack(route: string, verb: string, body: any = {}): Observable<any> {
         
-        // conditionally add Bearer token (if needed)
-        //this.headers.append("Authorization", "Bearer " +  this.authentication.getToken());
-
         let url: string = route.indexOf('/api/node/') > -1 ? global.SERVER_URL_NODE : global.SERVER_URL_CSHARP;
             url += route;
         const httpVerb = verb.toLowerCase();

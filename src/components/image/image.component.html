@@ -2,7 +2,7 @@
   <ion-col col-6 class="width-60 align-center">
     <ion-item>
       <ion-card tappable item-start (click)="onGetImgCordova()">
-        <div text-center text-wrap class="label">{{ header }}</div>
+        <div *ngIf="title" text-center margin text-wrap class="image-component-title">{{ title }}</div>
         <img *ngIf="imgSrc" class="img" [src]="imgSrc" onError="this.src='img/default.png';" />
         <img *ngIf="!imgSrc" class="img" src="img/default.png" />
       </ion-card>

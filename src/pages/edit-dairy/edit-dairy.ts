@@ -84,7 +84,9 @@ export class EditDairyPage extends BaseViewController {
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          this.navCtrl.pop();
+          setTimeout(() => {
+            this.navCtrl.pop();
+          }, 1000);
           console.log('response: ', response); 
         }, this.errorHandler(this.ERROR_TYPES.API));
   }

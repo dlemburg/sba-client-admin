@@ -16,7 +16,7 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
   myForm: any;
   type: string;
   auth: AuthUserInfo;
-  values: Array<any>;
+  values: Array<any> = [];
   editOid: number;
   selectedValue: any;
 
@@ -60,11 +60,13 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
 
   remove(): void {
     this.presentLoading(AppViewData.getLoading().removing);
-    this.API.stack(ROUTES.removeDairyVarietySweetener + `/${this.type}/${this.editOid}/${this.auth.companyOid}`, 'POST')
+    this.API.stack(ROUTES.removeDairyVarietySweetener, 'POST', {companyOid: this.auth.companyOid, editOid: this.editOid, type: this.type})
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          this.navCtrl.pop();
+          setTimeout(() => {
+            this.navCtrl.pop();
+          }, 1000);
           console.log('response: ', response); 
         }, this.errorHandler(this.ERROR_TYPES.API));
   }

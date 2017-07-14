@@ -392,5 +392,15 @@ export interface ICompanyDetails {
     socialMediaMessage?: string;
     socialMediaImg?: string;
     allowsCommentsOnOrderAhead?: boolean;
-    
+}
+
+export interface IGetEligibleRewardsProcessingTypeAutomaticForTransactionRequest {
+    date: string;
+    day: number;
+    hours: number;
+    mins: number;
+    purchaseItems: Array<IPurchaseItem>;
+    companyOid: number;
+    taxRate: number;
+    individualRewards?: Array<IReward>
 }

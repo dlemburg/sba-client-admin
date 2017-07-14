@@ -99,7 +99,7 @@
           <h4 margin-top text-center>Hours</h4>
             <div *ngIf="locations.length">
               <ion-item class="outline">
-                <ion-label>Populate hours from another location</ion-label>
+                <ion-label>Populate with hours from another location</ion-label>
                 <ion-select [(ngModel)]="selectedLocation" [ngModelOptions]="{standalone: true}" (ionChange)="populateTimesWithAnotherLocation(x)">
                   <ion-option *ngFor="let x of locations; let i = index;" [value]="x">{{ x.name }}</ion-option>
                 </ion-select>
@@ -124,7 +124,7 @@
               <ion-col text-center width-50 *ngIf="myForm.controls.sundayOpen.value === 'closed'"><ion-item>Closed</ion-item></ion-col>
               <ion-col width-10 class="close-toggle">
                 <ion-label>Closed </ion-label>
-                <ion-toggle color="danger" checked="false" (ionChange)="closedToggle($event, 0)"></ion-toggle>
+                <ion-toggle color="danger" [checked]="myForm.controls.sundayOpen.value === 'closed'" (ionChange)="closedToggle($event, 0)"></ion-toggle>
               </ion-col>
             </ion-row>
 
@@ -146,7 +146,7 @@
 
               <ion-col width-10 class="close-toggle">
                 <ion-label>Closed </ion-label>
-                <ion-toggle color="danger" checked="false" (ionChange)="closedToggle($event, 1)"></ion-toggle>
+                <ion-toggle color="danger" [checked]="myForm.controls.mondayOpen.value === 'closed'" (ionChange)="closedToggle($event, 1)"></ion-toggle>
               </ion-col>
             </ion-row>
 
@@ -168,7 +168,7 @@
 
               <ion-col width-10 class="close-toggle">
                 <ion-label>Closed </ion-label>
-                <ion-toggle color="danger" checked="false" (ionChange)="closedToggle($event, 2)"></ion-toggle>
+                <ion-toggle color="danger" [checked]="myForm.controls.tuesdayOpen.value === 'closed'" (ionChange)="closedToggle($event, 2)"></ion-toggle>
               </ion-col>
             </ion-row>
 
@@ -190,7 +190,7 @@
 
               <ion-col width-10 class="close-toggle">
                 <ion-label>Closed </ion-label>
-                <ion-toggle color="danger" checked="false" (ionChange)="closedToggle($event, 3)"></ion-toggle>
+                <ion-toggle color="danger" [checked]="myForm.controls.wednesdayOpen.value === 'closed'" (ionChange)="closedToggle($event, 3)"></ion-toggle>
               </ion-col>
             </ion-row>
 
@@ -212,7 +212,7 @@
 
               <ion-col width-10 class="close-toggle">
                 <ion-label>Closed </ion-label>
-                <ion-toggle color="danger" checked="false" (ionChange)="closedToggle($event, 4)"></ion-toggle>
+                <ion-toggle color="danger" [checked]="myForm.controls.thursdayOpen.value === 'closed'" (ionChange)="closedToggle($event, 4)"></ion-toggle>
               </ion-col>
             </ion-row>
 
@@ -234,7 +234,7 @@
 
               <ion-col width-10 class="close-toggle">
                 <ion-label>Closed </ion-label>
-                <ion-toggle color="danger" checked="false" (ionChange)="closedToggle($event, 5)"></ion-toggle>
+                <ion-toggle color="danger" [checked]="myForm.controls.fridayOpen.value === 'closed'" (ionChange)="closedToggle($event, 5)"></ion-toggle>
               </ion-col>
             </ion-row>
 
@@ -256,7 +256,7 @@
 
               <ion-col width-10 class="close-toggle">
                 <ion-label>Closed </ion-label>
-                <ion-toggle color="danger" checked="false" (ionChange)="closedToggle($event, 6)"></ion-toggle>
+                <ion-toggle color="danger" [checked]="myForm.controls.saturdayOpen.value === 'closed'" (ionChange)="closedToggle($event, 6)"></ion-toggle>
               </ion-col>
             </ion-row>
         <button color="primary"  [disabled]="!myForm.valid && !editValue" ion-button block margin-top>Submit</button>
@@ -290,7 +290,7 @@
                 </ion-col>
                 <ion-col width-10 class="close-toggle">
                   <ion-label>Closed </ion-label>
-                  <ion-toggle formControlName="isClosed" color="danger" checked="false" (ionChange)="closedToggle($event, i)"></ion-toggle>
+                  <ion-toggle formControlName="isClosed" color="danger" [checked]="myForm.controls.sundayOpen.value === 'closed'" (ionChange)="closedToggle($event, i)"></ion-toggle>
                 </ion-col>
             </ion-row>
           </div>

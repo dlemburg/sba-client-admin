@@ -11,7 +11,7 @@ export class ImageUtility {
     private file: File,
     private platform: Platform) {}
 
-    getImgCordova(cameraOptions?: CameraOptions): Promise<{imageData: string}> {
+    getImgCordova(cameraOptions: CameraOptions = {}): Promise<{imageData: string}> {
         return new Promise((resolve, reject) => {
             const options: CameraOptions = {
                 quality: cameraOptions.quality || 100,

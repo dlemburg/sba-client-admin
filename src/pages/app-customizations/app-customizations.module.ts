@@ -9,7 +9,7 @@ import { ImageComponentModule } from '../../components/image/image.component.mod
  
 @NgModule({
   declarations: [
-    AppCustomizationsPage,
+    AppCustomizationsPage
   ],
   imports: [
     IonicPageModule.forChild(AppCustomizationsPage),

@@ -17,8 +17,8 @@ export class TransactionsPage extends BaseViewController {
   locations: Array<any> = [];
 
   /* filters */
-  startDate: string;
-  endDate: string;
+  startDate: string = DateUtils.toLocalIsoString(DateUtils.getBeginningDateToday().toString());
+  endDate: string = DateUtils.toLocalIsoString(new Date().toString());
   selectedLocation: any = "*";  // defaults to "*"
   auth: AuthUserInfo;
 
@@ -32,23 +32,23 @@ export class TransactionsPage extends BaseViewController {
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController) { 
     super(alertCtrl, toastCtrl, loadingCtrl);
+
+    console.log("startDate: ", this.startDate);
+    console.log("end date: ", this.endDate);
   }
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.startDate = DateUtils.toLocalIsoString(DateUtils.getBeginningDateToday().toString());     // set start date to today 12:01a
-    this.endDate = DateUtils.toLocalIsoString(new Date().toString());       // set end date to today   now
-
     // doesn't need to be async, bc first query defaults the location to "*"
     this.getLocations();
     this.getTransactions();
   }
 
   getTransactions(): void {
-    const toData: IGetTransactionsFiltersToData = { startDate: this.startDate, endDate: this.endDate, locationOid: this.selectedLocation.toString()}; // converted to string b/c can be '*', so if number, converted back to int on server side
+    const toData: IGetTransactionsFiltersToData = { startDate: this.startDate, endDate: this.endDate, locationOid: this.selectedLocation.toString(), companyOid: this.auth.companyOid}; // converted to string b/c can be '*', so if number, converted back to int on server side
     this.presentLoading();
     
-    this.API.stack(ROUTES.getTransactions + `/${this.auth.companyOid}`, "POST", toData)
+    this.API.stack(ROUTES.getTransactions, "POST", toData)
         .subscribe(
             (response) => {
               console.log('response.data: ', response.data);
@@ -87,4 +87,5 @@ export interface IGetTransactionsFiltersToData {
   startDate: string;
   endDate: string;
   locationOid: number|string;
+  companyOid: number;
 }

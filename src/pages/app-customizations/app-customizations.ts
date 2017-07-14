@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Platform, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
+import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 import { API, ROUTES } from '../../global/api';
 import { Validation } from '../../utils/validation-utils';
@@ -12,13 +12,12 @@ import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/trans
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS } from '../../global/global';
 
-
+@IonicPage()
 @Component({
   selector: 'page-customizations',
   templateUrl: 'app-customizations.html'
 })
 
-// TODO: explanations
 export class AppCustomizationsPage extends BaseViewController {
   type: string;
   myForm: FormGroup;
@@ -32,7 +31,6 @@ export class AppCustomizationsPage extends BaseViewController {
   imgSrc: string = null;
   imgDidChange: boolean = false;
   failedUploadImgAttempts: number = 0;
-
 
  constructor(
    public navCtrl: NavController, 
@@ -69,15 +67,19 @@ export class AppCustomizationsPage extends BaseViewController {
       customCompanyEmailFooterMessage: [" "],
       hasSocialMediaRewards: [false],
       socialMediaBonusPoints: [0, Validation.test("isNumbersOnly")],
-      socialMediaMessage: [null],
       hasFacebook: [false],
       hasTwitter: [false],
       hasInstagram: [false],
+      socialMediaMessageInstagram: [null],
+      socialMediaMessageFacebook: [null],
+      socialMediaMessageTwitter: [null],
       pointsThreshold: [0, Validation.test("isNumbersOnly")],
       pointsPerFiftyCents: [0, Validation.test("isNumbersOnly")],
       hasPrinter: [false],
       acceptsPartialPayments: [false]
     });
+
+    console.log("INSIDE PAGE")
   }
 
   ionViewDidLoad() {
@@ -91,7 +93,7 @@ export class AppCustomizationsPage extends BaseViewController {
               this.dismissLoading();
 
               /* new way of handling- may be bugs */
-              this.patchForm(this.myForm.controls.value, response.data.companyDetails);
+              this.patchForm(this.myForm.value, response.data.companyDetails);
               
               this.oldImg = response.data.companyDetails.socialMediaImg;
               this.imgSrc = AppViewData.getDisplayImgSrc(response.data.companyDetails.socialMediaImg);

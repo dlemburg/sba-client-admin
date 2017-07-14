@@ -14,8 +14,8 @@ import { ICompanyDetails } from '../../models/models';
   templateUrl: 'add-dairy-variety-sweetener.html'
 })
 export class AddDairyVarietySweetenerPage extends BaseViewController {
-  genericValues: Array<string>;  // preloaded
-  selectedValues: Array<string>;  // selected preloaded
+  genericValues: Array<string> = [];  // preloaded
+  selectedValues: Array<string>  = [];  // selected preloaded
   myForm: any;
   type: string;
   auth: AuthUserInfo;

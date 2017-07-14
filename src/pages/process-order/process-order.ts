@@ -12,7 +12,8 @@ import { IErrChecks,
         IProductForProcessOrder, 
         AuthUserInfo, 
         IEditSubtotalDismiss, 
-        IUserDataForProcessOrder } from '../../models/models';
+        IUserDataForProcessOrder,
+        IGetEligibleRewardsProcessingTypeAutomaticForTransactionRequest } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, Slides, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
@@ -192,18 +193,19 @@ export class ProcessOrderPage extends BaseViewController {
 
       if (this.order.purchaseItems.length) {
         if (isGoingBack) {
-          this.order.transactionDetails.isRewardUsed = false;
           this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
+          this.order.transactionDetails.total = 0;
+          this.order.transactionDetails.taxes = 0;
           this.order.transactionDetails.rewardsSavings = 0;
-          this.order.transactionDetails.rewards = [...this.getIndividualRewards()];
+          this.order.transactionDetails.rewards = [...this.getIndividualRewards(this.order.transactionDetails.rewards)];
           this.order.transactionDetails.isEdited = false;
-          this.order.transactionDetails.reasonsForEdit = null;
+          this.order.transactionDetails.reasonsForEdit = [];
           this.order.transactionDetails.editAmount = 0;
+          this.order.transactionDetails.isRewardUsed = false;
 
           this.order.purchaseItems.forEach((x, index) => {
             x.discounts = 0;
             x.isFreePurchaseItem = false;
-            // x.displayPriceWithoutDiscounts = 0;
           });
           this.order.transactionDetails.rewards.forEach((x, index) => {
             x.discounts = 0;
@@ -490,7 +492,6 @@ export class ProcessOrderPage extends BaseViewController {
 
 
   addToOrder(item): void {
-    debugger;
     let checks = this.doChecksPurchaseItem(this.purchaseItem);
     
     if (!checks.isValid) {
@@ -540,8 +541,8 @@ export class ProcessOrderPage extends BaseViewController {
 
   }
 
-  getIndividualRewards(): Array<any> {
-    const individualRewards = this.order.transactionDetails.rewards.filter((x) => {
+  getIndividualRewards(rewards): Array<any> {
+    const individualRewards = rewards.filter((x) => {
       return x.type && x.type === this.REWARDS_TYPE.REWARDS_INDIVIDUAL;
     });
 
@@ -549,52 +550,51 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
 
-  getEligibleRewards() {
+
+  getEligibleRewards() { 
     this.presentLoading();
 
     const dateInfo = DateUtils.getCurrentDateInfo();
-    const toData = {
+    const toData: IGetEligibleRewardsProcessingTypeAutomaticForTransactionRequest = {
       date: DateUtils.toLocalIsoString(dateInfo.date.toString()), // get all rewards where expiry date < date
       day: dateInfo.day, 
       hours: dateInfo.hours,
       mins: dateInfo.mins, 
       purchaseItems: this.order.purchaseItems,
-      companyOid: this.auth.companyOid
+      companyOid: this.auth.companyOid,
+      taxRate: this.companyDetails.taxRate,
     };
-
-    console.log("toData: ", toData);
 
     this.API.stack(ROUTES.getEligibleRewardsProcessingTypeAutomaticForTransaction, "POST", toData )
       .subscribe(
           (response) => {
             console.log('response.data: ' , response.data);
 
-            // OLD
-            //this.order.transactionDetails.rewards = [...response.data.rewards, ...individualRewards]; // concat response and keep individual rewards
-            //this.parseRewardsForTransaction();
-
-
-            // if scan has already happened (i.e. employee scanned -> went back -> rewards recalculated)
-            const individualRewards = this.getIndividualRewards();
-            
             this.order.transactionDetails = response.data.transactionDetails;
             this.order.purchaseItems = response.data.purchaseItems;
 
-            if (individualRewards.length) {
-              this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, ...individualRewards];
-              this.order = this.calculateFreePurchaseItem(this.order);
-            }
-
-            this.order.transactionDetails.taxes = Utils.round(this.calculateTaxes(this.order.transactionDetails.subtotal, this.companyDetails.taxRate));
-            this.order.transactionDetails.total = Utils.round(this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes));
+            // calculate freePurchaseItem (easiest to do this on the client for now, 
+            // bc can do it before/after making trip to server) in other cases
+            this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, ...this.getIndividualRewards(this.order.transactionDetails.rewards)];
+            this.order = this.roundAllWithFreePurchaseItem(this.order, this.companyDetails.taxRate, this.calculateFreePurchaseItem(this.order));
             this.dismissLoading();
 
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
+
   // this is optional- but helps with aggregating information about rewards used
   addManualRewardToTransaction() {
     // will do later
+  }
+
+  roundAllWithFreePurchaseItem(order, taxRate, freePurchaseItemAmount = 0) {
+    order.transactionDetails.subtotal = Utils.round(order.transactionDetails.subtotal);
+    order.transactionDetails.rewardsSavings = Utils.round(order.transactionDetails.rewardsSavings + freePurchaseItemAmount);
+    order.transactionDetails.taxes = Utils.round(this.calculateTaxes((order.transactionDetails.subtotal - order.transactionDetails.rewardsSavings), taxRate));
+    order.transactionDetails.total = Utils.round(order.transactionDetails.total - order.transactionDetails.rewardsSavings);
+
+    return order;
   }
 
 
@@ -621,12 +621,11 @@ export class ProcessOrderPage extends BaseViewController {
             isFreePurchaseItem: +barcodeRewardData[1] === 0 ? false : true,
             userOid: +barcodeRewardData[2]
           }
-
-          // add to rewards
-          this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, {rewardOid: this.barcodeRewardData.rewardOid, isRewardAll: false, isFreePurchaseItem: true}];
         
           if (this.barcodeRewardData.isFreePurchaseItem) {
-            this.order = this.calculateFreePurchaseItem(this.order); 
+            this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, ...this.getIndividualRewards(this.order.transactionDetails.rewards)];
+            this.order = this.roundAllWithFreePurchaseItem(this.order, this.companyDetails.taxRate, this.calculateFreePurchaseItem(this.order));
+
           } else {
             // do nothing: don't support any other option right now
           }
@@ -646,81 +645,89 @@ export class ProcessOrderPage extends BaseViewController {
       */
       if (!barcodeData.cancelled) {
         if (barcodeData.text.indexOf("$") > -1) {
-          let barcodeUserData: Array<string> = barcodeData.text.split("$");
-          this.barcodeUserData = {
-            userOid: +barcodeUserData[0],
-            companyOid: +barcodeUserData[1],
-            isSocialMediaUsed: +barcodeUserData[2] === 0 ? false : true,
-            socialMediaType: +barcodeUserData[3]
+          let barcodeUserDataArr: Array<string> = barcodeData.text.split("$");
+          let barcodeUserData = {
+            userOid: +barcodeUserDataArr[0],
+            companyOid: +barcodeUserDataArr[1],
+            isSocialMediaUsed: +barcodeUserDataArr[2] === 0 ? false : true,
+            socialMediaType: +barcodeUserDataArr[3]
           }
+           // do conditional social media accept here
+          if (barcodeUserData.isSocialMediaUsed) {
+            this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
+              this.finishOnScanUserBarcode(data.barcodeUserData);
+            })
+          } else this.finishOnScanUserBarcode(barcodeUserData);
           this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType}); 
         }
       }
     }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
   }
 
+  finishOnScanUserBarcode(barcodeUserData: IBarcodeUserData) {
+    this.barcodeUserData = barcodeUserData;
+    this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType});
+  }
+
+  presentAcceptOrRejectSocialMediaAlert(barcodeUserData: IBarcodeUserData): Promise<{barcodeUserData: IBarcodeUserData}> {
+    return new Promise((resolve, reject) => {
+      let acceptOrRejectSocialMediaAlert = this.alertCtrl.create({
+        title: "Social Media Used!", 
+        message: `Type of social media used: ${barcodeUserData.socialMediaType}`,
+        buttons: [
+          {
+            text: "REJECT", 
+            handler: () => {
+              barcodeUserData.socialMediaType = null;
+              barcodeUserData.isSocialMediaUsed = false;
+
+              resolve({barcodeUserData});
+            }
+          }, {
+            text: "ACCEPT",
+            handler: () => {
+              resolve({barcodeUserData});
+            }
+          }
+        ]});
+        acceptOrRejectSocialMediaAlert.present();
+    });
+  }
+
   // manual entering paymentID
-  presentEnterUserPaymentIDModal() {
-    // modal to enter digits
-    // on dismiss: make api call to get userInfo
-    let enterUserPaymentIDModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
+  presentEnterMobileCardIdModal() {
+    let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
     
-    enterUserPaymentIDModal.onDidDismiss((data) => {
-      if (data.paymentID) {
+    enterMobileCardIdModal.onDidDismiss((data) => {
+      if ( data && data.mobileCardId) {
          // API get user info
-         this.getUserDataForProcessOrderAPI(data.paymentID, this.ID_TYPES.PAYMENT);
+         this.getUserDataForProcessOrderAPI(data.mobileCardId, this.ID_TYPES.PAYMENT);
       }
     });
-    enterUserPaymentIDModal.present();
+    enterMobileCardIdModal.present();
   }
 
-/*
-  processSocialMediaDiscount() {
-    let socialMediaRewardsDiscount = this.COMPANY_DETAILS.SOCIAL_MEDIA_DISCOUNT_AMOUNT * this.order.transactionDetails.subtotal;
+  // right now, calculates highest price item... can change this if needed
+  calculateFreePurchaseItem(order: IOrder): number {
+    let highItem: IPurchaseItem = null; 
+    let highItemIndex: number = 0;
 
-    // update subtotal and all social media properties
-    this.order.transactionDetails.isSocialMediaUsed = true;
-    this.order.transactionDetails.lkpSocialMediaTypeOid = this.userData.lkpSocialMediaTypeOid;
-    this.order.transactionDetails.subtotal -= socialMediaRewardsDiscount;
-    this.order.transactionDetails.taxes = this.calculateTaxes(this.order.transactionDetails.subtotal, this.COMPANY_DETAILS.TAX_RATE);
-    this.order.transactionDetails.total = this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes);
-    this.order.transactionDetails.rewardsSavings += socialMediaRewardsDiscount;
-  }
-  */
+    if (this.getIndividualRewards(order.transactionDetails.rewards).length) {
+      order.purchaseItems.forEach((x, i) => {
+        if (x.sizeAndOrPrice.price > highItem.sizeAndOrPrice.price) {
+            highItem = Object.assign({}, x);
+            highItem.sizeAndOrPrice.price = x.sizeAndOrPrice.price;
+            highItemIndex = i;
+        }
+      });
 
-  calculateFreePurchaseItem(order: IOrder): IOrder {
-    let highItem: IPurchaseItem = {
-      selectedProduct: {oid: null, name: null, imgSrc: null},
-      sizeAndOrPrice: { oid: null, name: null, price: null},
-      fixedPrice: null,
-      quantity: null,
-      addons: [],
-      flavors: [],
-      discounts: null,
-      isFreePurchaseItem: false
-    };
-    let highItemPrice: number = 0;
-    let index: number = 0;
+      // account for discounts already on it
+      if (highItem.discounts > 0) {
+        highItem.sizeAndOrPrice.price -= highItem.discounts;
+      } 
 
-    order.purchaseItems.forEach((x, i) => {
-      if (x.sizeAndOrPrice.price > highItemPrice) {
-          highItem = Object.assign({}, x);
-          highItemPrice = x.sizeAndOrPrice.price;
-          index = i;
-      }
-    });
-
-    // account for discounts already on it
-    if (highItem.discounts > 0) {
-      highItemPrice -= highItem.discounts;
-    } 
-
-    order.purchaseItems[index].discounts += highItemPrice;
-    order.purchaseItems[index].isFreePurchaseItem = true;
-    order.transactionDetails.rewardsSavings += highItemPrice;
-    order.transactionDetails.subtotal -= highItemPrice;
-
-    return order;
+      return highItem.sizeAndOrPrice.price;
+    } else return 0;
   }
 
 
@@ -730,7 +737,6 @@ export class ProcessOrderPage extends BaseViewController {
           let addonsCost = x.addonsCost !== null ? x.addonsCost : 0;
           let dairyCost = x.dairyCost !== null ? x.dairyCost: 0;
 
-          //TODO: not sure i need displayPriceWithoutDiscounts here b/c its done on server, look into this later
           x.displayPriceWithoutDiscounts = (x.sizeAndOrPrice.price * x.quantity) + (x.addonsCost * x.quantity) + (x.dairyCost);
           order.transactionDetails.subtotal += (x.sizeAndOrPrice.price * x.quantity) + (addonsCost * x.quantity) + (x.dairyCost);
       });
@@ -760,7 +766,6 @@ export class ProcessOrderPage extends BaseViewController {
               dairyCost += x.price;
           });
       }
-
       return dairyCost;
   }
 
@@ -897,6 +902,33 @@ interface IOrderConfirmation {
   doesWantReceipt:boolean;
   receiptType?:string
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

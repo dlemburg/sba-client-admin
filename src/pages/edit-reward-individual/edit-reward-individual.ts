@@ -12,6 +12,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
+import { ImageUtility } from '../../global/image-utility';
 
 @IonicPage()
 @Component({
@@ -40,6 +41,7 @@ export class EditRewardIndividualPage extends BaseViewController {
   oldImg: string = null;
   imgChanged: boolean = false;
   failedUploadImgAttempts = 0;
+  ImageUtility: ImageUtility;
 
 
   constructor(
@@ -83,7 +85,7 @@ export class EditRewardIndividualPage extends BaseViewController {
 
 
     // get lkps
-    this.API.stack(ROUTES.getLkpsIndividualRewardTypes, "GET")
+    this.API.stack(ROUTES.getLkpsIndividualRewardTypes + `/${this.auth.companyOid}`, "GET")
       .subscribe(
           (response) => {
             this.lkps.individualRewardTypes = response.data.individualRewardTypes;
@@ -99,7 +101,7 @@ export class EditRewardIndividualPage extends BaseViewController {
               this.dismissLoading();
               this.values = response.data.values;
               console.log('response.data: ', response.data);
-            }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   getRewardIndividual(): void {
@@ -168,11 +170,54 @@ export class EditRewardIndividualPage extends BaseViewController {
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          this.navCtrl.pop();
+          setTimeout(() => {
+            this.navCtrl.pop();
+          }, 1000);
           console.log('response: ', response); 
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
+  getImgCordova() {
+    this.presentLoading("Retrieving...");
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.ImageUtility.getImgCordova().then((data) => {
+      this.dismissLoading();
+      this.imgSrc = data.imageData;
+      this.myForm.patchValue({
+        img: `${CONST_APP_IMGS[17]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+
+  uploadImg(): Promise<any> {
+    let failedUploadImgAttempts = 0;
+
+    this.presentLoading(AppViewData.getLoading().savingImg);
+    return new Promise((resolve, reject) => {
+      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        this.dismissLoading();
+        resolve(data.message);
+      })
+      .catch((err) => {
+        failedUploadImgAttempts++
+        let message = "";
+        this.dismissLoading();
+
+        if (this.failedUploadImgAttempts === 1) {
+            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+            reject(err);
+        } else {
+          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+          resolve();
+        }
+        this.presentToast(false, message);
+      })
+    })
+  }
+
+
+/*
   getImgCordova() {
     this.presentLoading("Retrieving...");
     const options: CameraOptions = {
@@ -239,7 +284,7 @@ export class EditRewardIndividualPage extends BaseViewController {
         }
     });
   }
-
+*/
 
   submit(myForm): void {
     let expiryDate = this.myForm.controls.expiryDate.value.toString();

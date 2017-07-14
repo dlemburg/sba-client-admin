@@ -10,6 +10,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS } from '../../global/global';
+import { ImageUtility } from '../../global/image-utility';
 
 
 @IonicPage()
@@ -30,6 +31,10 @@ export class EditGeneralPage extends BaseViewController {
   imgSrc: string = null;
   imgChanged: boolean = false;
   failedUploadImgAttempts: number = 0;
+  GENERAL_TYPES = {
+    CATEGORIES: "Categories"
+  }
+  ImageUtility: ImageUtility;
 
 
 constructor(
@@ -87,15 +92,58 @@ constructor(
 
   remove(): void {
     this.presentLoading(AppViewData.getLoading().removing);
-    this.API.stack(ROUTES.removeGeneral + `/${this.type}/${this.editOid}/${this.auth.companyOid}`, 'POST')
+    this.API.stack(ROUTES.removeGeneral, 'POST', {editOid: this.editOid, companyOid: this.auth.companyOid, type: this.type})
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          this.navCtrl.pop();
-          console.log('response: ', response); 
+          setTimeout(() => {
+            this.navCtrl.pop();
+          }, 1000);          console.log('response: ', response); 
         },this.errorHandler(this.ERROR_TYPES.API));
   }
 
+    getImgCordova() {
+    this.presentLoading("Retrieving...");
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.ImageUtility.getImgCordova().then((data) => {
+      this.dismissLoading();
+      this.imgSrc = data.imageData;
+      this.myForm.patchValue({
+        img: `${CONST_APP_IMGS[14]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+
+  uploadImg(): Promise<any> {
+    let failedUploadImgAttempts = 0;
+
+    this.presentLoading(AppViewData.getLoading().savingImg);
+    return new Promise((resolve, reject) => {
+      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        this.dismissLoading();
+        resolve(data.message);
+      })
+      .catch((err) => {
+        failedUploadImgAttempts++
+        let message = "";
+        this.dismissLoading();
+
+        if (this.failedUploadImgAttempts === 1) {
+            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+            reject(err);
+        } else {
+          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+          resolve();
+        }
+        this.presentToast(false, message);
+      })
+    })
+  }
+
+
+
+/*
    getImgCordova() {
     this.presentLoading("Retrieving...");
     const options: CameraOptions = {
@@ -164,7 +212,7 @@ constructor(
       }
     });
   }
-
+*/
   submit(myForm, isValid): void {
     this.platform.ready().then(() => {
       this.uploadImg().then(() => {

@@ -7,7 +7,7 @@ export class DateUtils {
 constructor() { }
 
     public static getBeginningDateToday() {
-        return new Date().setHours(0, 0, 1, 0);
+        return new Date(new Date().setHours(0, 0, 1, 0));
     }
 
     // i.e.:  "09:00am" ->  9

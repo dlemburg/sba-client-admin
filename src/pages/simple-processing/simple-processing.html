@@ -3,9 +3,9 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Scan Barcodes</ion-title>
+    <ion-title>Simple Processing</ion-title>
     <ion-buttons end>
-      <button class="comment-icon" ion-button icon-only (click)="presentEnterUserPaymentIDModal()">
+      <button class="comment-icon" ion-button icon-only (click)="presentEnterMobileCardIdModal()">
         <ion-icon  ios="ios-unlock" md="md-unlock"></ion-icon>
       </button>
     </ion-buttons>
@@ -14,7 +14,7 @@
 
 
 <ion-content padding>
-  <div class="width-90 align-center">
+  <div class="width-80 align-center">
     <ion-item margin-top class="width-50">
       <ion-label stacked><dollar-icon></dollar-icon>Enter total</ion-label>
       <ion-input [(ngModel)]="total" type="tel"></ion-input>
@@ -23,13 +23,13 @@
       <ion-label class="text-area-label" stacked>Additional Comments</ion-label>
       <ion-textarea [(ngModel)]="employeeComments" type="text" ></ion-textarea>
     </ion-item>
-    <div margin-top text-center class="width-100">
-      <button class="width-80" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
+    <div margin-top text-center class="width-60 align-center">
+      <button class="simple-processing-btn width-100" margin-top ion-button block  color="primary" (click)="onScanIndividualRewardBarcode()">
         <ion-icon class="icon-primary" ios="ios-trophy" md="ios-trophy"></ion-icon><span class="btn-text">Scan Reward Barcode</span>
       </button>
     </div>
-    <div margin-top text-center class="width-100">
-      <button class="width-80" margin-top ion-button  color="primary" (click)="onScanIndividualRewardBarcode()">
+    <div margin-top text-center class="width-60 align-center">
+      <button class="simple-processing-btn width-100" margin-top ion-button block color="primary" (click)="onScanIndividualRewardBarcode()">
         <ion-icon ios="ios-barcode-outline" md="ios-barcode-outline"></ion-icon><span class="btn-text">Scan User Barcode</span>
       </button>
     </div>

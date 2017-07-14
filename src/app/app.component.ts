@@ -18,7 +18,8 @@ export class MyApp {
   @ViewChild(Nav) nav: Nav;
   rootPage;    
   pages: Array<any>;
-  auth;
+  auth = this.authentication.getCurrentUser();
+  companyName = this.authentication.isLoggedIn() ? this.auth.companyName : null;
 
   constructor(
     platform: Platform, 
@@ -39,6 +40,7 @@ export class MyApp {
     });
   }
 
+  
   /*
     set appData
     set appFeatures
@@ -49,7 +51,11 @@ export class MyApp {
    */
 
   initializeApp() {
-    this.auth = this.authentication.getCurrentUser();
+    this.pages = [
+      {name: "Home", component: "TabsPage"},
+      {name: "Menu", component: "CategoriesPage"},
+      {name: "Transactions", component: "TransactionsPage"}
+    ]
 
     this.API.stack(ROUTES.getAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
       .subscribe(
@@ -65,7 +71,6 @@ export class MyApp {
           AppFeatures.setFeatures({
             hasProcessOrder: response.data.appFeatures.hasProcessOrder
           });
-
           this.finishInitialization();
 
         }, (err) => {
@@ -76,11 +81,9 @@ export class MyApp {
   }
 
   finishInitialization() {
-
     const room = this.auth.companyOid + this.auth.locationOid;
     this.socketIO.connect(room);
     this.nav.setRoot('TabsPage');
-
 
     !this.backgroundMode.isEnabled && this.backgroundMode.enable();
     this.statusBar.styleDefault();
@@ -88,12 +91,11 @@ export class MyApp {
   }
   
 
-  openPage(page) {
+  navTo(page) {
     this.nav.setRoot(page.component);
   }
 
   signOut() {
-
     this.authentication.deleteToken();
     this.socketIO.disconnect();
     this.backgroundMode.isEnabled && this.backgroundMode.disable();

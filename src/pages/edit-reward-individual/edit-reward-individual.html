@@ -24,7 +24,7 @@
     </ion-item>
     <ion-list margin-top>
       <ion-item class="outline">
-        <ion-label>Select the product to edit</ion-label>
+        <ion-label>Select the individual reward to edit</ion-label>
         <ion-select [disabled]="!values.length" [(ngModel)]="editOid" (ionChange)="editValueChange()">
           <ion-option *ngFor="let x of values; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
         </ion-select>

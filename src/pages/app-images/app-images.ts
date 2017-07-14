@@ -30,7 +30,7 @@ export class AppImagesPage extends BaseViewController {
     {label: "'Order Ahead'", name: CONST_APP_IMGS[2], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "'Menu'", name: CONST_APP_IMGS[3], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Your Company Logo", name: CONST_APP_IMGS[4], img: null, imgSrc: null, targetWidth: 450,targetHeight: 150},
-    {label: "App Header Bar", name: CONST_APP_IMGS[5], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+   // {label: "App Header Bar", name: CONST_APP_IMGS[5], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Default (fallback)", name: CONST_APP_IMGS[6], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Rewards (top of page)", name: CONST_APP_IMGS[7], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Login Background", name: CONST_APP_IMGS[8], img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},

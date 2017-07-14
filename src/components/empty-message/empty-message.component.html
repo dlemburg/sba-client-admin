@@ -1,6 +1,6 @@
-<div class="width-80 align-center">
-  <ion-card>
-    <ion-card-content text-center *ngIf="!longMessage">No {{message}} to display.</ion-card-content>
+<div margin-top class="empty-message-container width-80 align-center">
+  <ion-card class="align-center">
+    <ion-card-content text-center *ngIf="!longMessage">No {{message}} to display</ion-card-content>
     <ion-card-content text-center *ngIf="longMessage">{{ longMessage }}</ion-card-content>
   </ion-card>
 </div>

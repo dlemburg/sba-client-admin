@@ -138,24 +138,60 @@ export class SimpleProcessingPage extends BaseViewController {
       */
       if (!barcodeData.cancelled) {
         if (barcodeData.text.indexOf("$") > -1) {
-          let barcodeUserData: Array<string> = barcodeData.text.split("$");
-          this.barcodeUserData = {
-            userOid: +barcodeUserData[0],
-            companyOid: +barcodeUserData[1],
-            isSocialMediaUsed: +barcodeUserData[2] === 0 ? false : true,
-            socialMediaType: +barcodeUserData[3]
+          let barcodeUserDataArr: Array<string> = barcodeData.text.split("$");
+          let barcodeUserData = {
+            userOid: +barcodeUserDataArr[0],
+            companyOid: +barcodeUserDataArr[1],
+            isSocialMediaUsed: +barcodeUserDataArr[2] === 0 ? false : true,
+            socialMediaType: +barcodeUserDataArr[3]
           }
-          this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType}); 
+
+          // do conditional social media accept here
+          if (barcodeUserData.isSocialMediaUsed) {
+            this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
+              this.finishOnScanUserBarcode(data.barcodeUserData);
+            })
+          } else this.finishOnScanUserBarcode(barcodeUserData);
         }
       }
     }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
   }
 
+  finishOnScanUserBarcode(barcodeUserData: IBarcodeUserData) {
+    this.barcodeUserData = barcodeUserData;
+    this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType});
+  }
 
-  // social media options are optional b/c cant guarantee if paymentID entered rather than barcode
-  getUserDataForProcessOrderAPI(userOidOrPaymentID, type, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
+  presentAcceptOrRejectSocialMediaAlert(barcodeUserData: IBarcodeUserData): Promise<{barcodeUserData: IBarcodeUserData}> {
+    return new Promise((resolve, reject) => {
+      let acceptOrRejectSocialMediaAlert = this.alertCtrl.create({
+        title: "Social Media Used!", 
+        message: `Type of social media used: ${barcodeUserData.socialMediaType}`,
+        buttons: [
+          {
+            text: "REJECT", 
+            handler: () => {
+              barcodeUserData.socialMediaType = null;
+              barcodeUserData.isSocialMediaUsed = false;
+
+              resolve({barcodeUserData});
+            }
+          }, {
+            text: "ACCEPT",
+            handler: () => {
+              resolve({barcodeUserData});
+            }
+          }
+        ]});
+        acceptOrRejectSocialMediaAlert.present();
+    });
+  }
+
+
+  // social media options are optional b/c cant guarantee if mobileCardId entered rather than barcode
+  getUserDataForProcessOrderAPI(userOidOrMobileCardId, type, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
-    let toData = { ID: userOidOrPaymentID, companyOid: this.auth.companyOid, type};
+    let toData = { ID: userOidOrMobileCardId, companyOid: this.auth.companyOid, type};
 
     // get user data
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
@@ -177,7 +213,7 @@ export class SimpleProcessingPage extends BaseViewController {
               } else {
                 this.showPopup({
                   title: 'Uh oh!', 
-                  message: "The customer doesn't have the proper funds. This company doesn't allow partial payments (application and cash/card).", 
+                  message: "The customer doesn't have the proper funds available. Your company doesn't allow partial payments (to pay with both application mobile card and cash/card).", 
                   buttons: [{text: "OK"}]
                 });
                 this.sufficientFunds = false;
@@ -186,18 +222,17 @@ export class SimpleProcessingPage extends BaseViewController {
           },this.errorHandler(this.ERROR_TYPES.API));
   }
 
-   // manual entering paymentID
-  presentEnterUserPaymentIDModal() {
+   // manual entering mobileCardId
+  presentEnterMobileCardIdModal() {
     // modal to enter digits
     // on dismiss: make api call to get userInfo
-    let enterUserPaymentIDModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
-    enterUserPaymentIDModal.onDidDismiss((data) => {
-      if (data.paymentID) {
-         // API get user info
-         this.getUserDataForProcessOrderAPI(data.paymentID, CONST_ID_TYPES.PAYMENT);
+    let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
+    enterMobileCardIdModal.onDidDismiss((data) => {
+      if (data && data.mobileCardId) {
+         this.getUserDataForProcessOrderAPI(data.mobileCardId, CONST_ID_TYPES.PAYMENT);
       }
     });
-    enterUserPaymentIDModal.present();
+    enterMobileCardIdModal.present();
   }
 
   doChecks(total): IErrChecks {

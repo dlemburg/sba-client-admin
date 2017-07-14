@@ -3,13 +3,12 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title></ion-title>
+    <ion-title>Order-Ahead Dashboard</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <h3 text-center>Active Orders</h3>
-  <EmptyMessage *ngIf="!orders.length" message="orders"></EmptyMessage>
+  <EmptyMessage *ngIf="!orders.length" longMessage="No active orders at the moment!"></EmptyMessage>
 
   <div class="width-80 align-center" *ngIf="orders.length">
     <ion-card class="align-left" *ngFor="let order of orders; let i = index;" (click)="order.showOrderDetails = !order.showOrderDetails">

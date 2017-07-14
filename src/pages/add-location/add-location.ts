@@ -14,6 +14,7 @@ import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/trans
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS } from '../../global/global';
 import { AppStorage } from '../../global/app-storage';
+import { ImageUtility } from '../../global/image-utility';
 
 
 @IonicPage()
@@ -35,7 +36,8 @@ export class AddLocationPage extends BaseViewController {
   imgSrc: string = null;
   img: string = null;
   failedUploadImgAttempts = 0;
-  
+  ImageUtility: ImageUtility;
+
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams, 
@@ -187,6 +189,47 @@ export class AddLocationPage extends BaseViewController {
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.ImageUtility.getImgCordova().then((data) => {
+      this.dismissLoading();
+      this.imgSrc = data.imageData;
+      this.myForm.patchValue({
+        img: `${CONST_APP_IMGS[18]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+
+  uploadImg(): Promise<any> {
+    let failedUploadImgAttempts = 0;
+
+    this.presentLoading(AppViewData.getLoading().savingImg);
+    return new Promise((resolve, reject) => {
+      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        this.dismissLoading();
+        resolve(data.message);
+      })
+      .catch((err) => {
+        failedUploadImgAttempts++
+        let message = "";
+        this.dismissLoading();
+
+        if (this.failedUploadImgAttempts === 1) {
+            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+            reject(err);
+        } else {
+          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+          resolve();
+        }
+        this.presentToast(false, message);
+      })
+    })
+  }
+
+
+/*
+  getImgCordova() {
+    this.presentLoading("Retrieving...");
     const options: CameraOptions = {
 
       // used lower quality for speed
@@ -247,6 +290,7 @@ export class AddLocationPage extends BaseViewController {
         });
     });
   }
+  */
 
   submit(myForm, isValid: boolean): void {
     this.isSubmitted = true;

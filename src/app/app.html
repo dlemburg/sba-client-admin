@@ -1,14 +1,14 @@
 <ion-menu [content]="content">  
   <ion-header>
     <ion-toolbar color="">
-      <ion-title>Dunkin Donuts</ion-title>
+      <ion-title>{{ companyName }}</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <ion-content class="menu">
     <ion-list class="menu-list">
-      <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
-       {{p.title}}
+      <button menuClose ion-item *ngFor="let x of pages" (click)="navTo(x)">
+       {{x.name}}
       </button>
     </ion-list>
     <div margin-top text-center><button menuClose class="width-50 margin-top" ion-button color="danger" (click)="signOut()">Sign Out</button></div>

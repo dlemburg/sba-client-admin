@@ -7,7 +7,7 @@ import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angul
   templateUrl: 'enter-id.html'
 })
 export class EnterIDPage {
-  paymentID: number;
+  mobileCardId: number;
   
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController) {}
 
@@ -17,13 +17,13 @@ export class EnterIDPage {
 
   dismiss() {
     this.viewCtrl.dismiss({
-      paymentID: null
+      mobileCardId: null
     });
   }
 
   dismissWithData() {
     this.viewCtrl.dismiss({
-      paymentID:  this.paymentID
+      mobileCardId:  this.mobileCardId
     });
   }
 }

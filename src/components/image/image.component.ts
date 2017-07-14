@@ -7,7 +7,8 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 })
 export class ImageComponent implements OnInit {
  @Input() imgSrc: string;
- @Input() header: string;
+ //@Input() header: string;
+ @Input() title: string;
  @Output() getImgCordova: EventEmitter<any> = new EventEmitter();
  
  constructor() { }

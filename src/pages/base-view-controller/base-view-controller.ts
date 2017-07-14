@@ -116,9 +116,6 @@ export class BaseViewController {
     alert.present();
   }
 
-
-
-  
   // app-wide loading
   public presentLoading(message = AppViewData.getLoading().default) {
     this.loading = this.loadingCtrl.create({
@@ -137,12 +134,12 @@ export class BaseViewController {
     if (message) {
       setTimeout(() => {
         this.loading.dismiss();
-      }, 800);
+      }, 1000);
 
       setTimeout(() => {
         this.loading.data.content = message;
         this.loading.data.spinner = 'hide';
-      }, 500);
+      }, 400);
     } else {
       this.loading.dismiss();
     }

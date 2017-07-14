@@ -10,7 +10,7 @@
 <ion-content padding  class="width-100">
   <div class="width-90 align-center">
     <ion-list>
-        <ion-item>
+        <ion-item class="outline">
           <ion-label>Select the {{type}} to edit</ion-label>
           <ion-select [disabled]="!values.length" [(ngModel)]="editValue" (ionChange)="editValueChange($event, x)">
             <ion-option *ngFor="let x of values; let i = index;" [value]="x">{{x.name}}</ion-option>
@@ -29,6 +29,8 @@
         <button color="primary" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
       </form>
     </div>
-    <div *ngIf="editOid" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>
+    <div *ngIf="editOid && type !== GENERAL_TYPES.CATEGORIES" margin-top text-center>
+      <button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button>
+    </div>
   </div>
 </ion-content>

@@ -47,13 +47,13 @@ export class AddGeneralPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
     this.type = this.navParams.data.type;
     this.auth = this.authentication.getCurrentUser();
   }
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
     this.ImageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;

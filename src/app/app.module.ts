@@ -26,6 +26,7 @@ import { Authentication } from '../global/authentication';    // holds all auth 
 import { API } from '../global/api';                          // holds routes and api call
 import { SocketIO } from '../global/socket-io';     //  holds socket.io methods
 import { NativeNotifications } from '../global/native-notifications';     // all native notification logic
+import { ImageUtility } from '../global/image-utility';
 
 // Components && base-view-controller
 import { BaseViewController } from '../pages/base-view-controller/base-view-controller';

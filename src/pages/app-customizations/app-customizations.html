@@ -115,7 +115,7 @@
       </ion-item>
       <ion-item margin-top>
         <ion-label floating>If yes, how many points?</ion-label>
-        <ion-input formControlName="socialMediaDiscountBonusPoints" type="text"></ion-input>
+        <ion-input formControlName="socialMediaBonusPoints" type="tel"></ion-input>
       </ion-item>
       <ion-item  margin-top>
         <ion-label text-wrap>Facebook</ion-label>
@@ -130,12 +130,21 @@
         <ion-checkbox formControlName="hasInstagram"></ion-checkbox>
       </ion-item>
       <ion-item margin-top>
-        <ion-label floating>Social Media Message</ion-label>
-        <ion-input formControlName="socialMediaMessage" type="text"></ion-input>
+        <ion-label floating>Social Media Message Facebook</ion-label>
+        <ion-input formControlName="socialMediaMessageFacebook" type="text"></ion-input>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-label floating>Social Media Message Twitter</ion-label>
+        <ion-input formControlName="socialMediaMessageTwitter" type="text"></ion-input>
+      </ion-item>
+      <ion-item margin-top>
+        <ion-label floating>Social Media Message Instagram</ion-label>
+        <ion-input formControlName="socialMediaMessageInstagram" type="text"></ion-input>
       </ion-item>
       <!-- image -->
-      <Image (getImgCordova)="getImgCordova()" header="Reward Individual Image" [imgSrc]="imgSrc"></Image>
-
+      <div margin-top>
+        <Image (getImgCordova)="getImgCordova()" title="Social Media Image" [imgSrc]="imgSrc"></Image>
+      </div>
 
 
 

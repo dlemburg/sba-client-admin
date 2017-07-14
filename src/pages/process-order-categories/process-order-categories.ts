@@ -28,7 +28,7 @@ export class ProcessOrderCategoriesPage {
     this.viewCtrl.dismiss({
       oid: category.oid,
       name: category.name,
-      img: category.imgSrc
+      img: category.img
     });
   }
 

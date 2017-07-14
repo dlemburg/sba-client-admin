@@ -9,13 +9,14 @@
 
 <ion-content padding  class="width-100">
   <div class="width-90 align-center">
-
+    <!--
     <ion-item>
       <ion-label>Popular choices</ion-label>
       <ion-select [(ngModel)]="selectedValues" multiple="true">
         <ion-option [disabled]="true" *ngFor="let x of genericValues; let i = index;" [value]="x">{{ x }}</ion-option>
       </ion-select>
     </ion-item>
+    -->
     <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
       <ion-item margin-top>
         <ion-label floating>Name</ion-label>

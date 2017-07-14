@@ -13,6 +13,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
+import { ImageUtility } from '../../global/image-utility';
 
 @IonicPage()
 @Component({
@@ -39,7 +40,8 @@ export class AddRewardPage extends BaseViewController {
   img: string = null;
   imgSrc: string = null;
   failedUploadImgAttempts: number = 0;
-  
+  ImageUtility: ImageUtility;
+
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams, 
@@ -182,6 +184,47 @@ export class AddRewardPage extends BaseViewController {
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.ImageUtility.getImgCordova().then((data) => {
+      this.dismissLoading();
+      this.imgSrc = data.imageData;
+      this.myForm.patchValue({
+        img: `${CONST_APP_IMGS[16]}${this.myForm.controls["name"].value}$${this.auth.companyOid}`
+      })
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
+
+  uploadImg(): Promise<any> {
+    let failedUploadImgAttempts = 0;
+
+    this.presentLoading(AppViewData.getLoading().savingImg);
+    return new Promise((resolve, reject) => {
+      this.ImageUtility.uploadImg('upload-img-no-callback', this.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+        this.dismissLoading();
+        resolve(data.message);
+      })
+      .catch((err) => {
+        failedUploadImgAttempts++
+        let message = "";
+        this.dismissLoading();
+
+        if (this.failedUploadImgAttempts === 1) {
+            message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
+            reject(err);
+        } else {
+          message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
+          resolve();
+        }
+        this.presentToast(false, message);
+      })
+    })
+  }
+
+
+/*
+  getImgCordova() {
+    this.presentLoading("Retrieving...");
     const options: CameraOptions = {
 
       // used lower quality for speed
@@ -242,7 +285,7 @@ export class AddRewardPage extends BaseViewController {
         });
     });
   }
-
+*/
 
   submit(myForm): void {    
     

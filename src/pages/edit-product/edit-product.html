@@ -67,7 +67,7 @@
         </ion-list>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.categoryOid"></control-messages>
 
-        <ion-list *ngIf="COMPANY_DETAILS.HAS_FLAVORS">
+        <ion-list *ngIf="companyDetails.hasFlavors">
           <ion-item>
             <ion-label>Flavors (if necessary)</ion-label>
             <ion-select formControlName="flavors" multiple="true">
@@ -78,7 +78,7 @@
         </ion-list>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.flavors"></control-messages>
 
-        <ion-list *ngIf="COMPANY_DETAILS.HAS_ADDONS">
+        <ion-list *ngIf="companyDetails.hasAddons">
           <ion-item>
             <ion-label>Add-Ons (if necessary)</ion-label>
             <ion-select formControlName="addons" multiple="true">
@@ -90,7 +90,7 @@
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.addons"></control-messages>
 
         <!-- dairy -->
-        <ion-list *ngIf="this.COMPANY_DETAILS.HAS_DAIRY">
+        <ion-list *ngIf="companyDetails.hasDairy">
           <ion-item>
             <ion-label>Dairy (optional)</ion-label>
             <ion-select formControlName="dairy" multiple="true">
@@ -102,7 +102,7 @@
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dairy"></control-messages>
 
         <!-- variety -->
-        <ion-list *ngIf="this.COMPANY_DETAILS.HAS_VARIETY">
+        <ion-list *ngIf="companyDetails.hasVariety">
           <ion-item>
             <ion-label>Variety (optional)</ion-label>
             <ion-select formControlName="variety" multiple="true">
@@ -114,7 +114,7 @@
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.variety"></control-messages>
 
         <!-- sweetener -->
-        <ion-list *ngIf="this.COMPANY_DETAILS.HAS_SWEETENER">
+        <ion-list *ngIf="companyDetails.hasSweetener">
           <ion-item>
             <ion-label>Sweetener (optional)</ion-label>
             <ion-select formControlName="sweetener" multiple="true">
@@ -135,7 +135,7 @@
           </ion-item>
         </ion-list>
 
-        <div *ngIf="sizesAndPricesType === this.SIZES_AND_PRICES_TYPE.FIXED_PRICE">
+        <div *ngIf="sizesAndPricesType === SIZES_AND_PRICES_TYPE.FIXED_PRICE">
           <ion-item>
             <ion-label floating>Fixed Price</ion-label>
             <ion-input formControlName="fixedPrice" type="tel"></ion-input>

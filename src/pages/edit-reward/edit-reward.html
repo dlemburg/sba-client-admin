@@ -25,8 +25,8 @@
       </ion-item>
     </ion-list>
 
-    <h4 text-center>Descriptive Info</h4>
     <div *ngIf="editOid" class="width-80 align-center">
+      <h4 text-center>Descriptive Info</h4>
       <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value)">
         <ion-item>
           <ion-label floating>Reward Name</ion-label>
