@@ -3,7 +3,7 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Set Location</ion-title>
+    <ion-title>Tap the map once to drop pin in your location</ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -11,3 +11,8 @@
 <ion-content padding>
     <div #map id="map" style="height:100%;"></div>
 </ion-content>
+<ion-footer>
+  <ion-toolbar>
+      <button (click)="submit()" class="footer-btn" color="secondary" ion-button block detail-push>Accept</button>
+  </ion-toolbar>
+</ion-footer>

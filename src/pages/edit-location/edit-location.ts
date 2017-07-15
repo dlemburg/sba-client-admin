@@ -16,6 +16,7 @@ import { CONST_APP_IMGS } from '../../global/global';
 import { AppStorage } from '../../global/app-storage';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
+import { Geolocation } from '@ionic-native/geolocation';
 
 @IonicPage()
 @Component({
@@ -56,7 +57,8 @@ constructor(
   public loadingCtrl: LoadingController, 
   private formBuilder: FormBuilder,
   private camera: Camera, 
-  private transfer: Transfer, 
+  private transfer: Transfer,
+  private geolocation: Geolocation, 
   private file: File,
   private platform: Platform) { 
     super(alertCtrl, toastCtrl, loadingCtrl);
@@ -108,8 +110,8 @@ constructor(
       const latAndLong = AppStorage.getLatAndLong();
       if (latAndLong.coordsLat || latAndLong.coordsLong) {
         this.myForm.patchValue({
-          coordsLat: latAndLong.coordsLat,
-          coordsLong: latAndLong.coordsLong
+          coordsLat: latAndLong.coordsLat.toFixed(7),
+          coordsLong: latAndLong.coordsLong.toFixed(7)
         });
       }
     } else this.initHasRun = true;  
@@ -119,9 +121,35 @@ constructor(
     AppStorage.setLatAndLong(null);
   }
 
+ /* geolocation */
+  getCurrentPosition(): Promise<{coordsLat: number, coordsLong: number}> {
+    return new Promise((resolve, reject) => {
+      this.geolocation.getCurrentPosition().then((data) => {
+        const coordsLat = +data.coords.latitude.toFixed(7);
+        const coordsLong = +data.coords.longitude.toFixed(7);
+        resolve({coordsLat, coordsLong});
+      })
+      .catch((err) => reject(err));
+    })
+  }
+
   /* google maps */
   navMap() {
-    this.navCtrl.push('MapPage');
+    const myForm = this.myForm.value;
+    let currentLocation = { coordsLat: null, coordsLong: null};
+
+    if (!myForm.coordsLat || !myForm.coordsLong) {
+      this.getCurrentPosition().then((data) => {
+        currentLocation = {coordsLat: data.coordsLat, coordsLong: data.coordsLong};
+        console.log("currentLocation: ", currentLocation);
+        this.navCtrl.push('MapPage', {currentLocation});
+      })
+      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.GEOLOCATION));
+    } else {
+      currentLocation = {coordsLat: myForm.coordsLat, coordsLong: myForm.coordsLong};
+      this.navCtrl.push('MapPage', {currentLocation});
+    }
+    
   }
 
   // this is different b/c i had the call to get all location data already made, so just used it to save time

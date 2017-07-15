@@ -85,6 +85,7 @@
     <plugin name="cordova-plugin-device" spec="^1.1.4" />
     <plugin name="cordova-plugin-file" spec="^4.3.3" />
     <plugin name="cordova-plugin-file-transfer" spec="^1.6.3" />
+    <plugin name="cordova-plugin-geolocation" spec="^2.4.3" />
     <plugin name="cordova-plugin-googlemaps" spec="^1.4.1">
         <variable name="API_KEY_FOR_ANDROID" value="AIzaSyAQz4rWQfIKUtCk6hd5RqwwlGHYBMVghJY" />
         <variable name="API_KEY_FOR_IOS" value="AIzaSyAsKsWGMPltx74sJ94J5_QpOrd-pNXaMsQ" />

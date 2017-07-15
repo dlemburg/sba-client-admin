@@ -16,6 +16,7 @@ import { CONST_APP_IMGS } from '../../global/global';
 import { AppStorage } from '../../global/app-storage';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
+import { Geolocation } from '@ionic-native/geolocation';
 
 
 @IonicPage()
@@ -51,6 +52,7 @@ export class AddLocationPage extends BaseViewController {
     private camera: Camera, 
     private transfer: Transfer, 
     private file: File,
+    private geolocation: Geolocation,
     private platform: Platform) { 
 
     super(alertCtrl, toastCtrl, loadingCtrl);
@@ -103,22 +105,47 @@ export class AddLocationPage extends BaseViewController {
       const latAndLong = AppStorage.getLatAndLong();
       if (latAndLong.coordsLat || latAndLong.coordsLong) {
         this.myForm.patchValue({
-          coordsLat: latAndLong.coordsLat || null,
-          coordsLong: latAndLong.coordsLong || null
+          coordsLat: latAndLong.coordsLat.toFixed(7) || null,
+          coordsLong: latAndLong.coordsLong.toFixed(7) || null
         });
       }
     } else this.initHasRun = true;  
   }
 
   ionViewDidLeave() {
-    AppStorage.setLatAndLong(null);
+    AppStorage.setLatAndLong({coordsLat: null, coordsLong: null});
+  }
+
+  /* geolocation */
+  getCurrentPosition(): Promise<{coordsLat: number, coordsLong: number}> {
+    return new Promise((resolve, reject) => {
+      this.geolocation.getCurrentPosition().then((data) => {
+        const coordsLat = +data.coords.latitude.toFixed(7);
+        const coordsLong = +data.coords.longitude.toFixed(7);
+        resolve({coordsLat, coordsLong});
+      })
+      .catch((err) => reject(err));
+    })
   }
 
   /* google maps */
   navMap() {
-    this.navCtrl.push('MapPage');
-  }
+    const myForm = this.myForm.value;
+    let currentLocation = { coordsLat: null, coordsLong: null};
 
+    if (!myForm.coordsLat || !myForm.coordsLong) {
+      this.getCurrentPosition().then((data) => {
+        currentLocation = {coordsLat: data.coordsLat, coordsLong: data.coordsLong};
+        console.log("currentLocation: ", currentLocation);
+        this.navCtrl.push('MapPage', {currentLocation});
+      })
+      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.GEOLOCATION));
+    } else {
+      currentLocation = {coordsLat: myForm.coordsLat, coordsLong: myForm.coordsLong};
+      this.navCtrl.push('MapPage', {currentLocation});
+    }
+    
+  }
 
   /* location hours are in format: 09:00am. conver to ISOstring date format */
   locationChanged(): void {
@@ -186,12 +213,6 @@ export class AddLocationPage extends BaseViewController {
       this.closedDaysArr = [...this.closedDaysArr, index];  // concat
     }
   }
-
-
-  // myForm to uploadImg
-  // img: Utils.generateImgName()  *remember to re-do number
-  // got rid of data.message in resolve()
-  // got rid of different loadings
 
   getImgCordova() {
     this.presentLoading("Retrieving...");

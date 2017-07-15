@@ -17,6 +17,8 @@ import { BackgroundMode } from '@ionic-native/background-mode';
 import { GoogleMaps } from '@ionic-native/google-maps';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { Printer } from '@ionic-native/printer';
+import { Geolocation } from '@ionic-native/geolocation';
+
 
 // both admin and owner
 import { MyApp } from './app.component';
@@ -65,6 +67,7 @@ import { SearchComponent } from '../components/search/search.component';
     LocalNotifications,
     BackgroundMode,
     GoogleMaps,
+    Geolocation,
     BarcodeScanner,
     Printer,
     //{ provide: ErrorHandler, useClass: CustomErrorHandler },

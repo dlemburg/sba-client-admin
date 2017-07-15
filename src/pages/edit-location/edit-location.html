@@ -21,6 +21,11 @@
 
       <div *ngIf="editValue" class="width-80 align-center">
         <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
+          
+          <!-- image -->
+          <h3 text-center margin-top>Location Image</h3>
+          <Image (getImgCordova)="getImgCordova()" header="Location Image (optional)" [imgSrc]="imgSrc"></Image>
+
           <ion-item>
             <ion-label floating>Location Name (i.e.: Your company name + city)</ion-label>
             <ion-input formControlName="name" type="text"></ion-input>
@@ -88,12 +93,8 @@
             </ion-col>
           </ion-row>
           <ion-row>
-            <button ion-button block (click)="navMap()">Get Coordinates</button>
+            <button type="button" ion-button block (click)="navMap()">Get Coordinates</button>
           </ion-row>
-
-           <!-- image -->
-          <h3 text-center margin-top>Location Image</h3>
-          <Image (getImgCordova)="getImgCordova()" header="Location Image (optional)" [imgSrc]="imgSrc"></Image>
         
         <!-- populate with hours here -->
           <h4 margin-top text-center>Hours</h4>
@@ -259,7 +260,7 @@
                 <ion-toggle color="danger" [checked]="myForm.controls.saturdayOpen.value === 'closed'" (ionChange)="closedToggle($event, 6)"></ion-toggle>
               </ion-col>
             </ion-row>
-        <button class="width-60 app-btn align-center" color="primary"  [disabled]="!myForm.valid && !editValue" ion-button block margin-top>Submit</button>
+        <button class="width-60 app-btn align-center" type="submit" color="primary"  [disabled]="!myForm.valid && !editValue" ion-button block margin-top>Submit</button>
       </form>
     </div>
     <div *ngIf="editOid" margin-top text-center>

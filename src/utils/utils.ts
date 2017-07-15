@@ -33,7 +33,7 @@ export class Utils {
 
     public static generateImgName = (data: {appImgIndex: number, name: string, companyOid: number}): string => {
         let isoDate = DateUtils.toLocalIsoString(new Date().toString());
-        isoDate = isoDate.slice(0, isoDate.indexOf(".")).replace(/:/g, "-");
+        isoDate = isoDate.slice(0, isoDate.indexOf("T")).replace(/:/g, "-");
 
         console.log("isoDate: ", isoDate);
         return `${CONST_APP_IMGS[data.appImgIndex]}$${data.name}$${data.companyOid}$${Utils.generateRandomString(3)}$${isoDate}.jpg`.replace(/\s+/g, '');

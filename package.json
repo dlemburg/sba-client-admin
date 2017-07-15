@@ -26,6 +26,7 @@
         "@ionic-native/core": "^3.12.1",
         "@ionic-native/device": "^3.12.1",
         "@ionic-native/file": "^3.12.1",
+        "@ionic-native/geolocation": "^4.0.0",
         "@ionic-native/google-maps": "^3.12.1",
         "@ionic-native/local-notifications": "^3.12.1",
         "@ionic-native/native-audio": "^3.12.1",
@@ -46,6 +47,7 @@
         "cordova-plugin-device": "^1.1.4",
         "cordova-plugin-file": "^4.3.3",
         "cordova-plugin-file-transfer": "^1.6.3",
+        "cordova-plugin-geolocation": "^2.4.3",
         "cordova-plugin-googlemaps": "^1.4.1",
         "cordova-plugin-nativeaudio": "^3.0.9",
         "cordova-plugin-splashscreen": "^4.0.3",
@@ -92,7 +94,8 @@
             "phonegap-plugin-barcodescanner": {},
             "de.appplant.cordova.plugin.local-notification": {},
             "cordova-plugin-stripe": {},
-            "de.appplant.cordova.plugin.printer": {}
+            "de.appplant.cordova.plugin.printer": {},
+            "cordova-plugin-geolocation": {}
         },
         "platforms": [
             "android"

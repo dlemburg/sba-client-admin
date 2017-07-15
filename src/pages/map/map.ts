@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Platform, IonicPage, NavController, NavParams } from 'ionic-angular';
+import { Platform, IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import {
  GoogleMaps,
  GoogleMap,
@@ -18,11 +18,16 @@ import { AppStorage } from '../../global/app-storage';
   templateUrl: 'map.html',
 })
 export class MapPage {
-  currentLocation: {coordsLat: number, coordsLong: number}
+  currentLocation: {coordsLat: number, coordsLong: number};
+  element: HTMLElement;
+  map: GoogleMap;
+
+
   constructor(
     public navCtrl: NavController, 
     public navParams: NavParams,
     public platform: Platform,
+    public loadingCtrl: LoadingController,
     public googleMaps: GoogleMaps) {
   }
 
@@ -31,21 +36,28 @@ export class MapPage {
   }
 
   ngAfterViewInit() {
+
     this.platform.ready().then(() => {
       this.loadMap();
     });
   }
 
   ionViewDidLeave() {
+   // AppStorage.setLatAndLong(this.currentLocation);
+  }
+
+  submit() {
     AppStorage.setLatAndLong(this.currentLocation);
+    this.navCtrl.pop();
   }
 
   loadMap() {
-    let element: HTMLElement = document.getElementById('map');
-    let map: GoogleMap = this.googleMaps.create(element);
-
    // const isAvailable = this.googleMaps.isAvailable();
-    map.one(GoogleMapsEvent.MAP_READY).then(() => {
+    this.element = document.getElementById('map');
+    this.map = this.googleMaps.create(this.element);
+
+    this.map.one(GoogleMapsEvent.MAP_READY).then(() => {
+
         console.log('Map is ready!');
          
         let initialZoomLatAndLong: LatLng = new LatLng(this.currentLocation.coordsLat, this.currentLocation.coordsLong);
@@ -54,30 +66,47 @@ export class MapPage {
           zoom: 18,
           tilt: 30
         };
-        map.moveCamera(position);
+        this.map.moveCamera(position);
 
 
-        let locationLatAndLong: LatLng = new LatLng(this.currentLocation.coordsLat, this.currentLocation.coordsLong);
+       // let locationLatAndLong: LatLng = new LatLng(this.currentLocation.coordsLat, this.currentLocation.coordsLong);
 
-        let markerOptions: MarkerOptions = {
-          position: locationLatAndLong,
-          title: "Drag this pin to the location."
-        };
-
-        map.addMarker(markerOptions).then((marker: Marker) => {
-          console.log("marker: ", marker);
-          marker.showInfoWindow();
-          marker.addEventListener(GoogleMapsEvent.MARKER_DRAG_END).subscribe((data) => {
-            marker.getPosition().then((latAndLong: LatLng) => {
-                this.currentLocation.coordsLat = latAndLong.lat;
-                this.currentLocation.coordsLong = latAndLong.lng;
-
-                //marker.setTitle(latLng.toUrlValue());
-                //marker.showInfoWindow();
-            });
-          });
+        this.map.addEventListener(GoogleMapsEvent.MAP_CLICK).subscribe((data) => {
+          console.log('CLICK: ', data);
+          this.addMarker(data);
         });
       });
   }
+
+  addMarker(data: any) {
+    this.currentLocation = {coordsLat: data.lat, coordsLong: data.lng};
+
+    let markerOptions: MarkerOptions = {
+      position: new LatLng(data.lat, data.lng),
+      //title: "Are you sure?"
+    };
+
+    this.map.clear();
+    this.map.addMarker(markerOptions).then((marker: Marker) => {
+      console.log("marker: ", marker);
+      marker.showInfoWindow();
+
+      /* marker event listener   (not needed yet)
+
+      marker.addEventListener(GoogleMapsEvent.MARKER_DRAG_END).subscribe((data) => {
+        console.log("DRAG END: ", data);
+        marker.getPosition().then((latAndLong: LatLng) => {
+            this.currentLocation.coordsLat = latAndLong.lat;
+            this.currentLocation.coordsLong = latAndLong.lng;
+
+            //marker.setTitle(latLng.toUrlValue());
+            //marker.showInfoWindow();
+        });
+      });
+      */
+    });
+  }
+
+
 
 }

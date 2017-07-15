@@ -21,7 +21,8 @@ export class BaseViewController {
     PLUGIN: {
       CAMERA: "CAMERA",
       BARCODE: "BARCODE",
-      PRINTER: "PRINTER"
+      PRINTER: "PRINTER",
+      GEOLOCATION: "GEOLOCATION"
     },
     API: "API",
     IMG_UPLOAD: "IMG UPLOAD",
@@ -32,7 +33,8 @@ export class BaseViewController {
     CAMERA: `Sorry, there was an error retrieving your photo.  ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
     BARCODE: `sorry, there was an error accessing the scanner. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
     PRINTER: `Sorry, there was an error either finding a printer or printing. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
-    IMG_UPLOAD: `Sorry, there was an error uploading your image. ${this.APPEND_DEFAULT_ERR_MESSAGE}`
+    IMG_UPLOAD: `Sorry, there was an error uploading your image. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
+    GEOLOCATION: `Sorry, there was an error calculating your position. ${this.APPEND_DEFAULT_ERR_MESSAGE}`
   }
   constructor(public alertCtrl: AlertController, public toastCtrl: ToastController, public loadingCtrl: LoadingController ) {
   }
