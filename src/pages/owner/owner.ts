@@ -43,7 +43,7 @@ constructor(
   public toastCtrl: ToastController, 
   public loadingCtrl: LoadingController, 
   public viewCtrl: ViewController) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
   }
 

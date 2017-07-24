@@ -28,7 +28,7 @@ export class EditSubtotalPage extends BaseViewController {
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController, 
     public viewCtrl: ViewController) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
   ionViewDidLoad() {
     this.subtotal = Utils.round(this.navParams.data.subtotal);

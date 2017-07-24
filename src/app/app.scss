@@ -218,6 +218,12 @@
     margin-top: 20px !important;
 }
 
+.dl-custom-toast-container {
+   > div {
+        background-color: map-get($colors, danger) !important;
+   }
+}
+
 
 
 

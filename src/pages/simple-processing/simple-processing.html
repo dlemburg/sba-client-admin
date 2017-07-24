@@ -19,12 +19,12 @@
       <ion-col col-6>
         <ion-item margin-top >
           <ion-label stacked><dollar-icon></dollar-icon>Enter total</ion-label>
-          <ion-input [(ngModel)]="total" (keypress)="onKeypressTotal($event)" type="tel"></ion-input>
+          <ion-input [(ngModel)]="total" (keypress)="onKeypressTotal($event)" type="tel"> {{ total | currency:symbolDisplay:true }} </ion-input>
         </ion-item>
       </ion-col>
       <ion-col col-6>
         <div margin-top>
-          <button (click)="calculateTaxes()" color="secondary" ion-button>Calculate Taxes</button>
+          <button (click)="calculateTaxes(total)" color="secondary" ion-button>Calculate Taxes</button>
           <div *ngIf="taxes > 0">Taxes applied: <span class="bold">{{ taxes | currency:symbolDisplay:true }}</span> </div>
         </div>
       </ion-col>

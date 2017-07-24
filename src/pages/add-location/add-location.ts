@@ -55,7 +55,7 @@ export class AddLocationPage extends BaseViewController {
     private geolocation: Geolocation,
     private platform: Platform) { 
 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
     this.myForm = this.formBuilder.group({
       name: [null, Validators.required],

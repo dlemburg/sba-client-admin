@@ -26,7 +26,7 @@ export class LoginSelectLocationPage extends BaseViewController {
     public alertCtrl: AlertController, 
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
   // params: locations, preliminaryToken

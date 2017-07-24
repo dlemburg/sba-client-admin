@@ -24,7 +24,7 @@ export class CategoriesPage extends BaseViewController {
     public alertCtrl: AlertController, 
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
   ionViewDidLoad() {

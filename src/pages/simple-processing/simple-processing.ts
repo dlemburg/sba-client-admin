@@ -27,7 +27,7 @@ export class SimpleProcessingPage extends BaseViewController {
     isSocialMediaUsed: false,
     balance: 0
   };
-  total: number = null;
+  total: string = null;
   taxes: number = 0;
   reasonForEdit: string = null;
   rewards: Array<any> = [];
@@ -53,7 +53,7 @@ export class SimpleProcessingPage extends BaseViewController {
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController, 
     public viewCtrl: ViewController) {
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
   }
 
@@ -73,10 +73,10 @@ export class SimpleProcessingPage extends BaseViewController {
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  calculateTaxes() {
-    if (!isNaN(+this.total)) {
-      this.taxes = Utils.round(+this.total * this.companyDetails.taxRate);
-      this.total = Utils.round(+this.total + (this.taxes));
+  calculateTaxes(total) {
+    if (!isNaN(+total)) {
+      this.taxes = +Utils.roundAndAppendZero(+total * this.companyDetails.taxRate);
+      this.total = Utils.roundAndAppendZero(+total + (this.taxes));
     }
   }
 
@@ -221,7 +221,7 @@ export class SimpleProcessingPage extends BaseViewController {
             this.userData.isSocialMediaUsed = socialMediaOpts.isSocialMediaUsed;
 
             // do checks
-            if (this.userData.balance < this.total) {
+            if (this.userData.balance < +this.total) {
               if (this.companyDetails.acceptsPartialPayments) {
                 if (this.userData.isSocialMediaUsed) {
                     //this.order.transactionDetails.isSocialMediaUsed = true;
@@ -272,8 +272,8 @@ export class SimpleProcessingPage extends BaseViewController {
     } else {
       this.presentLoading();
 
-      let taxes = (this.total * this.companyDetails.taxRate);
-      let subtotal = this.total - taxes;
+      let taxes = (+this.total * this.companyDetails.taxRate);
+      let subtotal = +this.total - taxes;
 
       const toData = {
         companyOid: this.auth.companyOid,

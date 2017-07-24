@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Events } from 'ionic-angular'
-import {SERVER_URL_CSHARP, SERVER_URL_NODE } from './global';
+import { SERVER_URL_CSHARP, SERVER_URL_NODE } from './global';
 import * as io from "socket.io-client";
 import { Authentication } from './authentication';
 import { AuthUserInfo, SocketEvents}  from '../models/models';

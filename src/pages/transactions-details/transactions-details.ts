@@ -50,8 +50,9 @@ export class TransactionsDetailsPage extends BaseViewController {
     public alertCtrl: AlertController, 
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
-    this.auth = this.authentication.getCurrentUser();
+      super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
+
+      this.auth = this.authentication.getCurrentUser();
   }
 
   ionViewDidLoad() {

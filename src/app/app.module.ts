@@ -18,6 +18,7 @@ import { GoogleMaps } from '@ionic-native/google-maps';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { Printer } from '@ionic-native/printer';
 import { Geolocation } from '@ionic-native/geolocation';
+import { AppVersion } from '@ionic-native/app-version';
 
 
 // both admin and owner
@@ -31,10 +32,10 @@ import { NativeNotifications } from '../global/native-notifications';     // all
 
 // classes
 import { ImageUtility } from '../global/image-utility';
-import { CustomErrorHandler } from '../global/custom-error-handler';
+import { BaseViewController } from '../pages/base-view-controller/base-view-controller';
+
 
 // Components && base-view-controller
-import { BaseViewController } from '../pages/base-view-controller/base-view-controller';
 import { MyJsonComponent } from '../components/json/json.component';
 import { SearchComponent } from '../components/search/search.component';
 
@@ -67,11 +68,16 @@ import { SearchComponent } from '../components/search/search.component';
     LocalNotifications,
     BackgroundMode,
     GoogleMaps,
+    AppVersion,
     Geolocation,
     BarcodeScanner,
     Printer,
-    //{ provide: ErrorHandler, useClass: CustomErrorHandler },
-    {provide: ErrorHandler, useClass: IonicErrorHandler},
+
+    // didn't want to use API, but the way Angular handles app-wide errors vs
+    // the way i wanted to handle them caused circular dependencies; so
+    // just combined it with the error handler in the API class
+    { provide: ErrorHandler, useClass: API },
+    //{provide: ErrorHandler, useClass: IonicErrorHandler},
 
     // my providers
     Authentication,

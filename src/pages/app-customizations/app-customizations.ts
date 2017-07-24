@@ -46,7 +46,7 @@ export class AppCustomizationsPage extends BaseViewController {
    private transfer: Transfer, 
    private file: File,
    private platform: Platform) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
    
     this.myForm = this.formBuilder.group({
       hasDairy: [false],
@@ -76,10 +76,14 @@ export class AppCustomizationsPage extends BaseViewController {
       pointsThreshold: [0, Validation.test("isNumbersOnly")],
       pointsPerFiftyCents: [0, Validation.test("isNumbersOnly")],
       hasPrinter: [false],
-      acceptsPartialPayments: [false]
+      acceptsPartialPayments: [false],
+      homeScreenMyMobileCardSubtitle: [null],
+      homeScreenRewardsSubtitle: [null],
+      homeScreenOrderAheadSubtitle: [null],
+      homeScreenMenuSubtitle: [null]
+
     });
 
-    console.log("INSIDE PAGE")
   }
 
   ionViewDidLoad() {

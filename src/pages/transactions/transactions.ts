@@ -31,7 +31,7 @@ export class TransactionsPage extends BaseViewController {
     public alertCtrl: AlertController, 
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
     console.log("startDate: ", this.startDate);
     console.log("end date: ", this.endDate);

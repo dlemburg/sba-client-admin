@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 
 @Injectable()
+
+
+// this is a hack- had to save it here when navigating to new page with google maps
 export class AppStorage {
 
 constructor() { }

@@ -1,62 +1,118 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ErrorHandler } from '@angular/core';
 import { Http, Headers, RequestOptions, Response } from '@angular/http';
 import * as global from './global';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/observable/throw';
 import { Authentication } from '../global/authentication';
-import { Ihttp } from '../models/models';
+import { Ihttp, ILogError } from '../models/models';
+import { DateUtils } from '../utils/date-utils';
 
 @Injectable()
-export class API {
-    /*  might need this for c# auth???
-    contentHeaders.append('Accept', 'application/json');
-    contentHeaders.append("Authorization", "Bearer " + token));
-    contentHeaders.append('X-Requested-With',	'XMLHttpRequest');
-            // this.headers.append( 'Content-Type', 'application/json' )
+export class API implements ErrorHandler {
+    token;
+    headers;
+    options;
+    auth;
+    logErrorAttempts = 0;
 
-    */
-    token = this.authentication.getToken();
-    headers = new Headers({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${this.token}`});
-    options = new RequestOptions({ headers: this.headers });
-    
     constructor(private http: Http, public authentication: Authentication) {}
 
-  
     public stack(route: string, verb: string, body: any = {}): Observable<any> {
-        
+        this.auth =  this.authentication.getCurrentUser();
+        this.token = this.authentication.getToken();
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        headers.append('Authorization', `Bearer ${this.token}`);
+        let options = new RequestOptions({ headers: headers });
+
+
+        /*
+            .NET server is fine with Authorization being set as a header on GET requests,
+            Node.js server is not. So anytime I need to verify token on GET request for node 
+            server, i'll have to send it as a query param, and access it on server side as req.query (or params?).
+            this means i'll have to add one more layer of abstraction here to account for it, as well as 
+            auth middleware on server side to account for GET -> req.query (or params?)  vs  POST req.headers
+
+        */
+        let isOnline = window.navigator.onLine;
         let url: string = route.indexOf('/api/node/') > -1 ? global.SERVER_URL_NODE : global.SERVER_URL_CSHARP;
             url += route;
         const httpVerb = verb.toLowerCase();
-        const options = this.options;
 
         if (httpVerb === "post") {
             return this.http[httpVerb](url, body, options)
                     .map((response: Response) => response.json())
-                    .catch(this.errorHandler);
+                    .catch((err) => {
+                        if (!isOnline) return Observable.throw("NOT_ONLINE")
+                        else {
+                            this.logError({err, url, httpVerb, type: "API"});
+                            return Observable.throw(err);
+                        }
+                    });
         } else if (httpVerb === "get") {
             return this.http[httpVerb](url, options)
                     .map((response: Response) => response.json())
-                    .catch(this.errorHandler);
+                    .catch((err) => {
+                         if (!isOnline) return Observable.throw("NOT_ONLINE")
+                         else {
+                             this.logError({err, url, httpVerb, type: "API"});
+                             return Observable.throw(err);
+                         }
+                    });
+        }
+    }
+    /* these error handlers don't interact with the view. when they are done, they forward error to view-error-handler
+        in BaseViewController. Easiest way to do this was to stick these in this class. 
+    */
+
+    // handles APP-WIDE errors
+    public handleError(err: any) {
+        console.log(" %c err (logger): "  + err, "color: red;");
+
+        if (!global.ENV.development) {
+            this.logError({type: "Javascript runtime error!", err})
         }
     }
 
+    // app-wide and API errors get sent here
+    public logError(args?): any {       
+        if (this.logErrorAttempts === 1 && args.type === "API") {
+            this.logErrorAttempts = 0;
+            return;
+        }
+        else this.logErrorAttempts++;
 
-    private errorHandler(err = 'ERROR! No stack trace given'): any {        
-        console.error('SEND ERR, STACKTRACE TO LOGGER SERVICE HERE');
-        throw err;
+        const toData: ILogError = {
+            err: args.err || null,
+            url: args.url || null,
+            httpVerb: args.httpVerb || null,
+            date: DateUtils.toLocalIsoString(new Date().toString()),
+            timezoneOffset: new Date().getTimezoneOffset() / 60,
+            app: "Client-Admin",
+            type: args.type || null,
+            companyOid: this.authentication.isLoggedIn() ? this.auth.companyOid : null,
+            userOid: this.authentication.isLoggedIn() ? this.auth.userOid : null
+        }      
+
+        //if (!global.ENV.development) {
+            console.log("logging error to node server");
+            this.stack(ROUTES.logClientError, "POST", toData).subscribe((response) => {
+                console.log("response: ", response);
+                if (args.type === "API") return;
+            }, (err) => {
+                console.log("error sending client err to server");
+            });
+        //}
     }
 }
-
-
 
 /////*****************************  ROUTES  ******************************///////
 
 // all API routes
-// api/n/* goes to node SERVER_URL
+// api/node/* goes to node SERVER_URL
 // api/cs/* goes to c# server
-const NODE = '/api/n';
-const CS = '/api/cs';
 
 // api | cs?node | {controller} | {action}      .............some routes have  :params OR ?queries on server-side
 export const ROUTES = {
@@ -127,7 +183,7 @@ export const ROUTES = {
     editDairyVarietySweetener: '/api/cs/owner/editDairyVarietySweetener',        // takes one
     getCompanyDetails: '/api/cs/shared/getCompanyDetails',
     getCompanyAppFeatures: '/api/cs/shared/getCompanyAppFeatures',
-    getAppStartupInfo: `/api/cs/shared/getAppStartupInfo`,
+    getClientAdminAppStartupInfo: `/api/cs/shared/getClientAdminAppStartupInfo`,
 
 
 
@@ -144,5 +200,8 @@ export const ROUTES = {
     uploadImgAndUnlink: `${global.SERVER_URL_NODE}/api/node/upload/img/uploadAndUnlink`,
     saveAppImg: '/api/node/owner/saveAppImg',
 
-    logError: '/api/node/appAnalytics/logError'
+
+    // error logging
+    logClientError: '/api/node/errorHandler/logClientError', // cs call built too
+    getClientAdminVersionNumber: '/api/cs/appData/getClientAdminVersionNumber'
 }

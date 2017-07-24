@@ -58,7 +58,7 @@ export class AddRewardPage extends BaseViewController {
     private file: File,
     private platform: Platform) { 
 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
      this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],

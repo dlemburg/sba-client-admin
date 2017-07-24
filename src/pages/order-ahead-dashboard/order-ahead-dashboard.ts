@@ -29,7 +29,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
     public loadingCtrl: LoadingController, 
     public socketIO: SocketIO, 
     public events: Events) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
     /* using ionic's events */
     this.events.subscribe(this.socketIO.socketEvents.incomingNewOrder, (data) => {
@@ -46,8 +46,10 @@ export class OrderAheadDashboardPage extends BaseViewController {
     });
     */
 
+    
     this.auth = this.authentication.getCurrentUser();
     this.getActiveOrders();
+    
   }
 
   ionViewDidEnter() {

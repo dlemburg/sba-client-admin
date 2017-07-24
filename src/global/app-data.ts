@@ -8,9 +8,9 @@ constructor() { }
 
     private static _storageDirectory = null;
     private static toast = {
-        defaultToastDuration: 4000,
+        defaultToastDuration: 5000,
         defaultToastPosition: "bottom",
-        defaultErrorMessage: "Sorry, there was an unexpected error. We will work hard to get it fixed soon.",
+        defaultErrorMessage: "Sorry, there was an unexpected error. The details of this error have already been sent to us. We will work hard to get it fixed soon. Sorry for the inconvenience!",
         imgUploadErrorMessageFirstAttempt: "Sorry, there was an error uploading your image. Try submitting again.",
         imgUploadErrorMessageSecondAttempt: ""
     }

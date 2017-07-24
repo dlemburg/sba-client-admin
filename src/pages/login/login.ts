@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators} from '@angular/forms';
+import { StatusBar } from "@ionic-native/status-bar";
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { AppFeatures } from '../../global/app-features';
-import { AuthUserInfo } from '../../models/models';
+import { AuthUserInfo, IClientAdminAppStartupInfoResponse } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { SocketIO } from '../../global/socket-io';
 import { BackgroundMode } from '@ionic-native/background-mode';
-
+import { AppStartup } from '../../global/app-startup';
 
 @IonicPage()
 @Component({
@@ -23,9 +24,10 @@ export class LoginPage extends BaseViewController {
   loading: any;
   locations: Array<any>;
   auth: AuthUserInfo;
+  appStartup: AppStartup;
 
   constructor(
-    public navCtrl: NavController, 
+    public navCtrl: NavController,
     public navParams: NavParams, 
     public backgroundMode: BackgroundMode, 
     public API: API, 
@@ -35,9 +37,9 @@ export class LoginPage extends BaseViewController {
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController, 
     private formBuilder: FormBuilder, 
-    public socketService: SocketIO) { 
+    public socketIO: SocketIO) { 
       
-    super(alertCtrl, toastCtrl, loadingCtrl);
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   
     this.myForm = this.formBuilder.group({
       email: [null, Validators.required],
@@ -45,13 +47,11 @@ export class LoginPage extends BaseViewController {
     });
   }
 
-  ionViewDidLoad() {
-    //this.bgroundImg = AppViewData.getImg().loginBackgroundImgSrc;
+  ionViewDidLoad() {    
+    // maybe hide tabs here??
+    this.authentication.deleteToken();
   }
 
-  navForgotPassword(): void {
-   // this.navCtrl.push(ForgotPasswordPage);
-  }
 
   presentSelectLocationPage(preliminaryCompanyTokenPayload, locations) {
     let preliminaryToken = preliminaryCompanyTokenPayload;
@@ -62,9 +62,19 @@ export class LoginPage extends BaseViewController {
         // save token
         const token = data.token;
         this.authentication.saveToken(token);
-        this.auth = this.authentication.getCurrentUser();
 
-         this.API.stack(ROUTES.getAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
+
+
+        //new stuff here
+        this.auth = this.authentication.getCurrentUser();
+        this.appStartup = new AppStartup(this.API, this.socketIO);
+
+        this.appStartup.getAppStartupInfo(this.auth.companyOid).then((startupData: IClientAdminAppStartupInfoResponse) => {
+          this.appStartup.initializeApp(startupData, this.auth.companyOid, this.auth.locationOid);
+          this.finishInitialization(data.role);
+        });
+        /*
+         this.API.stack(ROUTES.getClientAdminAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
           .subscribe(
             (response) => {
               const defaultImg = response.data.imgs.defaultImg;
@@ -79,6 +89,7 @@ export class LoginPage extends BaseViewController {
 
               this.finishInitialization(data.role);
             }, this.errorHandler(this.ERROR_TYPES.API));
+            */
 
     } else {
         // do nothing yet
@@ -86,19 +97,17 @@ export class LoginPage extends BaseViewController {
       }
     });
     selectLocationPage.present();
-
   }
 
   finishInitialization(role) {
-     // join socket room
-    const room = this.auth.companyOid + this.auth.locationOid;
-    this.socketService.connect(room);
-    !this.backgroundMode.isEnabled && this.backgroundMode.enable();
-
+     
+    this.navCtrl.setRoot('TabsPage');
 
     // originally had these going different routes
+    /*
     if (role === "Admin") this.navCtrl.setRoot('TabsPage');
     else if (role === "Owner") this.navCtrl.setRoot('TabsPage');
+    */
   }
 
   submit(myForm, isValid): void {
@@ -129,6 +138,6 @@ export class LoginPage extends BaseViewController {
               this.presentSelectLocationPage(preliminaryToken, locations);  
 
             }
-          },this.errorHandler(this.ERROR_TYPES.API));
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

@@ -43,20 +43,21 @@ export class AppImagesPage extends BaseViewController {
   ];
   editValue = {label: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
 
- constructor(public navCtrl: NavController, 
-             public navParams: NavParams,
-             public API: API, 
-             public authentication: Authentication,
-             public modalCtrl: ModalController, 
-             public alertCtrl: AlertController, 
-             public toastCtrl: ToastController, 
-             public loadingCtrl: LoadingController, 
-             private camera: Camera, 
-             private transfer: Transfer, 
-             private file: File,
-             private platform: Platform,
-             /*private domSanitizer: DomSanitizer */) { 
-    super(alertCtrl, toastCtrl, loadingCtrl);
+ constructor(
+  public navCtrl: NavController, 
+  public navParams: NavParams,
+  public API: API, 
+  public authentication: Authentication,
+  public modalCtrl: ModalController, 
+  public alertCtrl: AlertController, 
+  public toastCtrl: ToastController, 
+  public loadingCtrl: LoadingController, 
+  private camera: Camera, 
+  private transfer: Transfer, 
+  private file: File,
+  private platform: Platform,
+  /*private domSanitizer: DomSanitizer */) { 
+    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
    
   }
 

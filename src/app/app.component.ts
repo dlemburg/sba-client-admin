@@ -8,6 +8,9 @@ import { SocketIO } from '../global/socket-io';
 import { AppViewData } from '../global/app-data';
 import { AppFeatures } from '../global/app-features';
 import { API, ROUTES } from '../global/api';
+import { AppVersion } from '@ionic-native/app-version';
+import { AppStartup } from '../global/app-startup';
+import { IClientAdminAppStartupInfoResponse, AuthUserInfo } from '../models/models';
 
 declare var cordova: any;
 
@@ -18,77 +21,127 @@ export class MyApp {
   @ViewChild(Nav) nav: Nav;
   rootPage;    
   pages: Array<any>;
-  auth = this.authentication.getCurrentUser();
-  companyName = this.authentication.isLoggedIn() ? this.auth.companyName : null;
+  auth: AuthUserInfo;
+  //companyName = this.authentication.isLoggedIn() ? this.auth.companyName : null;
+  appStartup: AppStartup;
 
   constructor(
-    platform: Platform, 
+    public platform: Platform, 
     public statusBar: StatusBar, 
     public splashScreen: SplashScreen, 
     public backgroundMode: BackgroundMode, 
     public API: API, 
     private authentication: Authentication, 
-    public socketIO: SocketIO) {
-      
-    platform.ready().then(() => {
-      if (this.authentication.isLoggedIn()) {
-        this.initializeApp();
-      } else {
-        this.nav.setRoot('LoginPage');
-      }
-    });
-  }
-
-  
-  /*
-    set appData
-    set appFeatures
-    connect to socket
-    navigate to TabsPage
-    enable background mode
-
-   */
-
-  initializeApp() {
+    public socketIO: SocketIO,
+    public appVersion: AppVersion) {
+    
     this.pages = [
       {name: "Home", component: "TabsPage"},
       {name: "Menu", component: "CategoriesPage"},
       {name: "Transactions", component: "TransactionsPage"}
-    ]
+    ];
 
-    this.API.stack(ROUTES.getAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
-      .subscribe(
-        (response) => {
-          const defaultImg = response.data.imgs.defaultImg;
-
-          console.log("response.data: ", response.data);
-          
-          AppViewData.setImgs({
-            logoImgSrc: `${ROUTES.downloadImg}?img=${response.data.imgs.logoImg}`,
-            defaultImgSrc: defaultImg ? `${ROUTES.downloadImg}?img=${defaultImg}` : "img/default.png"
-          });
-          AppFeatures.setFeatures({
-            hasProcessOrder: response.data.appFeatures.hasProcessOrder
-          });
-          this.finishInitialization();
-
-        }, (err) => {
-
-          this.finishInitialization();
-          console.log("Problem downloading images on app startup");
-        });
+    /*
+      this.appVersion.getVersionNumber().then((versionNumber) => {
+        console.log("versionNumber: ", versionNumber);
+      });
+  */
+    this.init();
   }
 
-  finishInitialization() {
+  init() {
+    this.platform.ready().then(() => {
+      this.appStartup = new AppStartup(this.API, this.socketIO);
+
+      if (this.authentication.isLoggedIn()) {
+        this.auth = this.authentication.getCurrentUser();
+
+        console.log("logged in");
+
+        this.appStartup.getAppStartupInfo(this.auth.companyOid).then((data: IClientAdminAppStartupInfoResponse) => {
+          this.appStartup.initializeApp(data, this.auth.companyOid, this.auth.locationOid);
+          this.nav.setRoot('TabsPage');
+          this.doNativeThingsOnAppStartup(data.currentClientAdminVersionNumber, data.minClientAdminVersionNumber, data.mustUpdateClientAdminApp);
+        })
+      } else {
+        console.log("not logged in");
+        this.nav.setRoot('LoginPage');
+        this.doNativeThingsOnAppStartup();
+      }
+    });
+  }
+/*
+  getAppStartupInfo() {
+    return new Promise((resolve, reject) => {
+      this.API.stack(ROUTES.getClientAdminAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
+        .subscribe(
+          (response) => {
+            const res: IClientAdminAppStartupInfoResponse = response.data.appStartupInfo;
+            const defaultImg = res.defaultImg;
+            const logoImg = res.logoImg;
+            const hasProcessOrder = res.hasProcessOrder;
+            const clientAdminVersionNumber = res.currentClientAdminVersionNumber;
+            const minClientAdminVersionNumber = res.minClientAdminVersionNumber;
+            const mustUpdateClientAdminApp = res.mustUpdateClientAdminApp;
+
+            console.log("response.data: ", response.data);
+
+            resolve({
+              defaultImg, 
+              logoImg, 
+              clientAdminVersionNumber, 
+              minClientAdminVersionNumber,
+              mustUpdateClientAdminApp,
+              hasProcessOrder
+            });
+
+          }, (err) => {
+
+            resolve();
+            console.log("Problem downloading images on app startup");
+          });
+    });
+  }
+  */
+  /*
+
+  initializeApp(data: IClientAdminAppStartupInfoResponse) {
+    AppViewData.setImgs({
+      logoImgSrc: `${ROUTES.downloadImg}?img=${data.logoImg}`,
+      defaultImgSrc: data.defaultImg ? `${ROUTES.downloadImg}?img=${data.defaultImg}` : "img/default.png"
+    });
+    AppFeatures.setFeatures({
+      hasProcessOrder: data.hasProcessOrder
+    });
+
     const room = this.auth.companyOid + this.auth.locationOid;
     this.socketIO.connect(room);
     this.nav.setRoot('TabsPage');
+    this.doNativeThingsOnAppStartup(data.currentClientAdminVersionNumber, data.minClientAdminVersionNumber, data.mustUpdateClientAdminApp);
+  }
+  */
 
+  doNativeThingsOnAppStartup(currentClientAdminVersionNumber = 0, minClientAdminVersionNumber = 0, mustUpdateClientAdminVersion = false) {
+
+    // do version checks w/ update prompt here
+
+    this.invokePlatformListeners();
     !this.backgroundMode.isEnabled && this.backgroundMode.enable();
     this.statusBar.styleDefault();
     this.splashScreen.hide();
   }
-  
+
+  invokePlatformListeners() {
+    this.platform.pause.subscribe(() => {
+      // check token expiry
+    });
+
+    this.platform.resume.subscribe(() => {
+      if (!this.authentication.isLoggedIn()) {
+        this.nav.setRoot("LoginPage");
+      }
+    });
+  }
 
   navTo(page) {
     this.nav.setRoot(page.component);
@@ -99,23 +152,17 @@ export class MyApp {
     this.socketIO.disconnect();
     this.backgroundMode.isEnabled && this.backgroundMode.disable();
 
-
-    // clean up providers that hold state here
-
-    //AppViewData.cleanup();
-    //AppFeatures.cleanup();
-
     let navLogin = setTimeout(() => {
       this.nav.setRoot('LoginPage');
     },300);
 
    // clearTimeout(navLogin);
   }
+
+  ionViewDidUnload() {
+  
+  }
 }
-
-
-
-
 
 
 

@@ -100,7 +100,7 @@ export interface IPayload {
 }
 
 export interface AuthUserInfo {
-    userOid: string;
+    userOid: number;
     pushToken?: string;
     role: string;
     companyName: string;
@@ -403,4 +403,25 @@ export interface IGetEligibleRewardsProcessingTypeAutomaticForTransactionRequest
     companyOid: number;
     taxRate: number;
     individualRewards?: Array<IReward>
+}
+
+export interface ILogError {
+    date: string;
+    timezoneOffset: number;
+    app: string;
+    type: string;
+    companyOid: number;
+    userOid: number;
+    err: string;
+    url: string;
+    httpVerb: string;
+}
+
+export interface IClientAdminAppStartupInfoResponse {
+  hasProcessOrder: boolean;
+  logoImg: string;
+  defaultImg: string;
+  currentClientAdminVersionNumber: number;
+  minClientAdminVersionNumber: number;
+  mustUpdateClientAdminApp: boolean;
 }

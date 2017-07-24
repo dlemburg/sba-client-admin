@@ -6,14 +6,14 @@
   <form [formGroup]="myForm" (ngSubmit)="submit(myForm.value, myForm.valid)">
     <!-- email -->
     <div class="login-form-container">
-      <ion-item text-center>
+      <ion-item>
         <ion-label floating>Email</ion-label>
           <ion-input type="text" formControlName="email"></ion-input>
       </ion-item>
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.email"></control-messages>
 
       <!-- password -->
-      <ion-item text-center>
+      <ion-item>
         <ion-label floating>Password</ion-label>
           <ion-input type="password" formControlName="password"></ion-input>
       </ion-item>

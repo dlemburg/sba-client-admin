@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="io.ionic.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>MyApp</name>
-    <description>An awesome Ionic/Cordova app.</description>
-    <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
+    <name>Appetite Admin</name>
+    <description>The companion Administrator tool for your own small-business rewards application!</description>
+    <author email="daniel.lemburg1@gmail.com" href="">Daniel Lemburg</author>
     <content src="index.html" />
     <access origin="*" />
     <allow-navigation href="http://ionic.local/*" />
@@ -19,6 +19,7 @@
     <preference name="BackupWebStorage" value="none" />
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="FadeSplashScreenDuration" value="300" />
+    <preference name="AutoHideSplashScreen" value="false" />
     <preference name="SplashShowOnlyFirstTime" value="false" />
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="3000" />
@@ -100,4 +101,5 @@
     <plugin name="de.appplant.cordova.plugin.printer" spec="^0.7.3" />
     <plugin name="ionic-plugin-keyboard" spec="^2.2.1" />
     <plugin name="phonegap-plugin-barcodescanner" spec="^6.0.6" />
+    <plugin name="cordova-plugin-app-version" spec="^0.1.9" />
 </widget>

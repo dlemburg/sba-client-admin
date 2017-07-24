@@ -17,7 +17,7 @@
   <div class="width-90 align-center">
     <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value)">
       <!-- food and drink settings -->
-      <h3 text-center margin-top>Food and Drink Settings</h3>
+      <h3 text-center margin-top>Company Settings</h3>
       <ion-item margin-top>
         <ion-checkbox formControlName="hasFlavors"></ion-checkbox>
         <ion-label text-wrap>Does your company have flavors?</ion-label>
@@ -47,6 +47,25 @@
         <ion-label text-wrap>Does your company charge for addons?</ion-label>
       </ion-item>
 
+      <br>
+      <hr />
+      <h3 text-center margin-top>Home Screen Subtitles</h3>
+       <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>My Mobile Card Subtitle</ion-label>
+        <ion-textarea formControlName="homeScreenMyMobileCardSubtitle"></ion-textarea>
+      </ion-item>
+       <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Rewards Subtitle</ion-label>
+        <ion-textarea formControlName="homeScreenRewardsSubtitle"></ion-textarea>
+      </ion-item>
+       <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Order-Ahead Subtitle</ion-label>
+        <ion-textarea formControlName="homeScreenOrderAheadSubtitle"></ion-textarea>
+      </ion-item>
+       <ion-item margin-top>
+        <ion-label class="text-area-label" stacked>Menu Subtitle</ion-label>
+        <ion-textarea formControlName="homeScreenMenuSubtitle"></ion-textarea>
+      </ion-item>
 
       <!-- reward settings -->
       <br>
