@@ -45,7 +45,7 @@ export class RewardsPage extends BaseViewController {
               });
               this.dismissLoading();
               console.log('response.data: ' ,response.data);
-            },this.errorHandler(this.ERROR_TYPES.API));
+            }, this.errorHandler(this.ERROR_TYPES.API));
 
     const imgName = CONST_APP_IMGS[7];
     this.API.stack(ROUTES.getImgName + `/${this.auth.companyOid}/${imgName}`, "GET")

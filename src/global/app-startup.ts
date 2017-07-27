@@ -1,6 +1,5 @@
 import { API, ROUTES } from './api';
 import { IClientAdminAppStartupInfoResponse } from '../models/models';
-import { AppFeatures } from './app-features';
 import { AppViewData } from './app-data';
 import { SocketIO } from './socket-io';
 
@@ -18,42 +17,45 @@ export class AppStartup {
                 .subscribe(
                     (response) => {
                         const res: IClientAdminAppStartupInfoResponse = response.data.appStartupInfo;
-                        const defaultImg = res.defaultImg;
-                        const logoImg = res.logoImg;
-                        const hasProcessOrder = res.hasProcessOrder;
-                        const clientAdminVersionNumber = res.currentClientAdminVersionNumber;
-                        const minClientAdminVersionNumber = res.minClientAdminVersionNumber;
-                        const mustUpdateClientAdminApp = res.mustUpdateClientAdminApp;
-
                         console.log("response.data: ", response.data);
 
                         resolve({
-                            defaultImg, 
-                            logoImg, 
-                            clientAdminVersionNumber, 
-                            minClientAdminVersionNumber,
-                            mustUpdateClientAdminApp,
-                            hasProcessOrder
+                            defaultImg: res.defaultImg,
+                            logoImg: res.logoImg,
+                            clientAdminVersionNumber: res.currentClientAdminVersionNumber, 
+                            minClientAdminVersionNumber: res.minClientAdminVersionNumber,
+                            mustUpdateClientAdminApp: res.mustUpdateClientAdminApp,
+                            hasProcessOrder: res.hasProcessOrder
                         });
 
                     }, (err) => {
                         console.log("err: ", err);
-                        resolve();
+                        resolve({
+                            defaultImg: null,
+                            logoImg: null,
+                            clientAdminVersionNumber: null,
+                            minClientAdminVersionNumber: null,
+                            mustUpdateClientAdminApp: null,
+                            hasProcessOrder: null
+                        });
                         console.log("Problem downloading images on app startup");
                     });
                 });
     }
 
-    public initializeApp(data: IClientAdminAppStartupInfoResponse, companyOid, locationOid,) {
+    public initializeApp(data: IClientAdminAppStartupInfoResponse, companyOid, locationOid) {
+
         AppViewData.setImgs({
-            logoImgSrc: data.logoImg ? `${ROUTES.downloadImg}?img=${data.logoImg}` : "img/default.png",
-            defaultImgSrc: data.defaultImg ? `${ROUTES.downloadImg}?img=${data.defaultImg}` : "img/default.png"
+            logoImgSrc: data && data.logoImg ? `${ROUTES.downloadImg}?img=${data.logoImg}` : "img/default.png",
+            defaultImgSrc: data && data.defaultImg ? `${ROUTES.downloadImg}?img=${data.defaultImg}` : "img/default.png"
         });
-        AppFeatures.setFeatures({
-            hasProcessOrder: data.hasProcessOrder
+        AppViewData.setFeatures({
+            hasProcessOrder: data.hasProcessOrder || false
         });
 
-        const room = companyOid + locationOid;
-        this.socketIO.connect(room);
+        if (locationOid) {
+            const room = companyOid + locationOid;
+            this.socketIO.connect(room);
+        }
     }
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
 import { API, ROUTES } from '../../global/api';
 import { AuthUserInfo } from '../../models/models';
@@ -53,7 +53,6 @@ export class EditPasswordsPage extends BaseViewController {
       this.formDidChange = true;
   }
 
-
   submit(myForm: FormControl, isValid: boolean) {
     this.presentLoading(AppViewData.getLoading().saving);
     const toData = { companyOid: this.auth.companyOid, type: this.type, toData: myForm };
@@ -66,16 +65,17 @@ export class EditPasswordsPage extends BaseViewController {
                     this.dismissLoading();
                     this.showPopup({
                         title: AppViewData.getPopup().defaultErrorTitle, 
-                        message: response.message || "Sorry, the password or email you entered is incorrect.", 
+                        message: response.message || "Sorry, the current password you entered is incorrect.", 
                         buttons: [{text: AppViewData.getPopup().defaultConfirmButtonText}]
                     });
                 } else {
                     this.dismissLoading(AppViewData.getLoading().saved);
-                    this.navCtrl.pop();
+                    setTimeout(() => {
+                        this.navCtrl.pop();
+                    }, 1000);  
                     console.log('response: ', response);
                 }
             }, this.errorHandler(this.ERROR_TYPES.API));
     }
-
   }
 }

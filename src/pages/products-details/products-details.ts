@@ -61,13 +61,11 @@ export class ProductsDetailsPage extends BaseViewController {
             (response) => {
               this.dismissLoading();
               console.log('response.data: ' ,response.data);
-              //debugger;
               this.productDetails = response.data.productDetails;
 
-              
                if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
                 this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
                }
-            },this.errorHandler(this.ERROR_TYPES.API));
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

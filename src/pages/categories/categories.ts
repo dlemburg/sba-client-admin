@@ -38,7 +38,7 @@ export class CategoriesPage extends BaseViewController {
               this.categories.forEach((x) => {
                 x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
               });
-            },this.errorHandler(this.ERROR_TYPES.API));
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navProductsList(category): void {

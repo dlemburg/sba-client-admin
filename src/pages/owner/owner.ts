@@ -5,7 +5,6 @@ import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { API, ROUTES } from '../../global/api';
 import { CONST_PASSWORD_TYPES } from '../../global/global';
-import { AppViewData } from  '../../global/app-data';
 import { ICompanyDetails } from '../../models/models';
 
 @IonicPage()
@@ -16,8 +15,8 @@ import { ICompanyDetails } from '../../models/models';
 export class OwnerPage extends BaseViewController {
   addPages: Array<any> = [];
   pages: Array<any> = [
-    {name: 'Reward - All', img: null, addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
-    {name: 'Reward - Individual', img: null, addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
+    {name: 'Reward - All', img: 'img/rewards_all.jpeg', addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
+    {name: 'Reward - Individual', img: 'img/rewards_individual.jpeg', addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
     {name: 'Categories', img: null, type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
     {name: 'Products', img: 'img/products.jpeg', addComponent: 'AddProductPage', editComponent: 'EditProductPage'},
     {name: 'Sizes', type: 'Sizes', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
@@ -58,16 +57,12 @@ constructor(
         (response) => {
           console.log('response: ', response);
           this.companyDetails = response.data.companyDetails;
-
           this.pages = this.concatConditionalPages(this.pages);
           this.dismissLoading();
-
-
         }, (err) => {
           const shouldPopView = false;
           this.errorHandler.call(this, err, shouldPopView)
         });
-
   }
 
   ionViewDidEnter() {
@@ -75,7 +70,6 @@ constructor(
   }
 
   concatConditionalPages(pages) {
-
     if (this.companyDetails.hasVariety) {
       pages = [...pages, {name: 'Variety', img: 'img/variety.jpeg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Variety"}];
     }
@@ -105,5 +99,4 @@ constructor(
   nav(component, theType) {
     this.navCtrl.push(component, {type: theType ? theType : null});
   }
-
 }

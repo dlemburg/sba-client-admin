@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
@@ -21,7 +21,6 @@ export class EditDairyPage extends BaseViewController {
   isSubmitted: boolean;
   editOid: number = null;
   values: Array<INameAndOid> = [];
-
   companyDetails: ICompanyDetails = {};
 
   constructor(
@@ -99,7 +98,9 @@ export class EditDairyPage extends BaseViewController {
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().saved);
-          this.navCtrl.pop();
+          setTimeout(() => {
+            this.navCtrl.pop();
+          }, 1000);
           console.log('response: ', response);
         }, this.errorHandler(this.ERROR_TYPES.API));
   }

@@ -12,7 +12,7 @@
   the above flex-wrap should be a start w/o having to split into 2 arrays. this works for now
  -->
 <ion-content padding>
-  <ion-item *ngIf="!categories.length">No categories to display</ion-item>
+  <EmptyMessage *ngIf="!categories.length" message="categories"></EmptyMessage>
   <ion-row >
     <ion-col *ngFor="let x of categories" style="border-bottom: 1px solid lightgray;" col-6>
       <ion-card tappable class="hover" (click)="navProductsList(x)">

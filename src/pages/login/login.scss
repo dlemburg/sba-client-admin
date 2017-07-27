@@ -1,6 +1,8 @@
 page-login {
     ion-content {
         position: relative !important;
+        background-color: map-get($colors, dl-white) !important;
+        height: 100% !important;
     }
     .logo-container {
        margin-top: 10vh;
@@ -10,6 +12,8 @@ page-login {
 
     .login-form-container {
         width: 70%;
+        position: relative;
+       // top: -250px;
         margin: auto !important;
     }
     
@@ -36,7 +40,7 @@ page-login {
         margin-top: 50px;
         border: 2px solid white;
         border-radius: 5px;
-        color: white;
+        color: map-get($colors, primary);
         font-size: 20px;
     }
 

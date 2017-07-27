@@ -14,6 +14,10 @@
 
 
 <ion-content padding>
+  <!-- sub header -->
+  <ion-toolbar color="primary" *ngIf="!auth.locationOid">
+    <ion-title text-center>You are not currently logged into a location.</ion-title>
+  </ion-toolbar>
   <div class="width-80 align-center">
     <ion-row>
       <ion-col col-6>

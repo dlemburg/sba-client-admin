@@ -2,18 +2,15 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
 import { API, ROUTES } from '../../global/api';
-import { AppUtils } from '../../utils/app-utils';
 import { Authentication } from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { INameAndOid, AuthUserInfo, ILocation } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS } from '../../global/global';
-import { AppStorage } from '../../global/app-storage';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 import { Geolocation } from '@ionic-native/geolocation';
@@ -27,14 +24,14 @@ export class EditLocationPage extends BaseViewController {
   didPasswordChange: boolean = false;
   editValue: any = null;
   editOid: number = null;
-  days: Array<string> = AppUtils.getDays();
+  days: Array<string> = Utils.getDays();
   values: Array<INameAndOid> = [];
   myForm: FormGroup;
   selectedLocation: ILocation;
   isSubmitted: boolean;
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
-  states: Array<string> = AppUtils.getStates();
+  states: Array<string> = Utils.getStates();
   locations: Array<ILocation> = [];
   isCoordsSet: boolean = false;
   originalValue: string = null;
@@ -107,8 +104,8 @@ constructor(
   // coords are set in a service b/c nav and subsequent pop of MapPage
   ionViewDidEnter() {
     if (this.initHasRun) {
-      const latAndLong = AppStorage.getLatAndLong();
-      if (latAndLong.coordsLat || latAndLong.coordsLong) {
+      const latAndLong = AppViewData.getLatAndLong();
+      if (latAndLong.coordsLat && latAndLong.coordsLong) {
         this.myForm.patchValue({
           coordsLat: latAndLong.coordsLat.toFixed(7),
           coordsLong: latAndLong.coordsLong.toFixed(7)
@@ -118,7 +115,7 @@ constructor(
   }
 
   ionViewDidLeave() {
-    AppStorage.setLatAndLong(null);
+    AppViewData.setLatAndLong(null);
   }
 
  /* geolocation */
@@ -220,7 +217,7 @@ constructor(
   }
   
   setTimesToIsoString(days): void {
-    let daysOfWeek = AppUtils.getDays();
+    let daysOfWeek = Utils.getDays();
 
     // loop through open/close
     daysOfWeek.forEach((x, index) => {
@@ -243,7 +240,7 @@ constructor(
   }
 
   closedToggle(event, index): void {
-    let days = AppUtils.getDays();
+    let days = Utils.getDays();
     let ctrlOpen = days[index].toLowerCase() + "Open";
     let ctrlClose = days[index].toLowerCase() + "Close";
 
@@ -339,9 +336,7 @@ constructor(
                 this.navCtrl.pop();
                 console.log('response: ', response);
               }, this.errorHandler(this.ERROR_TYPES.API));
-        })
-        .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
-
+        }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
 }
 interface ToDataEditLocation {

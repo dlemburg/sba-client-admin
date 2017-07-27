@@ -1,19 +1,16 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
-import { AppUtils } from '../../utils/app-utils';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
-import { AuthUserInfo, ILocation, ICompanyDetails } from '../../models/models';
+import { AuthUserInfo, ILocation } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS } from '../../global/global';
-import { AppStorage } from '../../global/app-storage';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 import { Geolocation } from '@ionic-native/geolocation';
@@ -25,14 +22,14 @@ import { Geolocation } from '@ionic-native/geolocation';
   templateUrl: 'add-location.html'
 })
 export class AddLocationPage extends BaseViewController {
-  days: Array<string> = AppUtils.getDays();
+  days: Array<string> = Utils.getDays();
   myForm: FormGroup;
   selectedLocation: ILocation;
   isSubmitted: boolean;
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
   initHasRun: boolean = false;
-  states: Array<string> = AppUtils.getStates();
+  states: Array<string> = Utils.getStates();
   locations: Array<ILocation> = [];
   isCoordsSet: boolean = false;
   imgSrc: string = null;
@@ -102,8 +99,8 @@ export class AddLocationPage extends BaseViewController {
   // coords are set in a service b/c nav and subsequent pop of MapPage
   ionViewDidEnter() {
     if (this.initHasRun) {
-      const latAndLong = AppStorage.getLatAndLong();
-      if (latAndLong.coordsLat || latAndLong.coordsLong) {
+      const latAndLong = AppViewData.getLatAndLong();
+      if (latAndLong.coordsLat && latAndLong.coordsLong) {
         this.myForm.patchValue({
           coordsLat: latAndLong.coordsLat.toFixed(7) || null,
           coordsLong: latAndLong.coordsLong.toFixed(7) || null
@@ -113,7 +110,7 @@ export class AddLocationPage extends BaseViewController {
   }
 
   ionViewDidLeave() {
-    AppStorage.setLatAndLong({coordsLat: null, coordsLong: null});
+    AppViewData.setLatAndLong({coordsLat: null, coordsLong: null});
   }
 
   /* geolocation */
@@ -170,7 +167,7 @@ export class AddLocationPage extends BaseViewController {
   }
 
   setTimesToIsoString(days): void {
-    let daysOfWeek = AppUtils.getDays();
+    let daysOfWeek = Utils.getDays();
 
     // loop through each day open/close
     daysOfWeek.forEach((x, index) => {
@@ -189,7 +186,7 @@ export class AddLocationPage extends BaseViewController {
   
 
   closedToggle(event: any, index: number): void {
-    let days = AppUtils.getDays();
+    let days = Utils.getDays();
     let ctrlOpen = days[index].toLowerCase() + "Open";
     let ctrlClose = days[index].toLowerCase() + "Close";
 
@@ -262,7 +259,6 @@ export class AddLocationPage extends BaseViewController {
     myForm.saturdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
 
     const toData: ToDataSaveLocation = {toData: myForm, companyOid: this.auth.companyOid};
-
     this.presentLoading(AppViewData.getLoading().saving);
 
     this.uploadImg(myForm).then(() => {
@@ -270,12 +266,13 @@ export class AddLocationPage extends BaseViewController {
         .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
-            this.myForm.reset();
-            this.img = null;
-            this.imgSrc = null;
+            setTimeout(() => {
+              this.myForm.reset();
+              this.img = null;
+              this.imgSrc = null;
+            }, 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.API))
+    }).catch(this.errorHandler(this.ERROR_TYPES.API))
   }
 }
 interface ToDataSaveLocation {

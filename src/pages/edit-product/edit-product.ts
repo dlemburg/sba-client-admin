@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
+import { FormBuilder, Validators} from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
 import { ILkp } from '../../models/models';
 import { API, ROUTES } from '../../global/api';
@@ -8,10 +8,9 @@ import { Platform, IonicPage, NavController, NavParams, AlertController, ToastCo
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo, INameOidCompanyOid, INameAndOid, ICompanyDetails } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 
@@ -102,7 +101,7 @@ constructor(
       .subscribe(
           (response) => {
             this.companyDetails = response.data.companyDetails;
-          },this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
 
     // already had top call made; doesn't need to be async
     this.API.stack(ROUTES.getProductsNameAndOid + `/${this.auth.companyOid}`, 'GET')
@@ -176,7 +175,6 @@ constructor(
               if (product.fixedPrice) this.sizesAndPricesType = this.SIZES_AND_PRICES_TYPE.FIXED_PRICE;
 
               this.dismissLoading();
-            
             }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
@@ -286,7 +284,9 @@ constructor(
         .subscribe(
             (response) => {
               this.dismissLoading(AppViewData.getLoading().saved);
-              this.navCtrl.pop();
+               setTimeout(() => {
+                this.navCtrl.pop();
+              }, 1000);  
               console.log('response: ', response);
             }, this.errorHandler(this.ERROR_TYPES.API));
     })

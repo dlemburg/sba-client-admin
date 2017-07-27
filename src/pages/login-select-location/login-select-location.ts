@@ -4,7 +4,6 @@ import { ISelectLocation } from '../../models/models';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -41,16 +40,6 @@ export class LoginSelectLocationPage extends BaseViewController {
     });
   }
 
-/*
-  dismissAndCallLoginLocation() {
-    console.log("selectedLocation: ", this.selectedLocation)
-    this.viewCtrl.dismiss({
-      location: this.selectedLocation,
-      password: this.password
-    })
-  }
-  */
-
   submit() {
     let toData = { location: this.selectedLocation, password: this.password, preliminaryToken: this.preliminaryToken};
     console.log("toData: ", toData); 
@@ -73,7 +62,6 @@ export class LoginSelectLocationPage extends BaseViewController {
               role: response.data.role
             });
           }
-
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 

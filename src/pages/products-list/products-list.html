@@ -9,7 +9,7 @@
 
 
 <ion-content padding>
-  <ion-item *ngIf="!products.length">No products to display.</ion-item>
+  <EmptyMessage *ngIf="!products.length" message="products"></EmptyMessage>
   <ion-row class="align-center" style="border-bottom: 1px solid lightgray;" >
     <ion-col class="align-center" *ngFor="let x of products" col-9>
       <ion-card class="hover" tappable (click)="navToProductDetails(x)">

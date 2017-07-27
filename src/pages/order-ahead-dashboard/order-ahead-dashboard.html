@@ -8,9 +8,13 @@
 </ion-header>
 
 <ion-content padding>
-  <EmptyMessage *ngIf="!orders.length" longMessage="No active orders right now!"></EmptyMessage>
+  <!-- sub header -->
+  <ion-toolbar color="primary" *ngIf="!auth.locationOid">
+    <ion-title text-center>You are not currently logged into a location.</ion-title>
+  </ion-toolbar>
 
-  <div class="width-80 align-center" *ngIf="orders.length">
+  <EmptyMessage *ngIf="!orders.length && auth.locationOid" longMessage="No active orders right now!"></EmptyMessage>
+  <div class="width-80 align-center" *ngIf="orders.length && auth.locationOid">
     <ion-card class="align-left" *ngFor="let order of orders; let i = index;" (click)="order.showOrderDetails = !order.showOrderDetails">
       <ion-card-header>
         <ion-row>

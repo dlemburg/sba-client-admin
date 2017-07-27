@@ -64,7 +64,7 @@ export class RewardsDetailsPage extends BaseViewController {
               console.log('response.data: ' ,response.data);
               this.loading.dismiss();
               this.rewardDetails = response.data.rewardDetails;
-            },this.errorHandler(this.ERROR_TYPES.API));
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navRewardsBarcode() {

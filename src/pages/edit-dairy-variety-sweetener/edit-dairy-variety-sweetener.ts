@@ -79,7 +79,9 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().saved);
-          this.navCtrl.pop();
+          setTimeout(() => {
+            this.navCtrl.pop();
+          }, 1000);
           console.log('response: ', response);
         }, this.errorHandler(this.ERROR_TYPES.API));
   }

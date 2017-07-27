@@ -77,26 +77,30 @@ export class API implements ErrorHandler {
     }
 
     // app-wide and API errors get sent here
-    public logError(args?): any {       
-        if (this.logErrorAttempts === 1 && args.type === "API") {
-            this.logErrorAttempts = 0;
-            return;
-        }
-        else this.logErrorAttempts++;
+    public logError(args?): any {   
+        let err = args.err;
 
-        const toData: ILogError = {
-            err: args.err || null,
-            url: args.url || null,
-            httpVerb: args.httpVerb || null,
-            date: DateUtils.toLocalIsoString(new Date().toString()),
-            timezoneOffset: new Date().getTimezoneOffset() / 60,
-            app: "Client-Admin",
-            type: args.type || null,
-            companyOid: this.authentication.isLoggedIn() ? this.auth.companyOid : null,
-            userOid: this.authentication.isLoggedIn() ? this.auth.userOid : null
-        }      
+        if ((args.err.status === 0 && args.type === "API") || args.type !== "API") {
+            err = "ERR_CONNECTION_REFUSED";
+    
+            if (this.logErrorAttempts === 1 && args.type === "API") {
+                this.logErrorAttempts = 0;
+                return;
+            }
+            else this.logErrorAttempts++;
 
-        //if (!global.ENV.development) {
+            const toData: ILogError = {
+                err: err || null,
+                url: args.url || null,
+                httpVerb: args.httpVerb || null,
+                date: DateUtils.toLocalIsoString(new Date().toString()),
+                timezoneOffset: new Date().getTimezoneOffset() / 60,
+                app: "Client-Admin",
+                type: args.type || null,
+                companyOid: this.authentication.isLoggedIn() ? this.auth.companyOid : null,
+                userOid: this.authentication.isLoggedIn() ? this.auth.userOid : null
+            }      
+
             console.log("logging error to node server");
             this.stack(ROUTES.logClientError, "POST", toData).subscribe((response) => {
                 console.log("response: ", response);
@@ -104,7 +108,7 @@ export class API implements ErrorHandler {
             }, (err) => {
                 console.log("error sending client err to server");
             });
-        //}
+        }
     }
 }
 
@@ -160,9 +164,7 @@ export const ROUTES = {
     getRewardsIndividualNameAndOid: '/api/cs/owner/getRewardsIndividualNameAndOid',
     getEligibleRewardsProcessingTypeAutomaticForTransaction: '/api/cs/rewards/getEligibleRewardsProcessingTypeAutomaticForTransaction',
     processTransaction: '/api/cs/shared/processTransaction',
-
     processTransactionSimpleProcessing: '/api/cs/shared/processTransactionSimpleProcessing',
-    
     getCompanyDetailsForTransaction: '/api/cs/shared/getCompanyDetailsForTransaction',
     getActiveOrders: '/api/cs/owner/getActiveOrders',
     clearActiveOrderForOrderAhead: '/api/cs/ownwer/clearActiveOrderForOrderAhead',

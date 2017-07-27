@@ -18,7 +18,6 @@ export class ProcessOrderProductsPage {
     this.products.forEach((x) => {
       x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
     });
-
   }
   
   dismissWithData(product) {
@@ -35,5 +34,4 @@ export class ProcessOrderProductsPage {
       name: null
     });
   }
-
 }

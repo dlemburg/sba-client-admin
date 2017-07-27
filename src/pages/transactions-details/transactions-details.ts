@@ -4,7 +4,6 @@ import { ITransactionDetailsOwner, AuthUserInfo } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
@@ -77,12 +76,9 @@ export class TransactionsDetailsPage extends BaseViewController {
   }
 
   getRewards(): void {
-    const route = ROUTES.getRewardsUsedInTransaction + 
-                  `/${this.auth.companyOid}
-                  /${this.transactionOid}
+    const route = ROUTES.getRewardsUsedInTransaction + `/${this.auth.companyOid}/${this.transactionOid}
                   ?isRewardAllUsed=${this.order.isRewardAllUsed}
                   &isRewardIndividualUsed=${this.order.isRewardIndividualUsed}`;
-
     this.showRewards = !this.showRewards;
 
     if (this.doCallGetRewards) {

@@ -4,7 +4,6 @@ import { AuthUserInfo } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { AppViewData } from '../../global/app-data';
 import { DateUtils } from '../../utils/date-utils';
 
 @IonicPage()

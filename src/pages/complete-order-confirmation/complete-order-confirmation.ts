@@ -12,8 +12,8 @@ export class CompleteOrderConfirmationPage {
   receiptType: string = null;
   receiptOptions: Array<any> = [];
   RECEIPT_TYPES = CONST_RECEIPT_TYPES;
-
   HAS_PRINTER: boolean = false;
+  
   constructor(public navCtrl: NavController, public navParams: NavParams, public viewCtrl: ViewController) {}
 
   ionViewDidLoad() {
@@ -31,8 +31,6 @@ export class CompleteOrderConfirmationPage {
     this.doesWantReceipt = true;
     this.receiptType = type;
   }
-
-
 
   dismissWithData() {
     this.viewCtrl.dismiss({

@@ -158,9 +158,11 @@ export class AddRewardIndividualPage extends BaseViewController {
         .subscribe(
             (response) => {
               this.dismissLoading(AppViewData.getLoading().saved);
-              this.myForm.reset();
-              this.img = null;
-              this.imgSrc = null;
+              setTimeout(() => {
+                this.myForm.reset();
+                this.img = null;
+                this.imgSrc = null;
+              }, 500);  
             }, this.errorHandler(this.ERROR_TYPES.API));
     })
     .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));

@@ -8,10 +8,10 @@
       "dom",
       "es2015"
     ],
-    "module": "es2015",
+    "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
-    "target": "es5"
+    "target": "es6"
   },
   "include": [
     "src/**/*.ts"
@@ -24,3 +24,6 @@
     "rewriteTsconfig": false
   }
 }
+       //     prod         dev
+// "module": "es2015"   "commonjs"
+// "target": "es5"      "es6"

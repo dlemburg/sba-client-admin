@@ -9,7 +9,7 @@ import {
  MarkerOptions,
  Marker
 } from '@ionic-native/google-maps';
-import { AppStorage } from '../../global/app-storage';
+import { AppViewData } from '../../global/app-data';
 
 
 @IonicPage()
@@ -47,7 +47,7 @@ export class MapPage {
   }
 
   submit() {
-    AppStorage.setLatAndLong(this.currentLocation);
+    AppViewData.setLatAndLong(this.currentLocation);
     this.navCtrl.pop();
   }
 

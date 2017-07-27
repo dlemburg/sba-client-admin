@@ -1,7 +1,7 @@
 
-<ion-content class="background-login">
-  <div class="logo-container" text-center>
-    <div class="logo">Logo</div>
+<ion-content>
+  <div class="align-center width-80">
+    <CompanyLogo logo="{{logo}}"></CompanyLogo>
   </div>
   <form [formGroup]="myForm" (ngSubmit)="submit(myForm.value, myForm.valid)">
     <!-- email -->

@@ -99,10 +99,11 @@ export class AddGeneralPage extends BaseViewController {
         (response) => {
           console.log('response: ', response);
           this.dismissLoading(AppViewData.getLoading().saved);
-          this.myForm.reset();
-          this.img = null;
-          this.imgSrc = null;
-
+          setTimeout(() => {
+            this.myForm.reset();
+            this.img = null;
+            this.imgSrc = null;
+          }, 500);  
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

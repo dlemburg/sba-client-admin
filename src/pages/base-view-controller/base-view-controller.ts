@@ -1,13 +1,8 @@
 import { Component } from '@angular/core';
-import { API, ROUTES } from '../../global/api';
 import { ENV } from '../../global/global';
-import { Utils } from '../../global/utils/utils';
-import { Authentication } from '../../global/authentication';
 import { IErrorHandlerOpts } from '../../models/models';
-
-import { NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
+import { NavController, AlertController, ToastController, LoadingController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
-import { IPopup } from '../../models/models';
 
 
 @Component({

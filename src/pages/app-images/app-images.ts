@@ -38,8 +38,6 @@ export class AppImagesPage extends BaseViewController {
     {label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Mobile Card", name: CONST_APP_IMGS[11], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Added-To-Cart", name:CONST_APP_IMGS[12], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-
-
   ];
   editValue = {label: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
 

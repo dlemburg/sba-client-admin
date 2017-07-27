@@ -76,8 +76,8 @@ import { SearchComponent } from '../components/search/search.component';
     // didn't want to use API, but the way Angular handles app-wide errors vs
     // the way i wanted to handle them caused circular dependencies; so
     // just combined it with the error handler in the API class
-    { provide: ErrorHandler, useClass: API },
-    //{provide: ErrorHandler, useClass: IonicErrorHandler},
+   // { provide: ErrorHandler, useClass: API },
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
 
     // my providers
     Authentication,

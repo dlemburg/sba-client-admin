@@ -67,8 +67,6 @@ export class ReceiptPage {
     let innerHTML = ReceiptTemplates.generateReceiptHTML(this.order, this.auth);
 
     console.log("innerHTML: ", innerHTML);
-    //this.auth = this.authentication.getCurrentUser();
-    //this.order = this.navParams.data.order;
   }
 
 }

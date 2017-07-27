@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
+import { FormBuilder, Validators} from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
 import { INameOidCompanyOid, ILkp,  IPopup, AuthUserInfo, ICompanyDetails  } from '../../models/models';
 import { API, ROUTES } from '../../global/api';
@@ -7,10 +7,9 @@ import { Authentication } from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 
@@ -40,9 +39,7 @@ export class AddProductPage extends BaseViewController {
   img: string = null;
   imgSrc: string = null;
   failedUploadImgAttempts: number = 0;
-
   companyDetails: ICompanyDetails = {};
-
   SIZES_AND_PRICES_TYPE = {
     FIXED_PRICE: "Fixed Price",
     SIZES: "Sizes"
@@ -64,7 +61,7 @@ export class AddProductPage extends BaseViewController {
     private transfer: Transfer, 
     private file: File,
     private platform: Platform) { 
-    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
+        super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
     this.myForm = this.formBuilder.group({
       name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
@@ -106,9 +103,8 @@ export class AddProductPage extends BaseViewController {
       .subscribe(
           (response) => {
             console.log("response.data.productInfo: ", response.data.productInfo);
+
             let { categories, flavors, addons, dairy, variety, sweetener, sizes, keywords, nutritions, seasons } = response.data.productInfo;
-            
-            // not part of myForm
             this.categories = categories;
             this.flavors = flavors;
             this.addons = addons;
@@ -131,7 +127,6 @@ export class AddProductPage extends BaseViewController {
     let modal = this.modalCtrl.create('ExplanationsPage', {type: "Products"}, {enableBackdropDismiss: true, showBackdrop: true})
     modal.present();
   }
-
 
   onSizeChange(sizes: Array<any>): void {
     let arr = this.myForm.controls.sizesAndPrices;
@@ -192,7 +187,6 @@ export class AddProductPage extends BaseViewController {
 
     /*** Package for submit ***/
     const toData: ToDataSaveProduct = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
-    
     this.presentLoading(AppViewData.getLoading().saving);
 
     this.uploadImg(myForm).then(() => {
@@ -200,10 +194,11 @@ export class AddProductPage extends BaseViewController {
         .subscribe(
             (response) => {
               this.dismissLoading(AppViewData.getLoading().saved);
-              this.myForm.reset();
-              this.img = null;
-              this.imgSrc = null;
-              this.failedUploadImgAttempts = 0;
+              setTimeout(() => {
+                this.myForm.reset();
+                this.img = null;
+                this.imgSrc = null;
+              }, 500);  
             }, this.errorHandler(this.ERROR_TYPES.API));
     })
     .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
-import { INameImg, AuthUserInfo } from '../../models/models';
+import { AuthUserInfo } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
@@ -26,7 +26,7 @@ export class ProductsListPage extends BaseViewController {
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController) {
        
-    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
+      super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
   ionViewDidLoad() {

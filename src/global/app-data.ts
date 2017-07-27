@@ -5,6 +5,10 @@ import { ROUTES } from './api';
 export class AppViewData {
 
 constructor() { }
+    private static _features = {
+        hasProcessOrder: false
+    }
+    private static _latAndLong: {coordsLat: number, coordsLong: number} = {coordsLat: null, coordsLong: null};
 
     private static _storageDirectory = null;
     private static toast = {
@@ -89,6 +93,28 @@ constructor() { }
         return `<div class="custom-spinner-container">
                   <div class="custom-spinner-box">${message}</div>
                 </div>`
+    }
+
+    /* FEATURES */
+
+     public static getFeatures() {
+        return AppViewData._features;
+    }
+
+    public static setFeatures(args) {
+        AppViewData._features = {
+            hasProcessOrder: args.hasProcessOrder
+        }
+    }
+
+
+    /* Lat and Long for map for owner create/edit location */
+    public static setLatAndLong(latAndLong) {
+        AppViewData._latAndLong = Object.assign({}, latAndLong);
+    }
+
+    public static getLatAndLong() {
+        return AppViewData._latAndLong;
     }
 
     public static cleanup() {

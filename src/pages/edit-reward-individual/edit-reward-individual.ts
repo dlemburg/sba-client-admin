@@ -1,17 +1,16 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
+import { FormBuilder, Validators} from '@angular/forms';
 import { API, ROUTES } from '../../global/api';
-import { AppUtils } from '../../utils/app-utils';
 import { Authentication } from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo, INameAndOid } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
+import { CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 
@@ -76,7 +75,7 @@ export class EditRewardIndividualPage extends BaseViewController {
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.days = AppUtils.getDays();
+    this.days = Utils.getDays();
     this.presentLoading();
 
     // SUBSCRIBE TO FORM
@@ -203,8 +202,6 @@ export class EditRewardIndividualPage extends BaseViewController {
     })
   }
 
-
-
   submit(myForm): void {
     this.presentLoading(AppViewData.getLoading().saving);
 
@@ -220,7 +217,9 @@ export class EditRewardIndividualPage extends BaseViewController {
             (response) => {
               console.log("response: ", response.data);
               this.dismissLoading(AppViewData.getLoading().saved);
-              this.navCtrl.pop();
+              setTimeout(() => {
+                this.navCtrl.pop();
+              }, 1000);  
             }, this.errorHandler(this.ERROR_TYPES.API));
     });
   }

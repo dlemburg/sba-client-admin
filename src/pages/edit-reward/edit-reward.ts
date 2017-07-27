@@ -9,10 +9,10 @@ import { Platform, IonicPage, NavController, NavParams, AlertController, ToastCo
 import { AppViewData } from '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
+import { CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 
@@ -120,7 +120,7 @@ constructor(
 
             console.log('response.data: ', response.data);
             this.dismissLoading();
-          },this.errorHandler(this.ERROR_TYPES.API));
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navExplanations() {
@@ -307,7 +307,9 @@ constructor(
         .subscribe(
             (response) => {
               this.dismissLoading(AppViewData.getLoading().saved);
-              this.navCtrl.pop();
+              setTimeout(() => {
+                this.navCtrl.pop();
+              }, 1000);  
               console.log('response: ', response);            
             },this.errorHandler(this.ERROR_TYPES.API));
     })

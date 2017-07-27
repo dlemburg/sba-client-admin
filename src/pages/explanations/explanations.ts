@@ -36,10 +36,7 @@ constructor(
           (response) => {
             console.log('response.data: ', response.data);
             this.explanations = response.data.explanations;
-          }, (err) => {
-            const shouldPopView = false;
-            this.errorHandler.call(this, err, shouldPopView)
-          });
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   dismissModal() {

@@ -1,18 +1,17 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
+import { FormBuilder, Validators} from '@angular/forms';
 import { API, ROUTES } from '../../global/api';
 import { Validation } from '../../utils/validation-utils';
-import { AppUtils } from '../../utils/app-utils';
 import { Authentication } from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { DateUtils } from '../../utils/date-utils';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
+import { CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 
@@ -83,7 +82,7 @@ export class AddRewardPage extends BaseViewController {
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.days = AppUtils.getDays();
+    this.days = Utils.getDays();
     this.presentLoading();
 
     // SUBSCRIBE TO FORM
@@ -225,7 +224,6 @@ export class AddRewardPage extends BaseViewController {
       });
     }
     const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
-
     this.presentLoading(AppViewData.getLoading().saving);
 
     this.uploadImg(myForm).then(() => {
@@ -233,13 +231,13 @@ export class AddRewardPage extends BaseViewController {
         .subscribe(
             (response) => {
               this.dismissLoading(AppViewData.getLoading().saved);
-              this.myForm.reset();
-              this.img = null;
-              this.imgSrc = null;
-              this.failedUploadImgAttempts = 0;
+              setTimeout(() => {
+                this.myForm.reset();
+                this.img = null;
+                this.imgSrc = null;
+              }, 500);  
             }, this.errorHandler(this.ERROR_TYPES.API));
-      })
-      .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
 }
 

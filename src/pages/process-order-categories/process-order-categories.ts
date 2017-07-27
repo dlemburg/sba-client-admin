@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
-import { INameAndOid } from '../../models/models';
 import { AppViewData } from '../../global/app-data';
 
 
@@ -38,7 +37,4 @@ export class ProcessOrderCategoriesPage {
       name: null
     });
   }
-
-
-
 }

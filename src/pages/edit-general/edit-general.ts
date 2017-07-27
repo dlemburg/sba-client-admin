@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { API, ROUTES} from '../../global/api';
-import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators} from '@angular/forms';
 import { Authentication} from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo, INameAndOid } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 
@@ -60,7 +59,7 @@ constructor(
     });
   }
 
-//t this page uses: keyword, category, flavor, size, add-on
+//this page uses: keyword, category, flavor, size, addons
   ionViewDidLoad() {
     this.type = this.navParams.data.type;
     this.auth = this.authentication.getCurrentUser();
@@ -99,7 +98,8 @@ constructor(
           this.dismissLoading(AppViewData.getLoading().removed);
           setTimeout(() => {
             this.navCtrl.pop();
-          }, 1000);          console.log('response: ', response); 
+          }, 1000);          
+          console.log('response: ', response); 
         },this.errorHandler(this.ERROR_TYPES.API));
   }
 
@@ -128,8 +128,6 @@ constructor(
     })
   }
 
-
-
   submit(myForm, isValid): void {
     this.presentLoading(AppViewData.getLoading().saving);
     const toData: ToDataEditGeneral = {toData: myForm, editOid: this.editOid, companyOid: this.auth.companyOid };
@@ -139,11 +137,11 @@ constructor(
         .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
-            this.navCtrl.pop();
-            console.log('response: ', response);
-          },this.errorHandler(this.ERROR_TYPES.API));
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+            setTimeout(() => {
+              this.navCtrl.pop();
+            }, 1000);            console.log('response: ', response);
+          }, this.errorHandler(this.ERROR_TYPES.API));
+    }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
 }
 interface ToDataEditGeneral {

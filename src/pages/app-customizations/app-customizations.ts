@@ -11,6 +11,8 @@ import { Camera, CameraOptions } from '@ionic-native/camera';
 import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS } from '../../global/global';
+import { ImageUtility } from '../../global/image-utility';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -30,7 +32,7 @@ export class AppCustomizationsPage extends BaseViewController {
   oldImg: string = null;
   imgSrc: string = null;
   imgDidChange: boolean = false;
-  failedUploadImgAttempts: number = 0;
+  ImageUtility: ImageUtility;
 
  constructor(
    public navCtrl: NavController, 
@@ -73,6 +75,7 @@ export class AppCustomizationsPage extends BaseViewController {
       socialMediaMessageInstagram: [null],
       socialMediaMessageFacebook: [null],
       socialMediaMessageTwitter: [null],
+      socialMediaImg: [null],
       pointsThreshold: [0, Validation.test("isNumbersOnly")],
       pointsPerFiftyCents: [0, Validation.test("isNumbersOnly")],
       hasPrinter: [false],
@@ -81,9 +84,7 @@ export class AppCustomizationsPage extends BaseViewController {
       homeScreenRewardsSubtitle: [null],
       homeScreenOrderAheadSubtitle: [null],
       homeScreenMenuSubtitle: [null]
-
     });
-
   }
 
   ionViewDidLoad() {
@@ -126,126 +127,53 @@ export class AppCustomizationsPage extends BaseViewController {
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    const options: CameraOptions = {
-
-      // used lower quality for speed
-      quality: 100,
-      targetHeight: 238,
-      targetWidth: 423,
-      destinationType: this.camera.DestinationType.FILE_URI,
-      encodingType: this.camera.EncodingType.JPEG,
-      mediaType: this.camera.MediaType.PICTURE,
-      sourceType: 2
-    }
-
-    this.platform.ready().then(() => {
-      this.camera.getPicture(options).then((imageData) => {
-        console.log("imageData, ", imageData);
-
-        this.imgSrc = imageData;
-        this.img = CONST_APP_IMGS[13] + `$` + this.auth.companyOid;
-        this.imgDidChange = true;
-        this.myForm.patchValue({
-          socialMediaImg: this.img
-        });
-        this.dismissLoading();
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.ImageUtility.getImgCordova().then((data) => {
+      this.dismissLoading();
+      this.imgSrc = data.imageData;
+      this.myForm.patchValue({
+        socialMediaImg: Utils.generateImgName({appImgIndex: 13, name: this.myForm.controls["socialMediaImg"].value, companyOid: this.auth.companyOid})
       })
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 
-  uploadImg(): Promise<any> {
-    this.presentLoading(AppViewData.getLoading().savingImg);
-
+  uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
 
-      if (!this.imgDidChange) {
+      let route = this.oldImg ? ROUTES.uploadImgAndUnlink + `/${this.oldImg}` : ROUTES.uploadImgNoCallback;
+      let action = this.oldImg ? 'upload-img-and-unlink' : 'upload-img-no-callback';
+
+     
+      this.ImageUtility.uploadImg(action, myForm.socialMediaImg, this.imgSrc, route).then((data) => {
         resolve();
-      } else {
-        let options: FileUploadOptions = {
-          fileKey: 'upload-img-and-unlink', 
-          fileName: this.img,        
-          headers: {}
-        };
-        const fileTransfer: TransferObject = this.transfer.create();
-
-        fileTransfer.upload(this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`, options).then((data) => {
-          console.log("uploaded successfully... ");
-          this.dismissLoading();
-          resolve();
-        })
-        .catch((err) => {
-            let message = "";
-            let shouldPopView = false;
-            this.failedUploadImgAttempts++;
-            this.dismissLoading();
-
-            if (this.failedUploadImgAttempts === 1) {
-               message = AppViewData.getToast().imgUploadErrorMessageFirstAttempt;
-               reject(err);
-            } else {
-              message = AppViewData.getToast().imgUploadErrorMessageSecondAttempt;
-              resolve();
-            }
-            this.presentToast(shouldPopView, message);
-        });
-      }
-    });
+      })
+      .catch((err) => {
+        console.log("catch from upload img");
+        reject(err);
+      })
+    })
   }
 
 
-
-
   submit(myForm: FormControl, isValid: boolean) {
+
     if (this.formDidChange || this.imgDidChange) {
-      this.platform.ready().then(() => {
-        this.uploadImg().then(() => {
-
-          /* package */
-          this.presentLoading();
-          let toData = { toData: myForm, companyOid: this.auth.companyOid };
-
+      /* package */
+      this.presentLoading();
+      let toData = { toData: myForm, companyOid: this.auth.companyOid };
+      
+      this.uploadImg(myForm).then(() => {
           this.API.stack(ROUTES.saveCompanyDetails, "POST", toData)
             .subscribe(
                 (response) => {
                   console.log("response: ", response.data);
                   this.dismissLoading(AppViewData.getLoading().saved);
-                  this.navCtrl.pop();
+                  setTimeout(() => {
+                    this.navCtrl.pop();
+                  }, 500)
                 },this.errorHandler(this.ERROR_TYPES.API));
           });
-        });
     }
   }
 }
-
-
-/*
-              this.myForm.patchValue({
-                hasDairy: response.data.companyDetails.hasDairy,
-                hasSweetener: response.data.companyDetails.hasSweetener,
-                hasVariety: response.data.companyDetails.hasVariety,
-                hasFlavors: response.data.companyDetails.hasFlavors,
-                hasAddons: response.data.companyDetails.hasAddons,
-                doesChargeForDairy: response.data.companyDetails.doesChargeForDairy,
-                doesChargeForAddons: response.data.companyDetails.doesChargeForAddons,
-                hasRewardIndividualBirthday: response.data.companyDetails.hasRewardIndividualBirthday,
-                hasRewardIndividualFirstMobileCardUpload: response.data.companyDetails.hasRewardIndividualFirstMobileCardUpload,
-               // hasRewardIndividualPointsThreshold: response.data.companyDetails.hasRewardIndividualPointsThreshold,
-                defaultProductHealthWarning: response.data.companyDetails.defaultProductHealthWarning,
-                defaultRewardsExclusionsMessage: response.data.companyDetails.defaultRewardsExclusionsMessage,
-                defaultOrderAheadExclusionsMessage: response.data.companyDetails.defaultOrderAheadExclusionsMessage,
-                customCompanyEmailReloadMessage: response.data.companyDetails.customCompanyEmailReloadMessage,
-                customCompanyEmailReceiptMessage: response.data.companyDetails.customCompanyEmailReceiptMessage,
-                hasSocialMediaRewards: response.data.companyDetails.hasSocialMediaRewards,
-                socialMediaDiscountAmountPercent: response.data.companyDetails.socialMediaDiscountAmountPercent,
-                socialMediaMessage: response.data.companyDetails.socialMediaMessage,
-                socialMediaImg: response.data.compamnyDetails.socialMediaImg,
-                hasFacebook: response.data.companyDetails.hasFacebook,
-                hasTwitter: response.data.companyDetails.hasTwitter,
-                hasInstagram: response.data.companyDetails.hasInstagram,
-                pointsThreshold: response.data.companyDetails.pointsThreshold,
-                pointsPerFiftyCents: response.data.companyDetails.pointsPerFiftyCents,
-                hasPrinter: response.data.companyDetails.hasPrinter,
-                acceptsPartialPayments: response.data.companyDetails.acceptsPartialPayments
-              });
-              */

@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ModalController, AlertController, ToastController, LoadingController, ViewController } from 'ionic-angular';
 import { API, ROUTES } from '../../global/api';
-import { AppViewData } from  '../../global/app-data';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { Authentication } from '../../global/authentication';
 import { CONST_ID_TYPES, CONST_REWARDS_TYPES } from '../../global/global';
-import { IUserDataForProcessOrder, IErrChecks, IBarcodeUserData, IBarcodeRewardData, ICompanyDetails } from '../../models/models';
+import { IErrChecks, IBarcodeUserData, IBarcodeRewardData, ICompanyDetails } from '../../models/models';
 import { NativeNotifications } from '../../global/native-notifications';
 import { DateUtils } from '../../utils/date-utils';
 import { Utils } from '../../utils/utils';
@@ -236,7 +235,7 @@ export class SimpleProcessingPage extends BaseViewController {
                 this.sufficientFunds = false;
               }
             } 
-          },this.errorHandler(this.ERROR_TYPES.API));
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
    // manual entering mobileCardId
@@ -258,8 +257,7 @@ export class SimpleProcessingPage extends BaseViewController {
     if (!total.toString().match(/^\d+(?:\.\d{0,2})?$/)) {
       errs.push("Please enter a valid subtotal.")
       return {isValid: false, errs};
-    }
-    else return {isValid: true, errs: []}
+    } else return {isValid: true, errs: []}
   }
 
 
@@ -299,6 +297,5 @@ export class SimpleProcessingPage extends BaseViewController {
               this.dismissLoading();
             }, this.errorHandler(this.ERROR_TYPES.API));
     }
-
   }
 }

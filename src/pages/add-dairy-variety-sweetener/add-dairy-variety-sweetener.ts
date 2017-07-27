@@ -54,10 +54,7 @@ export class AddDairyVarietySweetenerPage extends BaseViewController {
           console.log('response: ', response);
           this.genericValues = response.data.genericValues;
           this.getCompanyDetailsAPI();
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        },  this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
   }
 
   getCompanyDetailsAPI() {
@@ -76,7 +73,9 @@ export class AddDairyVarietySweetenerPage extends BaseViewController {
         (response) => {
           console.log('response: ', response);
           this.dismissLoading(AppViewData.getLoading().saved);
-          this.myForm.reset();
+          setTimeout(() => {
+            this.myForm.reset();
+          }, 500);
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 

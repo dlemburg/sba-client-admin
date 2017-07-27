@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators} from '@angular/forms';
-import { StatusBar } from "@ionic-native/status-bar";
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
-import { AppFeatures } from '../../global/app-features';
 import { AuthUserInfo, IClientAdminAppStartupInfoResponse } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { SocketIO } from '../../global/socket-io';
@@ -22,9 +20,10 @@ export class LoginPage extends BaseViewController {
   myForm: FormGroup;
   incorrectPasswordOrEmail: boolean = false;
   loading: any;
-  locations: Array<any>;
+  locations: Array<any> = [];
   auth: AuthUserInfo;
   appStartup: AppStartup;
+  logo: string = "img/logo.png";
 
   constructor(
     public navCtrl: NavController,
@@ -52,70 +51,49 @@ export class LoginPage extends BaseViewController {
     this.authentication.deleteToken();
   }
 
-
   presentSelectLocationPage(preliminaryCompanyTokenPayload, locations) {
     let preliminaryToken = preliminaryCompanyTokenPayload;
     let selectLocationPage = this.modalCtrl.create('LoginSelectLocationPage', {locations, preliminaryToken}, {enableBackdropDismiss: false});
 
     selectLocationPage.onDidDismiss((data) => {
-      if (data.token) {
-        // save token
-        const token = data.token;
-        this.authentication.saveToken(token);
-
-
-
-        //new stuff here
-        this.auth = this.authentication.getCurrentUser();
-        this.appStartup = new AppStartup(this.API, this.socketIO);
-
-        this.appStartup.getAppStartupInfo(this.auth.companyOid).then((startupData: IClientAdminAppStartupInfoResponse) => {
-          this.appStartup.initializeApp(startupData, this.auth.companyOid, this.auth.locationOid);
-          this.finishInitialization(data.role);
-        });
-        /*
-         this.API.stack(ROUTES.getClientAdminAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
-          .subscribe(
-            (response) => {
-              const defaultImg = response.data.imgs.defaultImg;
-
-              AppViewData.setImgs({
-                logoImgSrc: `${ROUTES.downloadImg}?img=${response.data.imgs.logoImg}`,
-                defaultImgSrc: defaultImg ? `${ROUTES.downloadImg}?img=${defaultImg}` : "img/default.png"
-              });
-              AppFeatures.setFeatures({
-                hasProcessOrder: response.data.appFeatures.hasProcessOrder
-              });
-
-              this.finishInitialization(data.role);
-            }, this.errorHandler(this.ERROR_TYPES.API));
-            */
-
-    } else {
-        // do nothing yet
-        return;
-      }
+      if (data && data.token) {
+        this.saveTokenAndInitializeApp(data.token, data.role); 
+      } else return;
     });
     selectLocationPage.present();
   }
 
-  finishInitialization(role) {
-     
-    this.navCtrl.setRoot('TabsPage');
+  saveTokenAndInitializeApp(token, role) {
+    // save token
+    this.authentication.saveToken(token);
 
-    // originally had these going different routes
-    /*
-    if (role === "Admin") this.navCtrl.setRoot('TabsPage');
-    else if (role === "Owner") this.navCtrl.setRoot('TabsPage');
-    */
+    //new stuff here
+    this.auth = this.authentication.getCurrentUser();
+    this.appStartup = new AppStartup(this.API, this.socketIO);
+
+    this.appStartup.getAppStartupInfo(this.auth.companyOid).then((startupData: IClientAdminAppStartupInfoResponse) => {
+      this.appStartup.initializeApp(startupData, this.auth.companyOid, this.auth.locationOid);
+      this.finishInitialization(role);
+    });
+  }
+
+  finishInitialization(role) {
+    this.navCtrl.setRoot('TabsPage');
+  }
+
+  alertInvalidAndRedirect() {
+    this.showPopup({
+      title: "No locations found!", 
+      message: "Please have the owner create a location before allowing Admins to login.",
+      buttons: [
+        {text: "OK", handler: () => { this.navCtrl.setRoot("LoginPage")}}
+      ]
+    })
   }
 
   submit(myForm, isValid): void {
     this.presentLoading("Logging in...");
-    
     let toData = myForm;
-    let preliminaryToken = null;
-    let locations = [];
 
     this.API.stack(ROUTES.companyLogin, 'POST', toData)
         .subscribe(
@@ -131,12 +109,15 @@ export class LoginPage extends BaseViewController {
                 buttons: [{text: AppViewData.getPopup().defaultConfirmButtonText}]
               });
             } else {
-              preliminaryToken = response.data.preliminaryCompanyTokenPayload;
-              locations = response.data.locations;
+              const { preliminaryCompanyTokenPayload, token, locations, role } = response.data;
 
-              // go to selectLocation page
-              this.presentSelectLocationPage(preliminaryToken, locations);  
-
+              // EXPLANATION:
+              // if has locations, make them login to location; if no locations, proceed
+              // if admin and no locations, redirect back to login
+              if (locations.length) this.presentSelectLocationPage(preliminaryCompanyTokenPayload, locations);
+              else if (role === "Admin" && !locations.length) this.alertInvalidAndRedirect();
+              else if (!locations.length && token && role === "Owner") this.saveTokenAndInitializeApp(token, role);
+              else console.log("uh oh, no solution for this yet...");
             }
           }, this.errorHandler(this.ERROR_TYPES.API));
   }

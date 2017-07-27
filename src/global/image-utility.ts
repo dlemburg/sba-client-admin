@@ -27,12 +27,10 @@ export class ImageUtility {
                 this.camera.getPicture(options).then((imageData) => {
                     console.log("imageData, ", imageData);
                     resolve({imageData});
-                })
-            })
-            .catch((err) => {
-                reject(err);
+                }).catch((err) => {
+                    reject(err);
+                });
             });
-
         });
   }
 

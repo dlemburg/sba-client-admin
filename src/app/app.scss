@@ -26,7 +26,7 @@
  }
  */
 
- $background-img : url(../../../img/mountains.jpg) no-repeat;
+ $background-img : url(../../../img/icon.png) no-repeat;
  $danger : map-get($colors, danger);
 
  .menu {
@@ -153,7 +153,7 @@
 .font-12 { font-size: 12px;}
 .font-8 {font-size: 8px; }
 
- .error-msg {
+.error-msg {
     color: $danger !important;
 }
 
@@ -192,7 +192,7 @@
 }
 
 .background {
-    //background: $background-img !important;
+    background: $background-img !important;
     background-size: cover !important;
 }
 

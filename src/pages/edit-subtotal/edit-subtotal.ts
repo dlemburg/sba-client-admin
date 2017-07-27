@@ -30,6 +30,7 @@ export class EditSubtotalPage extends BaseViewController {
     public viewCtrl: ViewController) { 
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
+  
   ionViewDidLoad() {
     this.subtotal = Utils.round(this.navParams.data.subtotal);
     this.cacheSubtotal = Utils.round(this.navParams.data.subtotal);

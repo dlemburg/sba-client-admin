@@ -16,7 +16,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
   orders: Array<IOrderAhead> = [];
   setIntervalHandler: any = null;
   loading: any;
-  auth: AuthUserInfo;
+  auth: AuthUserInfo = this.authentication.getCurrentUser();
   initHasRun: boolean = false;
 
   constructor(
@@ -45,9 +45,6 @@ export class OrderAheadDashboardPage extends BaseViewController {
       this.onIncomingNewOrder(data);
     });
     */
-
-    
-    this.auth = this.authentication.getCurrentUser();
     this.getActiveOrders();
     
   }
@@ -69,20 +66,22 @@ export class OrderAheadDashboardPage extends BaseViewController {
 
 
   getActiveOrders() {
-    let toData = {locationOid: this.auth.locationOid, companyOid: this.auth.companyOid};
+    if (this.auth.locationOid) {
+      let toData = {locationOid: this.auth.locationOid, companyOid: this.auth.companyOid};
 
-    this.presentLoading();
-    this.API.stack(ROUTES.getActiveOrders, "POST", toData)
-        .subscribe(
-            (response) => {
-              console.log('response.data: ', response.data);
+      this.presentLoading();
+      this.API.stack(ROUTES.getActiveOrders, "POST", toData)
+          .subscribe(
+              (response) => {
+                console.log('response.data: ', response.data);
 
-              this.orders = this.setArrivalDates(response.data.activeOrders);
-              this.setTimerInterval(); 
-              this.orders = this.sortOrders(response.data.activeOrders);
+                this.orders = this.setArrivalDates(response.data.activeOrders);
+                this.setTimerInterval(); 
+                this.orders = this.sortOrders(response.data.activeOrders);
 
-              this.dismissLoading();
-            }, this.errorHandler(this.ERROR_TYPES.API));
+                this.dismissLoading();
+              }, this.errorHandler(this.ERROR_TYPES.API));
+    }
   }
 
 
@@ -145,9 +144,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
     });
   }
 
-  onRefreshScreen() {
-
-  }
+  onRefreshScreen() {}
 
   onProcessOrder(order, index): void {
     let toData = { 
@@ -164,7 +161,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
   }
 
   onSetIsActiveFalse(order, index) {
-        const toData = {
+    const toData = {
       transactionOid: order.transactionOid,
       userOid: order.userOid,
       companyOid: this.auth.companyOid

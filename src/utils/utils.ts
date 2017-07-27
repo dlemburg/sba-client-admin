@@ -6,6 +6,22 @@ import { DateUtils } from './date-utils';
 export class Utils {
     constructor() { }
 
+    public static getNumbersMultipleSelectionList(len: number = 25): Array<{number?: number, isSelected?: boolean}> {
+        let arr = [];
+        for (let i = 1; i < len + 1; i++) {
+            arr.push({number: i, isSelected: false});
+        }
+        return arr;
+    }
+
+    public static getDays() {
+        return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    }
+
+    public static getStates(): Array<string> {
+        return ['Alabama','Alaska','American Samoa','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Federated States of Micronesia','Florida','Georgia','Guam','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Marshall Islands','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Northern Mariana Islands','Ohio','Oklahoma','Oregon','Palau','Pennsylvania','Puerto Rico','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virgin Island','Virginia','Washington','West Virginia','Wisconsin','Wyoming']
+
+    }
 
     public static generateRandomString = (length = 8) => {
         let charset = "abcdefghijklmnpqrstuvwxyz",
@@ -39,7 +55,6 @@ export class Utils {
         return `${CONST_APP_IMGS[data.appImgIndex]}$${data.name}$${data.companyOid}$${Utils.generateRandomString(3)}$${isoDate}.jpg`.replace(/\s+/g, '');
 
         // i.e.:  categoriesImg$muffins$12$ai39vl5z$2017-07-14T15-28-12
-
     }
 
      public static getNumbersList(len: number = 25): Array<number> {

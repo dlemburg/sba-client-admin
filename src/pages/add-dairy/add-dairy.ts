@@ -70,7 +70,9 @@ export class AddDairyPage extends BaseViewController {
         (response) => {
           console.log('response: ', response);
           this.dismissLoading(AppViewData.getLoading().saved);
-          this.myForm.reset();
+          setTimeout(() => {
+            this.myForm.reset();
+          }, 500);
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
