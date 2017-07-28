@@ -204,24 +204,30 @@ export class EditRewardIndividualPage extends BaseViewController {
 
   submit(myForm): void {
     this.presentLoading(AppViewData.getLoading().saving);
-
-    let expiryDate = this.myForm.controls.expiryDate.value.toString();
+    let expiryDate = myForm.expiryDate.toString();
     
     /*** package ***/
-    if (myForm.hasExpiryDate) this.myForm.patchValue({expiryDate: expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchStartTime(this.myForm.controls.startDate.value) : expiryDate});
-    const toData: ToDataSaveOrEditReward = {toData: this.myForm.value, companyOid: this.auth.companyOid, editOid: this.editOid};
+    if (myForm.hasExpiryDate)  myForm.expiryDate = expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : expiryDate;
     
-    this.uploadImg(myForm).then(() => {
-      this.API.stack(ROUTES.editRewardIndividual, "POST", toData)
-        .subscribe(
-            (response) => {
-              console.log("response: ", response.data);
-              this.dismissLoading(AppViewData.getLoading().saved);
-              setTimeout(() => {
-                this.navCtrl.pop();
-              }, 1000);  
-            }, this.errorHandler(this.ERROR_TYPES.API));
-    });
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    } else this.finishSubmit(myForm);
+  }
+
+  finishSubmit(myForm) {
+    const toData: ToDataSaveOrEditReward = {toData: this.myForm.value, companyOid: this.auth.companyOid, editOid: this.editOid};
+
+    this.API.stack(ROUTES.editRewardIndividual, "POST", toData)
+      .subscribe(
+          (response) => {
+            console.log("response: ", response.data);
+            this.dismissLoading(AppViewData.getLoading().saved);
+            setTimeout(() => {
+              this.navCtrl.pop();
+            }, 1000);  
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 interface ToDataSaveOrEditReward {

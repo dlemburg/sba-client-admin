@@ -306,11 +306,35 @@ constructor(
     })
   }
 
-  submit(myForm, isValid: boolean): void {    
-     this.presentLoading(AppViewData.getLoading().saving);
+  finishSubmit(myForm) {
+    const toData: ToDataEditLocation = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editValue.oid, didPasswordChange: this.didPasswordChange};
+    this.API.stack(ROUTES.editLocation, "POST", toData )
+      .subscribe(
+          (response) => {
+            this.dismissLoading(AppViewData.getLoading().saved);
+            this.navCtrl.pop();
+            console.log('response: ', response);
+          }, this.errorHandler(this.ERROR_TYPES.API));
+  }
 
-     // convert iso string back to time string. this always needs to happen before submitting.
-     // 2 ways to create open/close time:   1.) pre-populate, 2.) choose from datepicker.  both need to be converted ISOString -> timeString
+  submit(myForm, isValid: boolean): void {    
+    this.presentLoading(AppViewData.getLoading().saving);
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD))
+    } else this.finishSubmit(myForm);
+  }
+}
+interface ToDataEditLocation {
+    toData: any;
+    editOid: number;
+    companyOid: number;
+    didPasswordChange: boolean;
+}
+
+
+     /*
       myForm.sundayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
       myForm.sundayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
       myForm.mondayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
@@ -325,23 +349,5 @@ constructor(
       myForm.fridayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
       myForm.saturdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
       myForm.saturdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
-
-      const toData: ToDataEditLocation = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editValue.oid, didPasswordChange: this.didPasswordChange};
-     
-      this.uploadImg(myForm).then(() => {
-        this.API.stack(ROUTES.editLocation, "POST", toData )
-          .subscribe(
-              (response) => {
-                this.dismissLoading(AppViewData.getLoading().saved);
-                this.navCtrl.pop();
-                console.log('response: ', response);
-              }, this.errorHandler(this.ERROR_TYPES.API));
-        }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
-  }
-}
-interface ToDataEditLocation {
-    toData: any;
-    editOid: number;
-    companyOid: number;
-    didPasswordChange: boolean;
-}
+    */
+    

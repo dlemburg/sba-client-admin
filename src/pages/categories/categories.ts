@@ -5,6 +5,7 @@ import { IonicPage, NavController, NavParams, AlertController, ToastController, 
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { AppViewData } from '../../global/app-data';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -34,10 +35,8 @@ export class CategoriesPage extends BaseViewController {
         .subscribe(
             (response) => {
               this.dismissLoading();
-              this.categories = response.data.categories;
-              this.categories.forEach((x) => {
-                x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
-              });
+              this.categories = Utils.getImgs(response.data.categories);
+              
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 

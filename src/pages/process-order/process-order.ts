@@ -274,7 +274,6 @@ export class ProcessOrderPage extends BaseViewController {
      this.API.stack(ROUTES.getProductDetails + `/${this.auth.companyOid}/${currentProductOid}`, "GET")
         .subscribe(
             (response) => {
-              
               this.productDetails = response.data.productDetails;
               console.log('response.data: ' , response.data);
              // let { sizesAndPrices, addonsToClient, flavorsToClient, dairyToClient, varietyToClient, sweetenerToClient, oid, numberOfFreeAddonsUntilCharged, addonsPriceAboveLimit } = response.data.productDetails;
@@ -482,13 +481,9 @@ export class ProcessOrderPage extends BaseViewController {
     return {isValid: true, errs};
   }
 
-
-
   selectDairyQuantity(purchaseItemIndex, quantity) {
     this.purchaseItem.dairy[purchaseItemIndex].quantity = quantity;
   }
-  
-
 
   addToOrder(item): void {
     let checks = this.doChecksPurchaseItem(this.purchaseItem);
@@ -524,13 +519,11 @@ export class ProcessOrderPage extends BaseViewController {
       this.productDetails = this.clearProductDetails();
       this.isEditInProgress = this.clearEditInProgress(); 
       this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
-
     }
     
     const cancelFn = () => {
       this.isEditInProgress = this.clearEditInProgress();
     }
-
 
     this.showPopup({
       title: "Please confirm",
@@ -547,8 +540,6 @@ export class ProcessOrderPage extends BaseViewController {
 
     return individualRewards;
   }
-
-
 
   getEligibleRewards() { 
     this.presentLoading();
@@ -580,7 +571,6 @@ export class ProcessOrderPage extends BaseViewController {
 
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
-
 
   // this is optional- but helps with aggregating information about rewards used
   addManualRewardToTransaction() {
@@ -729,7 +719,6 @@ export class ProcessOrderPage extends BaseViewController {
     } else return 0;
   }
 
-
   calculateSubtotal(order: IOrder, COMPANY_DETAILS: ICompanyDetails): number {
       this.order.transactionDetails.subtotal = 0;
       order.purchaseItems.forEach((x, index) => {
@@ -779,7 +768,6 @@ export class ProcessOrderPage extends BaseViewController {
   calculateEditAmount(subtotal: number, editAmount: number) {
     return subtotal - editAmount;
   }
-
 
   onEditSubtotal() {
     this.orderHasBeenEdited = true;
@@ -887,12 +875,11 @@ export class ProcessOrderPage extends BaseViewController {
                   } else {
                     this.finishSubmit();
                   }
-                },this.errorHandler(this.ERROR_TYPES.API));
+                }, this.errorHandler(this.ERROR_TYPES.API));
         }
       });
         
-    }
-        
+    }      
 }
 
 interface IOrderConfirmation {

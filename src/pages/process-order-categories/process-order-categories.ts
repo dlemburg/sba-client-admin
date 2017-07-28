@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
-import { AppViewData } from '../../global/app-data';
-
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -16,11 +15,7 @@ export class ProcessOrderCategoriesPage {
  constructor(public viewCtrl: ViewController, public navCtrl: NavController, public navParams: NavParams) {}
 
   ionViewDidLoad() {
-    this.categories = this.navParams.data.categories;
-
-    this.categories.forEach((x) => {
-      x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
-    });
+    this.categories = Utils.getImgs(this.navParams.data.categories);
   }
   
   dismissWithData(category) {

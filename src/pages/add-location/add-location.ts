@@ -235,34 +235,11 @@ export class AddLocationPage extends BaseViewController {
       })
     })
   }
-  
-  submit(myForm, isValid: boolean): void {
-    this.isSubmitted = true;
-   
 
-    /*** Package for submit ***/
-    // convert iso string back to time string. this always needs to happen before submitting.
-    // 2 ways to create open/close time:   1.) pre-populate, 2.) choose from datepicker.  both need to be converted ISOString -> timeString
-    myForm.sundayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
-    myForm.sundayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
-    myForm.mondayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
-    myForm.mondayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayClose),
-    myForm.tuesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayOpen),
-    myForm.tuesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayClose),
-    myForm.wednesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayOpen),
-    myForm.wednesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayClose),
-    myForm.thursdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayOpen),
-    myForm.thursdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayClose),
-    myForm.fridayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayOpen),
-    myForm.fridayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
-    myForm.saturdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
-    myForm.saturdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
-
+  finishSubmit(myForm) {
     const toData: ToDataSaveLocation = {toData: myForm, companyOid: this.auth.companyOid};
-    this.presentLoading(AppViewData.getLoading().saving);
 
-    this.uploadImg(myForm).then(() => {
-      this.API.stack(ROUTES.saveLocation, "POST", toData)
+    this.API.stack(ROUTES.saveLocation, "POST", toData)
         .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
@@ -272,7 +249,18 @@ export class AddLocationPage extends BaseViewController {
               this.imgSrc = null;
             }, 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
-    }).catch(this.errorHandler(this.ERROR_TYPES.API))
+  }
+  
+  submit(myForm, isValid: boolean): void {
+    this.isSubmitted = true;
+
+    this.presentLoading(AppViewData.getLoading().saving);
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD))
+    } else this.finishSubmit(myForm);
+    
   }
 }
 interface ToDataSaveLocation {

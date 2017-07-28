@@ -5,6 +5,7 @@ import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { AppViewData } from '../../global/app-data';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -40,11 +41,8 @@ export class ProductsListPage extends BaseViewController {
             (response) => {
               this.dismissLoading();
               console.log('response.data: ' , response.data);
-              this.products = response.data.products;
-
-              this.products.forEach((x) => {
-                x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
-              });
+              this.products = Utils.getImgs(response.data.products);
+              
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 

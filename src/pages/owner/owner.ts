@@ -16,7 +16,7 @@ export class OwnerPage extends BaseViewController {
   addPages: Array<any> = [];
   pages: Array<any> = [
     {name: 'Reward - All', img: 'img/rewards_all.jpeg', addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
-    {name: 'Reward - Individual', img: 'img/rewards_individual.jpeg', addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
+    {name: 'Reward - One', img: 'img/rewards_individual.jpeg', addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
     {name: 'Categories', img: null, type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
     {name: 'Products', img: 'img/products.jpeg', addComponent: 'AddProductPage', editComponent: 'EditProductPage'},
     {name: 'Sizes', type: 'Sizes', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},

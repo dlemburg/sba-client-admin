@@ -2,10 +2,12 @@ EmptyMessage {
    ion-card {
         min-height: 10vh !important;
         margin-top: 100px !important;
-        display: -webkit-flex; /* Safari */
-        -webkit-align-items: center; /* Safari 7.0+ */
+        display: -webkit-flex;
+        -webkit-align-items: center;
         display: flex;
         align-content: center;
+        border-left: 5px solid map-get($colors, primary);
+        border-radius: 8px !important;
    } 
    ion-card-content {
        font-size: 20px !important;

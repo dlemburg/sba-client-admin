@@ -16,7 +16,7 @@
         <ion-input type="text" formControlName="name"></ion-input>
       </ion-item>
 
-      <div *ngIf="type === 'Categories'">
+      <div class="margin-top" *ngIf="type === 'Categories'">
           <Image (getImgCordova)="getImgCordova()" header="Category Image" [imgSrc]="imgSrc"></Image>
       </div>
       

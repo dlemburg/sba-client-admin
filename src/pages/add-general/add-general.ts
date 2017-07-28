@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Authentication } from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
 
@@ -77,24 +76,20 @@ export class AddGeneralPage extends BaseViewController {
     })
   }
 
-
   submit(myForm, isValid): void {
     this.presentLoading(AppViewData.getLoading().saving);
-
     let type: string = this.type.toLowerCase();
-
-    if (type === "categories") {
+    
+    if (type === "categories" && myForm.img) {
         this.uploadImg(myForm).then(() => {
           this.finishSubmit(type, myForm);
-        })
-        .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
-    } else {
-      this.finishSubmit(type, myForm);
-    }
+        }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    } else this.finishSubmit(type, myForm);
+  
   }
 
   finishSubmit(type: string, myForm):void {
-    this.API.stack(ROUTES.saveOwnerGeneralAdd + `/${type}`, 'POST', {toData: myForm, isEdit: false, companyOid: this.auth.companyOid })
+    this.API.stack(ROUTES.saveOwnerGeneralAdd + `/${type}`, 'POST', {toData: myForm, companyOid: this.auth.companyOid })
       .subscribe(
         (response) => {
           console.log('response: ', response);

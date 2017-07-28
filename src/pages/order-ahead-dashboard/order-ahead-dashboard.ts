@@ -87,10 +87,10 @@ export class OrderAheadDashboardPage extends BaseViewController {
 
   // sorts according to 1.) arrivalMins, then  2.) purchaseDate (if expired)
   sortOrders(orders: Array<IOrderAhead>): Array<IOrderAhead> {
-    let unExpiredOrders = orders.filter((x) => {
+    let unexpiredOrders = orders.filter((x) => {
       return !x.isExpired;
     });
-    unExpiredOrders = unExpiredOrders.sort((a, b) => {
+    unexpiredOrders = unexpiredOrders.sort((a, b) => {
       return +a.arrivalMins - +b.arrivalMins;
     });
 
@@ -98,7 +98,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
       return x.isExpired;
     }); 
 
-    return [...unExpiredOrders, ...expiredOrders];
+    return [...unexpiredOrders, ...expiredOrders];
 
   }
 
@@ -111,7 +111,6 @@ export class OrderAheadDashboardPage extends BaseViewController {
       x.arrivalDate = new Date(date.setMinutes(date.getMinutes() + x.eta));
       x.showOrderDetails = false;
     });
-
     return orders;
   }
 

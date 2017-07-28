@@ -207,42 +207,42 @@ export class AddRewardPage extends BaseViewController {
     })
   }
 
-
-
   submit(myForm): void {    
 
     /*** package ***/
-    this.myForm.patchValue({
-      startDate: DateUtils.patchStartTime(myForm.startDate),
-      expiryDate: DateUtils.patchEndTime(myForm.expiryDate)
-    });
     if (myForm.dateRuleDays) {
-      this.myForm.patchValue({
-        dateRuleDays: myForm.dateRuleDays.join(","),  // convert to string
-        dateRuleTimeStart: DateUtils.getHours(myForm.dateRuleTimeStart),
-        dateRuleTimeEnd: DateUtils.getHours(myForm.dateRuleTimeEnd),
-      });
+      myForm.dateRuleDays = myForm.dateRuleDays.join(",");
+      myForm.dateRuleTimeStart = DateUtils.getHours(myForm.dateRuleTimeStart);
+      myForm.dateRuleTimeEnd = DateUtils.getHours(myForm.dateRuleTimeEnd);
     }
-    const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
+    myForm.startDate = DateUtils.patchStartTime(myForm.startDate);
+    myForm.expiryDate = DateUtils.patchEndTime(myForm.expiryDate);
+
     this.presentLoading(AppViewData.getLoading().saving);
 
-    this.uploadImg(myForm).then(() => {
-      this.API.stack(ROUTES.saveReward, "POST", toData)
-        .subscribe(
-            (response) => {
-              this.dismissLoading(AppViewData.getLoading().saved);
-              setTimeout(() => {
-                this.myForm.reset();
-                this.img = null;
-                this.imgSrc = null;
-              }, 500);  
-            }, this.errorHandler(this.ERROR_TYPES.API));
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
       }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    } else this.finishSubmit(myForm);
+  }
+
+  finishSubmit(myForm) {
+    const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid};
+    this.API.stack(ROUTES.saveReward, "POST", toData)
+      .subscribe(
+          (response) => {
+            this.dismissLoading(AppViewData.getLoading().saved);
+            setTimeout(() => {
+              this.myForm.reset();
+              this.img = null;
+              this.imgSrc = null;
+            }, 500);  
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 
 interface ToDataSaveOrEditReward {
   toData: any;
   companyOid: number;
-  isEdit: boolean;
 }

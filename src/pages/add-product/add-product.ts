@@ -184,13 +184,17 @@ export class AddProductPage extends BaseViewController {
       this.presentToast(false, "Looks like you have values for fixed price and multiple sizes.");
       return;
     }
-
-    /*** Package for submit ***/
-    const toData: ToDataSaveProduct = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
     this.presentLoading(AppViewData.getLoading().saving);
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    } else this.finishSubmit(myForm);
+  }
 
-    this.uploadImg(myForm).then(() => {
-      this.API.stack(ROUTES.saveProduct, "POST", toData)
+  finishSubmit(myForm) {
+    const toData: ToDataSaveProduct = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
+    this.API.stack(ROUTES.saveProduct, "POST", toData)
         .subscribe(
             (response) => {
               this.dismissLoading(AppViewData.getLoading().saved);
@@ -200,8 +204,6 @@ export class AddProductPage extends BaseViewController {
                 this.imgSrc = null;
               }, 500);  
             }, this.errorHandler(this.ERROR_TYPES.API));
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
 }
 interface ToDataSaveProduct {

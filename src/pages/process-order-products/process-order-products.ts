@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ViewController } from 'ionic-angular';
-import { AppViewData } from '../../global/app-data';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -14,10 +14,7 @@ export class ProcessOrderProductsPage {
 
   ionViewDidLoad() {
     this.products = this.navParams.data.products;
-
-    this.products.forEach((x) => {
-      x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
-    });
+    this.products = Utils.getImgs(this.products);
   }
   
   dismissWithData(product) {

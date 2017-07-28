@@ -129,11 +129,21 @@ constructor(
   }
 
   submit(myForm, isValid): void {
-    this.presentLoading(AppViewData.getLoading().saving);
+    
+      this.presentLoading(AppViewData.getLoading().saving);
+      let type: string = this.type.toLowerCase();
+      
+      if (type === "categories" && myForm.img) {
+          this.uploadImg(myForm).then(() => {
+            this.finishSubmit(type, myForm);
+          }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+      } else this.finishSubmit(type, myForm);
+  }
+
+  finishSubmit(type, myForm) {
     const toData: ToDataEditGeneral = {toData: myForm, editOid: this.editOid, companyOid: this.auth.companyOid };
 
-    this.uploadImg(myForm).then(() => {      
-      this.API.stack(ROUTES.saveOwnerGeneralEdit + `/${this.type}`, 'POST', toData)
+    this.API.stack(ROUTES.saveOwnerGeneralEdit + `/${this.type}`, 'POST', toData)
         .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
@@ -141,9 +151,9 @@ constructor(
               this.navCtrl.pop();
             }, 1000);            console.log('response: ', response);
           }, this.errorHandler(this.ERROR_TYPES.API));
-    }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
   }
 }
+
 interface ToDataEditGeneral {
   toData: any;
   companyOid: number;

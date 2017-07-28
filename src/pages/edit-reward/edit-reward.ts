@@ -289,31 +289,35 @@ constructor(
   submit(myForm): void {
     this.presentLoading(AppViewData.getLoading().saving);
 
-    let expiryDate = this.myForm.controls.expiryDate.value.toString();
-    let startDate = this.myForm.controls.startDate.value.toString();
+    let expiryDate = myForm.expiryDate.toString();
+    let startDate = myForm.startDate.toString();
 
     /*** Package for submit ***/
-    this.myForm.patchValue({
-      startDate: expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchStartTime(myForm.startDate) : expiryDate,
-      expiryDate: startDate.indexOf("T00:00:00") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : startDate,
-      dateRuleTimeStart: myForm.dateRuleTimeStart ? DateUtils.getHours(myForm.dateRuleTimeStart) : null,
-      dateRuleTimeEnd: myForm.dateRuleTimeEnd ? DateUtils.getHours(myForm.dateRuleTimeEnd) : null,
-      dateRuleDays: myForm.dateRuleDays ? myForm.dateRuleDays.split(","): null
-    });
+    myForm.expiryDate = expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : expiryDate;
+    myForm.startDate = startDate.indexOf("T00:00:00") < 0 ? DateUtils.patchStartTime(myForm.startDate) : startDate;
+    myForm.dateRuleTimeStart = myForm.dateRuleTimeStart ? DateUtils.getHours(myForm.dateRuleTimeStart) : null,
+    myForm.dateRuleTimeEnd = myForm.dateRuleTimeEnd ? DateUtils.getHours(myForm.dateRuleTimeEnd) : null,
+    myForm.dateRuleDays = myForm.dateRuleDays ? myForm.dateRuleDays.split(",") : null
+    
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    } else this.finishSubmit(myForm);
+  }
+
+  finishSubmit(myForm) {
     const toData: ToDataEditReward = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
 
-    this.uploadImg(myForm).then(() => {
-      this.API.stack(ROUTES.editReward, "POST", toData)
-        .subscribe(
-            (response) => {
-              this.dismissLoading(AppViewData.getLoading().saved);
-              setTimeout(() => {
-                this.navCtrl.pop();
-              }, 1000);  
-              console.log('response: ', response);            
-            },this.errorHandler(this.ERROR_TYPES.API));
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    this.API.stack(ROUTES.editReward, "POST", toData)
+      .subscribe(
+          (response) => {
+            this.dismissLoading(AppViewData.getLoading().saved);
+            setTimeout(() => {
+              this.navCtrl.pop();
+            }, 1000);  
+            console.log('response: ', response);            
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 

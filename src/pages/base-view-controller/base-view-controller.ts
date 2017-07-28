@@ -24,13 +24,12 @@ export class BaseViewController {
     UNHANDLED_EXCEPTION: "UNHANDLED_EXCEPTION",
     NOT_ONLINE: "NOT_ONLINE"
   }
-  public APPEND_DEFAULT_ERR_MESSAGE: "We will work hard to ensure that this is not a problem on our end"
   public ERROR_MESSAGES = {
-    CAMERA: `Sorry, there was an error retrieving your photo.  ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
-    BARCODE: `sorry, there was an error accessing the scanner. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
-    PRINTER: `Sorry, there was an error either finding a printer or printing. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
-    IMG_UPLOAD: `Sorry, there was an error uploading your image. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
-    GEOLOCATION: `Sorry, there was an error calculating your position. ${this.APPEND_DEFAULT_ERR_MESSAGE}`,
+    CAMERA: `Sorry, there was an error retrieving your photo.  We will work hard to ensure that this is not a problem on our end.`,
+    BARCODE: `sorry, there was an error accessing the scanner. We will work hard to ensure that this is not a problem on our end.`,
+    PRINTER: `Sorry, there was an error either finding a printer or printing. We will work hard to ensure that this is not a problem on our end.`,
+    IMG_UPLOAD: `Sorry, there was an error uploading your image. We will work hard to ensure that this is not a problem on our end.`,
+    GEOLOCATION: `Sorry, there was an error calculating your position. We will work hard to ensure that this is not a problem on our end.`,
     NOT_ONLINE: `Uh oh, looks like you're not online. Data is expensive these days!`
   }
   constructor(

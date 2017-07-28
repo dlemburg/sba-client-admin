@@ -7,6 +7,7 @@ import { BaseViewController} from '../base-view-controller/base-view-controller'
 import { DateUtils } from '../../utils/date-utils';
 import { AppViewData } from '../../global/app-data';
 import { CONST_APP_IMGS } from '../../global/global';
+import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
@@ -39,10 +40,7 @@ export class RewardsPage extends BaseViewController {
     this.API.stack(ROUTES.getRewards + `/${this.auth.companyOid}/${currentDate}`, "GET")
         .subscribe(
             (response) => {
-              this.rewards = response.data.rewards;
-              this.rewards.forEach((x) => {
-                x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
-              });
+              this.rewards = Utils.getImgs(response.data.rewards);
               this.dismissLoading();
               console.log('response.data: ' ,response.data);
             }, this.errorHandler(this.ERROR_TYPES.API));

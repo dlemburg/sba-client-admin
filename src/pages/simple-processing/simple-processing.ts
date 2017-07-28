@@ -16,7 +16,6 @@ import { BarcodeScanner } from '@ionic-native/barcode-scanner';
   templateUrl: 'simple-processing.html',
 })
 export class SimpleProcessingPage extends BaseViewController {
-
   dataFromRewardIndividualBarcodeScan: any;
   userData = {
     userOid: null,
@@ -52,8 +51,7 @@ export class SimpleProcessingPage extends BaseViewController {
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController, 
     public viewCtrl: ViewController) {
-    super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
-
+      super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
   ionViewDidLoad() {
@@ -81,10 +79,8 @@ export class SimpleProcessingPage extends BaseViewController {
 
   onKeypressTotal(e) {
     const allowedKeys = "0123456789.";
-    
     if (allowedKeys.indexOf(e.key) > -1 || e.keyCode === 13) return;
     else e.preventDefault();
-
   }
 
   onScanIndividualRewardBarcode() {
@@ -259,8 +255,6 @@ export class SimpleProcessingPage extends BaseViewController {
       return {isValid: false, errs};
     } else return {isValid: true, errs: []}
   }
-
-
 
   submit() {
     let doChecks = this.doChecks(this.total);

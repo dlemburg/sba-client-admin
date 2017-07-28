@@ -10,9 +10,9 @@
 
 <ion-content padding>
   <EmptyMessage *ngIf="!products.length" message="products"></EmptyMessage>
-  <ion-row class="align-center" style="border-bottom: 1px solid lightgray;" >
+  <ion-row *ngIf="products.length" class="align-center" style="border-bottom: 1px solid lightgray;" >
     <ion-col class="align-center" *ngFor="let x of products" col-9>
-      <ion-card class="hover" tappable (click)="navToProductDetails(x)">
+      <ion-card class="hover ion-card" tappable (click)="navToProductDetails(x)">
         <img  [src]="x.imgSrc" onError="this.src='img/default.png';"/>
         <div class="card-title">{{ x.name }}</div>
       </ion-card>

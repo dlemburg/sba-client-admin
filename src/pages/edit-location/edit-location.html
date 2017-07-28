@@ -23,8 +23,7 @@
         <form [formGroup]="myForm" novalidate (ngSubmit)="submit(myForm.value, myForm.valid)">
           
           <!-- image -->
-          <h3 text-center margin-top>Location Image</h3>
-          <Image (getImgCordova)="getImgCordova()" header="Location Image (optional)" [imgSrc]="imgSrc"></Image>
+          <Image (getImgCordova)="getImgCordova()" header="Location Image" [imgSrc]="imgSrc"></Image>
 
           <ion-item>
             <ion-label floating>Location Name (i.e.: Your company name + city)</ion-label>

@@ -268,29 +268,34 @@ constructor(
   }
 
   submit(myForm, isValid: boolean): void {
-    this.presentLoading(AppViewData.getLoading().saving);
-
-    /*** Package for submit ***/
-    const toData: ToDataEditProduct = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
 
     // validate size -- this is a hack- should be cleaned up later
     if (myForm.fixedPrice && myForm.sizesAndPrices.length) {
       this.presentToast(false, "Looks like you have values for fixed price and multiple sizes.");
       return;
     }
+    this.presentLoading(AppViewData.getLoading().saving);
 
-    this.uploadImg(myForm).then(() => {            
-      this.API.stack(ROUTES.editProduct, "POST", toData)
-        .subscribe(
-            (response) => {
-              this.dismissLoading(AppViewData.getLoading().saved);
-               setTimeout(() => {
-                this.navCtrl.pop();
-              }, 1000);  
-              console.log('response: ', response);
-            }, this.errorHandler(this.ERROR_TYPES.API));
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    } else this.finishSubmit(myForm);
+  }
+
+  finishSubmit(myForm) {
+    const toData: ToDataEditProduct = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
+
+    this.API.stack(ROUTES.editProduct, "POST", toData)
+      .subscribe(
+          (response) => {
+            this.dismissLoading(AppViewData.getLoading().saved);
+              setTimeout(() => {
+              this.navCtrl.pop();
+            }, 1000);  
+            console.log('response: ', response);
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 

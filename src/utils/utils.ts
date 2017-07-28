@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CONST_APP_IMGS } from '../global/global';
 import { DateUtils } from './date-utils';
+import { AppViewData } from '../global/app-data';
 
 @Injectable()
 export class Utils {
@@ -91,5 +92,14 @@ export class Utils {
         if ( ( (retNumber.toString().length -1) - decimalIndex) === 1) retNumber += "0";
 
         return retNumber;
+    }
+
+    public static getImgs(arr) {
+        if (arr.length) {
+            arr.forEach((x) => {
+                x.imgSrc = AppViewData.getDisplayImgSrc(x.img);
+            });
+            return arr;
+        } else return [];
     }
 }

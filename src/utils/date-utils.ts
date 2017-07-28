@@ -42,12 +42,12 @@ constructor() { }
 
     // i.e.: ISOString ->  "09:30am"  
     // keeps in military hours
-    public static convertIsoStringToHoursAndMinutesString(IsoString: string): string {
+    public static convertIsoStringToHoursAndMinutesString(isoString: string): string {
 
         // this accounts for closed days. should not be apart of re-usable utility fn
-        if (IsoString === "closed" || IsoString === "Closed") return IsoString;
+        if (isoString === "closed" || isoString === "Closed") return isoString;
 
-        const date = new Date(IsoString);
+        const date = new Date(isoString);
         const minutes = this.prependZero(date.getMinutes());
         const militaryHours = date.getHours();
         let amOrPm = "";

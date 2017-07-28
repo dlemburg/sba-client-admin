@@ -13,9 +13,9 @@
  -->
 <ion-content padding>
   <EmptyMessage *ngIf="!categories.length" message="categories"></EmptyMessage>
-  <ion-row >
+  <ion-row *ngIf="categories.length">
     <ion-col *ngFor="let x of categories" style="border-bottom: 1px solid lightgray;" col-6>
-      <ion-card tappable class="hover" (click)="navProductsList(x)">
+      <ion-card tappable class="hover ion-card" (click)="navProductsList(x)">
         <img [src]="x.imgSrc" onError="this.src='img/default.png';"/>
         <div class="card-title">{{ x.name }}</div>
       </ion-card>

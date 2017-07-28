@@ -5,12 +5,14 @@ import { Authentication } from '../../global/authentication';
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { CONST_APP_IMGS, DEFAULT_IMG } from '../../global/global';
 //import cloneDeep from 'lodash.cloneDeep';
 //import { DomSanitizer } from '@angular/platform-browser';
+import { ImageUtility } from '../../global/image-utility';
+import { Utils } from '../../utils/utils';
 
 
 @IonicPage()
@@ -25,21 +27,22 @@ export class AppImagesPage extends BaseViewController {
   defaultImg: string = DEFAULT_IMG;
   currentIndex: number = null;
   values = [
-    {label: "My Card", name: CONST_APP_IMGS[0], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Rewards", name: CONST_APP_IMGS[1], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Order Ahead", name: CONST_APP_IMGS[2], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Menu", name: CONST_APP_IMGS[3], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Your Company Logo", name: CONST_APP_IMGS[4], img: null, imgSrc: null, targetWidth: 450,targetHeight: 150},
+    {label: "My Card", name: CONST_APP_IMGS[0], appImgIndex: 0, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Rewards", name: CONST_APP_IMGS[1], appImgIndex: 1, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Order Ahead", name: CONST_APP_IMGS[2], appImgIndex: 2, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Menu", name: CONST_APP_IMGS[3], appImgIndex: 3, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Your Company Logo", name: CONST_APP_IMGS[4], appImgIndex: 4, img: null, imgSrc: null, targetWidth: 450,targetHeight: 150},
    // {label: "App Header Bar", name: CONST_APP_IMGS[5], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Default (fallback)", name: CONST_APP_IMGS[6], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Rewards (top of page)", name: CONST_APP_IMGS[7], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Login Background", name: CONST_APP_IMGS[8], img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
-    {label: "Order Complete Background", name: CONST_APP_IMGS[9], img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
-    {label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Mobile Card", name: CONST_APP_IMGS[11], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
-    {label: "Added-To-Cart", name:CONST_APP_IMGS[12], img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Default (fallback)", name: CONST_APP_IMGS[6], appImgIndex: 6, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Rewards (top of page)", name: CONST_APP_IMGS[7], appImgIndex: 7, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Login Background", name: CONST_APP_IMGS[8], appImgIndex: 8, img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
+    {label: "Order Complete Background", name: CONST_APP_IMGS[9], appImgIndex: 9, img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
+    {label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], appImgIndex: 10, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Mobile Card", name: CONST_APP_IMGS[11], appImgIndex: 11, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "Added-To-Cart", name: CONST_APP_IMGS[12], appImgIndex: 12, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
   ];
-  editValue = {label: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
+  editValue = {label: null, appImgIndex: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
+  ImageUtility: ImageUtility;
 
  constructor(
   public navCtrl: NavController, 
@@ -73,73 +76,38 @@ export class AppImagesPage extends BaseViewController {
   }
 
 
-  //  TODO
-  // this.editValue.targetWidth, this.editValue.targetHeight
-  // cordova
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    const options: CameraOptions = {
+    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.ImageUtility.getImgCordova({targetHeight: 400, targetWidth: 600}).then((data) => {
+      this.dismissLoading();
+      this.editValue.imgSrc = data.imageData;
+      this.editValue.img = Utils.generateImgName({appImgIndex: this.editValue.appImgIndex, name: "", /*this.editValue.label.replace(/\s+/g, '-') */ companyOid: this.auth.companyOid});
+    }).catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
+  }
 
-      // used lower quality for speed
-      quality: 100,
-      targetHeight: 400,
-      targetWidth: 600,
-      destinationType: this.camera.DestinationType.FILE_URI,
-      encodingType: this.camera.EncodingType.JPEG,
-      mediaType: this.camera.MediaType.PICTURE,
-      sourceType: 2
-    }
-
-    this.platform.ready().then(() => {
-      this.camera.getPicture(options).then((imageData) => {
-        console.log("imageData, ", imageData);
-       // this.appImg.imgSrc = this.domSanitizer.bypassSecurityTrustResourceUrl(imageData);
-       // don't need sanitizer b/c used [src] in template instead of src
-
-
-        // sets name: $ acts as separator for server
-        this.editValue.img = this.editValue.name + `$` + this.auth.companyOid;
-        this.editValue.imgSrc = imageData;
-        this.dismissLoading();
+  uploadImg(myForm): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.ImageUtility.uploadImg('company-app-img', this.editValue.img, this.editValue.imgSrc, ROUTES.uploadCompanyAppImg).then((data) => {
+        resolve();
+      })
+      .catch((err) => {
+        console.log("catch from upload img");
+        reject(err);
       })
     })
-    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
-
-  uploadImg(editValue): Promise<any> {
-    console.log("inside cordova");
-    return new Promise((resolve, reject) => {
-        let options: FileUploadOptions = {
-          fileKey: 'company-app-img',  // correlates to name in multer
-          fileName: editValue.img,        
-          headers: {}
-        };
-        const fileTransfer: TransferObject = this.transfer.create();
-        let res = resolve;
-        let rej = reject;
-
-        fileTransfer.upload(editValue.imgSrc, ROUTES.uploadCompanyAppImg, options).then((data) => {
-          console.log("uploaded successfully... resolving now...");
-          res(data);
-        })
-        .catch((err) => {
-          console.log("inside error");
-          rej(err);
-        });
-       
-      });
-  }
+  
 
   submit() {
     console.log("inside submit");
     this.presentLoading(AppViewData.getLoading().saving);
-    this.platform.ready().then(() => {
-        this.uploadImg(this.editValue).then((data) => {
-        this.editValue = {label: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
-        this.dismissLoading(AppViewData.getLoading().saved);
-      })
-      .catch(this.errorHandler(this.ERROR_TYPES.API));
+
+    this.uploadImg(this.editValue).then((data) => {
+      this.editValue = {label: null, appImgIndex: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
+      this.dismissLoading(AppViewData.getLoading().saved);
     })
+    .catch(this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 
