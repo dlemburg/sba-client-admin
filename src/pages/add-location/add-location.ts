@@ -235,6 +235,17 @@ export class AddLocationPage extends BaseViewController {
       })
     })
   }
+  
+  submit(myForm, isValid: boolean): void {
+    this.isSubmitted = true;
+
+    this.presentLoading(AppViewData.getLoading().saving);
+    if (myForm.img) {
+      this.uploadImg(myForm).then(() => {
+        this.finishSubmit(myForm);
+      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD))
+    } else this.finishSubmit(myForm);
+  }
 
   finishSubmit(myForm) {
     const toData: ToDataSaveLocation = {toData: myForm, companyOid: this.auth.companyOid};
@@ -249,18 +260,6 @@ export class AddLocationPage extends BaseViewController {
               this.imgSrc = null;
             }, 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
-  }
-  
-  submit(myForm, isValid: boolean): void {
-    this.isSubmitted = true;
-
-    this.presentLoading(AppViewData.getLoading().saving);
-    if (myForm.img) {
-      this.uploadImg(myForm).then(() => {
-        this.finishSubmit(myForm);
-      }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD))
-    } else this.finishSubmit(myForm);
-    
   }
 }
 interface ToDataSaveLocation {

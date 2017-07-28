@@ -156,24 +156,28 @@ export class AppCustomizationsPage extends BaseViewController {
   }
 
 
-  submit(myForm: FormControl, isValid: boolean) {
-
+  submit(myForm, isValid: boolean) {
     if (this.formDidChange || this.imgDidChange) {
-      /* package */
-      this.presentLoading();
-      let toData = { toData: myForm, companyOid: this.auth.companyOid };
+      this.presentLoading(AppViewData.getLoading().saving);
       
-      this.uploadImg(myForm).then(() => {
-          this.API.stack(ROUTES.saveCompanyDetails, "POST", toData)
-            .subscribe(
-                (response) => {
-                  console.log("response: ", response.data);
-                  this.dismissLoading(AppViewData.getLoading().saved);
-                  setTimeout(() => {
-                    this.navCtrl.pop();
-                  }, 500)
-                },this.errorHandler(this.ERROR_TYPES.API));
-          });
+      if (myForm.socialMediaImg) {
+        this.uploadImg(myForm).then(() => {
+          this.finishSubmit(myForm);
+        }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD))
+      } else this.finishSubmit(myForm);
     }
+  }
+
+  finishSubmit(myForm) {
+    let toData = { toData: myForm, companyOid: this.auth.companyOid };
+     this.API.stack(ROUTES.saveCompanyDetails, "POST", toData)
+        .subscribe(
+            (response) => {
+              console.log("response: ", response.data);
+              this.dismissLoading(AppViewData.getLoading().saved);
+              setTimeout(() => {
+                this.navCtrl.pop();
+              }, 500)
+            }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

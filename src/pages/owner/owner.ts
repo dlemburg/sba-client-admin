@@ -29,8 +29,8 @@ export class OwnerPage extends BaseViewController {
     {name: 'Owner Passwords', img: 'img/owner-passwords.jpg', component: 'EditPasswordsPage', type: CONST_PASSWORD_TYPES.OWNER },
   ];
   category: string = null;
-  auth: AuthUserInfo
-
+  auth: AuthUserInfo;
+  initHasRun: boolean = false;
   companyDetails: ICompanyDetails = {};
 
 constructor(
@@ -47,11 +47,25 @@ constructor(
   }
 
   ionViewDidLoad() {
-    this.presentLoading();
     this.auth = this.authentication.getCurrentUser();
     this.category = 'settings';
     this.category = 'add-edit';  // init segment
+    this.getAppCustomizationsAndSettingsForOwnerPage();
+    
+  }
 
+  ionViewDidEnter() {
+    this.selectedPage = null;
+    
+    if (this.initHasRun) this.getAppCustomizationsAndSettingsForOwnerPage();
+    else this.initHasRun = true;
+  }
+
+  getAppCustomizationsAndSettingsForOwnerPage() {
+    this.pages = this.setDefaultPages();
+    this.settings = this.setDefaultSettings();
+
+    this.presentLoading();
     this.API.stack(ROUTES.getAppCustomizationsAndSettingsForOwnerPage + `/${this.auth.companyOid}`, 'GET')
       .subscribe(
         (response) => {
@@ -59,16 +73,28 @@ constructor(
           this.companyDetails = response.data.companyDetails;
           this.pages = this.concatConditionalPages(this.pages);
           this.dismissLoading();
-        }, (err) => {
-          const shouldPopView = false;
-          this.errorHandler.call(this, err, shouldPopView)
-        });
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  ionViewDidEnter() {
-    this.selectedPage = null;
+  // prevents doubles
+  setDefaultPages() {
+    return [
+      {name: 'Reward - All', img: 'img/rewards_all.jpeg', addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
+      {name: 'Reward - One', img: 'img/rewards_individual.jpeg', addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
+      {name: 'Categories', img: null, type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
+      {name: 'Products', img: 'img/products.jpeg', addComponent: 'AddProductPage', editComponent: 'EditProductPage'},
+      {name: 'Sizes', type: 'Sizes', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
+    ];
   }
 
+  setDefaultSettings() {
+    return [
+      {name: 'App Customizations and Settings', img: 'img/app-settings.jpeg', component: 'AppCustomizationsPage' },
+      {name: 'App Images', img: 'img/app-images.jpeg', component: 'AppImagesPage' },
+      {name: 'Admin Passwords', img: 'img/admin-passwords.jpeg', component: 'EditPasswordsPage', type: CONST_PASSWORD_TYPES.ADMIN },
+      {name: 'Owner Passwords', img: 'img/owner-passwords.jpg', component: 'EditPasswordsPage', type: CONST_PASSWORD_TYPES.OWNER },
+    ];
+  }
   concatConditionalPages(pages) {
     if (this.companyDetails.hasVariety) {
       pages = [...pages, {name: 'Variety', img: 'img/variety.jpeg', addComponent: 'AddDairyVarietySweetenerPage', editComponent: 'EditDairyVarietySweetenerPage', type: "Variety"}];
