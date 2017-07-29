@@ -29,9 +29,7 @@ export class EditRewardIndividualPage extends BaseViewController {
   PROCESSING_TYPE = CONST_PROCESSING_TYPE;
   DISCOUNT_TYPE = CONST_DISCOUNT_TYPE;
   DISCOUNT_RULE = CONST_DISCOUNT_RULE;
-  lkps: any = {
-    individualRewardTypes: []
-  }
+  individualRewardTypes: Array<string> = [];
   doCallGetProducts: boolean = true;
   isSubmitted: boolean;
   editOid: number = null;
@@ -65,7 +63,7 @@ export class EditRewardIndividualPage extends BaseViewController {
         img: [''],
         description: ['', Validators.compose([Validators.required, Validators.maxLength(200)])],
         exclusions: ['', Validators.compose([Validators.maxLength(200)])],
-        lkpRewardIndividualTypeOid: [null, Validators.required],
+        individualRewardType: [null, Validators.required],
       //  hasExpiryDate: [false, Validators.required],
       // isFreePurchaseItem: [true, Validators.required],
       // expiryDate: ['']
@@ -85,15 +83,16 @@ export class EditRewardIndividualPage extends BaseViewController {
 
 
     // get lkps
-    this.API.stack(ROUTES.getLkpsIndividualRewardTypes + `/${this.auth.companyOid}`, "GET")
+    this.API.stack(ROUTES.getRewardIndividualTypes + `/${this.auth.companyOid}/created-edit`, "GET")
       .subscribe(
           (response) => {
-            this.lkps.individualRewardTypes = response.data.individualRewardTypes;
-            this.getEditValues();
+            this.values = response.data.individualRewardTypes;
+           // this.getEditValues();
             console.log('response.data: ', response.data);
-          },this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+            this.dismissLoading();
+          },this.errorHandler(this.ERROR_TYPES.API));
   }
-
+/*
   getEditValues(): void {
     this.API.stack(ROUTES.getRewardsIndividualNameAndOid + `/${this.auth.companyOid}`, "GET")
         .subscribe(
@@ -103,14 +102,14 @@ export class EditRewardIndividualPage extends BaseViewController {
               console.log('response.data: ', response.data);
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
-
+*/
   getRewardIndividual(): void {
     this.presentLoading();
-    this.API.stack(ROUTES.getRewardIndividualToEdit + `/${this.editOid}`, "GET")
+    this.API.stack(ROUTES.getRewardIndividualTypes + `/${this.editOid}`, "GET")
       .subscribe(
           (response) => {
             this.dismissLoading();
-            let { name, img, description, exclusions, hasExpiryDate, expiryDate, isFreePurchaseItem, lkpRewardIndividualTypeOid } = response.data.reward;
+            let { name, img, description, exclusions, hasExpiryDate, expiryDate, isFreePurchaseItem, individualRewardType } = response.data.reward;
             this.myForm.patchValue({
               name, 
               img, 
@@ -119,7 +118,7 @@ export class EditRewardIndividualPage extends BaseViewController {
               hasExpiryDate, 
               expiryDate: new Date(expiryDate).toISOString(), 
               isFreePurchaseItem, 
-              lkpRewardIndividualTypeOid
+              individualRewardType
             });
 
             // init everything

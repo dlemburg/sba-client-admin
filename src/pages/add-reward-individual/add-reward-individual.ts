@@ -1,18 +1,17 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl} from '@angular/forms';
+import { FormBuilder, Validators} from '@angular/forms';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { Platform, IonicPage, NavController, NavParams, AlertController, ToastController, ModalController, LoadingController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
 import { AuthUserInfo } from '../../models/models';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
-import { Camera, CameraOptions } from '@ionic-native/camera';
-import { Transfer, FileUploadOptions, TransferObject } from '@ionic-native/transfer';
+import { Camera } from '@ionic-native/camera';
+import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
-import { CONST_APP_IMGS, CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
+import { CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { DateUtils } from '../../utils/date-utils';
-import { AppUtils } from '../../utils/app-utils';
 import { Utils } from '../../utils/utils';
 
 @IonicPage()
@@ -31,9 +30,7 @@ export class AddRewardIndividualPage extends BaseViewController {
   DISCOUNT_TYPE = CONST_DISCOUNT_TYPE;
   DISCOUNT_RULE = CONST_DISCOUNT_RULE;
   
-  lkps: any = {
-    individualRewardTypes: []
-  }
+  individualRewardTypes:Array<any> = [];
   doCallGetProducts: boolean = true;
   isSubmitted: boolean;
   img: string = null;
@@ -62,7 +59,7 @@ export class AddRewardIndividualPage extends BaseViewController {
       img: [null],
       description: [null, Validators.compose([Validators.required, Validators.maxLength(200)])],
       exclusions: [null, Validators.compose([Validators.maxLength(200)])],
-      lkpRewardIndividualTypeOid: [null, Validators.required],
+      individualRewardType: [null, Validators.required],
     /*  hasExpiryDate: [false, Validators.required], */
      // isFreePurchaseItem: [true, Validators.required],
      // expiryDate: [null]
@@ -71,7 +68,7 @@ export class AddRewardIndividualPage extends BaseViewController {
 
   ionViewDidLoad() {
     this.auth = this.authentication.getCurrentUser();
-    this.days = AppUtils.getDays();
+    this.days = Utils.getDays();
     this.presentLoading();
 
     // SUBSCRIBE TO FORM
@@ -80,11 +77,11 @@ export class AddRewardIndividualPage extends BaseViewController {
    // this.myForm.get('hasExpiryDate').valueChanges.subscribe(data => this.onHasExpiryDateChanged(data));
 
     // get lkps
-    this.API.stack(ROUTES.getLkpsIndividualRewardTypes + `/${this.auth.companyOid}`, "GET")
+    this.API.stack(ROUTES.getRewardIndividualTypes + `/${this.auth.companyOid}/uncreated-add`, "GET")
       .subscribe(
           (response) => {
             this.dismissLoading();
-            this.lkps.individualRewardTypes = response.data.individualRewardTypes;
+            this.individualRewardTypes = response.data.individualRewardTypes;
             console.log('response.data: ', response.data);
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
@@ -93,8 +90,6 @@ export class AddRewardIndividualPage extends BaseViewController {
     let modal = this.modalCtrl.create('ExplanationsPage', {type: "RewardsIndividual"}, {enableBackdropDismiss: true, showBackdrop: true})
     modal.present();
   }
-
-
 
   onHasExpiryDateChanged(data): void {
     // change validation/errors

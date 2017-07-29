@@ -68,14 +68,14 @@
           <ion-col>
             <ion-item>
               <ion-label floating>Location Latitude</ion-label>
-              <ion-input type="text" formControlName="coordsLong"></ion-input>
+              <ion-input type="text" formControlName="coordsLat"></ion-input>
             </ion-item>
             <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.coordsLat"></control-messages>
           </ion-col>
           <ion-col>
             <ion-item>
               <ion-label floating>Location Longitude</ion-label>
-              <ion-input type="text" formControlName="coordsLat"></ion-input>
+              <ion-input type="text" formControlName="coordsLong"></ion-input>
             </ion-item>
             <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.coordsLong"></control-messages>
           </ion-col>
@@ -187,7 +187,7 @@
             <ion-col col-3 > Thursday </ion-col>
             <ion-col col-3 *ngIf="myForm.controls.thursdayOpen.value !== 'closed'">
               <ion-item>
-                <ion-datetime formControlName="thursdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
+                <ion-datetime formControlName="thursdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a" (ionChange)="dateChange($event)"></ion-datetime>
               </ion-item>
               <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.thursdayOpen"></control-messages>
             </ion-col> 

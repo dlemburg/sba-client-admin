@@ -15,13 +15,16 @@
 <ion-content padding class="width-100">
   <div class="width-90 align-center">
     <h4 text-center>Descriptive Info</h4>
-    <ion-item color="primary" text-wrap>
-       All individual rewards will be generated automatically for the user when appropriate. These individual
-    rewards will not be available for everyone; rather, they will be given to the user based on meeting at least one of the following criteria:
-    1.) A reward given for a birthday, 
-    2.) A reward given for the first time a user loads money onto the mobile card, and 3.) A reward given for when 
-    a user crosses the company point threshold amount currently in place. All of these are optional and are up to the company to implement.
-    </ion-item>
+   <ion-item margin-top color="primary" text-wrap><span class="bold"> Note:</span> 
+    <div>
+      All individual rewards will be generated automatically for the user when appropriate. These individual
+      rewards will not be available for everyone; rather, they will be given to the user based on meeting at least one of the following criteria:
+      <div>1.) A reward given for a birthday </div>
+      <div>2.) A reward given for the first time a user loads money onto the mobile card</div>
+      <div>3.) A reward given for when a user crosses the company point threshold amount currently in place. All of these are optional and are up to the company to implement.</div>
+    </div>
+    <div class="margin-top individual-rewards-not-enabled" *ngIf="!individualRewardTypes.length">***You have not created any individual rewards yet!***</div>
+  </ion-item>
     <ion-list margin-top>
       <ion-item class="outline">
         <ion-label>Select the individual reward to edit</ion-label>

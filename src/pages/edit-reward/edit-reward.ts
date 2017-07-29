@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Validation } from '../../utils/validation-utils';
-import { AppUtils } from '../../utils/app-utils';
 import { INameAndOid, AuthUserInfo } from '../../models/models';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
@@ -93,7 +92,7 @@ constructor(
     /*** going to have to do something with dateRuleTimeStart and dateRuleTimeEnd- 
      * coming in as number (changed it to make server call easier), need to get it to ISO string for client***/
     
-    this.days = AppUtils.getDays();
+    this.days = Utils.getDays();
     this.auth = this.authentication.getCurrentUser();
 
     // SUBSCRIBE TO FORM

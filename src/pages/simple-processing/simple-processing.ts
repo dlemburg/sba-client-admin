@@ -23,7 +23,8 @@ export class SimpleProcessingPage extends BaseViewController {
     companyOid: null,
     socialMediaType: null,
     isSocialMediaUsed: false,
-    balance: 0
+    balance: 0,
+    rewardsSavings: 0
   };
   total: string = null;
   taxes: number = 0;
@@ -109,7 +110,8 @@ export class SimpleProcessingPage extends BaseViewController {
             let modal = this.modalCtrl.create("EditSubtotalPage", {subtotal: this.total, type: "total"});
             modal.present();
             modal.onDidDismiss((data) => {
-              if (data.total) {
+              if (data.subtotal) {
+                this.userData.rewardsSavings = +this.total - data.subtotal;
                 this.total = data.subtotal;
                 this.reasonForEdit = data.reasonForEdit
               }
@@ -170,6 +172,7 @@ export class SimpleProcessingPage extends BaseViewController {
   }
 
   finishOnScanUserBarcode(barcodeUserData: IBarcodeUserData) {
+    this.userData.userOid = barcodeUserData.userOid;
     this.barcodeUserData = barcodeUserData;
     this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType});
   }
@@ -269,15 +272,17 @@ export class SimpleProcessingPage extends BaseViewController {
 
       const toData = {
         companyOid: this.auth.companyOid,
+        userOid: this.userData.userOid,
         locationOid: this.auth.locationOid,
         total: this.total,
         subtotal: subtotal,
         reasonForEdit: this.reasonForEdit,
         taxes: taxes,
+        rewardsSavings: this.userData.rewardsSavings,
         isRewardUsed: this.isRewardUsed,
         isRewardIndividualUsed: this.dataFromRewardIndividualBarcodeScan.type === CONST_REWARDS_TYPES.REWARDS_INDIVIDUAL,
         isSocialMediaUsed: this.userData.isSocialMediaUsed,
-        lkpSocialMediaTypeOid: this.userData.socialMediaType,
+        socialMediaType: this.userData.socialMediaType,
         purchaseDate: DateUtils.toLocalIsoString(new Date().toString()),
         employeeComments: this.employeeComments
       }

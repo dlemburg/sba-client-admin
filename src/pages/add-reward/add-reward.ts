@@ -120,7 +120,7 @@ export class AddRewardPage extends BaseViewController {
  
 
   discountRuleChanged(event): void {
-    this.currentDiscountRule = this.getCurrentDiscountRule(event);
+    this.currentDiscountRule = event ? this.getCurrentDiscountRule(event) : null;
 
     const conditions = this.doCallGetProducts && this.currentDiscountRule === this.DISCOUNT_RULE.PRODUCT;
     if (conditions) {

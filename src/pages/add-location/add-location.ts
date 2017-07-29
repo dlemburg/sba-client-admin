@@ -224,6 +224,11 @@ export class AddLocationPage extends BaseViewController {
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 
+  dateChange(event) {
+    //test
+    //debugger;
+  }
+
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
       this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {

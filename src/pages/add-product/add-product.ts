@@ -64,7 +64,7 @@ export class AddProductPage extends BaseViewController {
         super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
     this.myForm = this.formBuilder.group({
-      name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
+      name: ['', Validators.compose([Validators.required, Validators.maxLength(45)])],
       img: [null],
       caloriesLow: ['', Validators.compose([Validation.test("isAboveZero"), Validation.test("isNumbersOnly")])],
       caloriesHigh: ['', Validators.compose([Validation.test("isAboveZero"), Validation.test("isNumbersOnly")])],
