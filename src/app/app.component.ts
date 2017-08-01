@@ -38,7 +38,8 @@ export class MyApp {
     this.pages = [
       {name: "Home", component: "TabsPage"},
       {name: "Menu", component: "CategoriesPage"},
-      {name: "Transactions", component: "TransactionsPage"}
+      {name: "Transactions", component: "TransactionsPage"},
+      {name: "Rewards", component: "RewardsPage"}
     ];
 
     /*

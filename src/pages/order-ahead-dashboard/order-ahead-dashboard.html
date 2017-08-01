@@ -40,7 +40,7 @@
             <button (click)="onProcessOrder(order, i)" class="process-btn" color="secondary" ion-button outline no-margin>Process</button>
           </ion-col>
           <ion-col *ngIf="order.isProcessing" text-right>
-            <button (click)="onSetIsActiveFalse(order, i)" class="process-btn" color="danger" ion-button outline no-margin>Clear</button>
+            <button (click)="onSetInactive(order, i)" class="process-btn" color="danger" ion-button outline no-margin>Clear</button>
           </ion-col>
         </ion-row>
       </ion-card-header>
@@ -68,9 +68,10 @@
               <span *ngIf="order.total" class="bold">Total: </span>
               <span class="total bold">{{ order.total | currency:symbolDisplay:true }}</span>
             </div>
-            <div *ngIf="order.isExpired" margin-top text-center>
+            <div *ngIf="order.isExpired && !order.customerNeverPickedUp" margin-top text-center>
               <button (click)="customerNeverPickedUp(order, i)" color="danger" ion-button outline no-margin>Customer never picked up</button>
             </div>
+            <div *ngIf="order.customerNeverPickedUp" class="customer-never-picked-up" text-center>Customer didn't pick up this order</div>
           </div>
       </ion-card-content>
     </ion-card>

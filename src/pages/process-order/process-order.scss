@@ -158,6 +158,16 @@ page-process-order {
         font-size: 12px !important;
     }
 
+    .discounts-move-left {
+        position: relative !important;
+        right: 5px !important;
+    }
+
+    .taxes-move-right {
+        position: relative !important;
+        left: 10px !important;
+    }
+
     .reasons-for-edit-btn {
         color: map-get($colors, danger);
         border-color: map-get($colors, danger); 

@@ -37,16 +37,28 @@ export class OrderAheadDashboardPage extends BaseViewController {
     });
   }
 
+  /* EVENTS THAT CAN HAPPEN ON THIS PAGE
+  - incoming order (socket -> ionic event)
+  - process
+  - clear active
+  - customer never picked up
+
+  */
+
   ionViewDidLoad() {
     console.log("hello world")
-    //debugger;
+    
     /* w/ observer pattern
     this.connection = this.socketService.on(this.socketService.events.incomingNewOrder).subscribe( (data) => {
       this.onIncomingNewOrder(data);
     });
     */
-    this.getActiveOrders();
-    
+    this.getActiveOrders(); 
+  }
+
+  ionViewDidLeave() {
+    clearInterval(this.setIntervalHandler);
+    //this.connection.unsubscribe();
   }
 
   ionViewDidEnter() {
@@ -58,9 +70,10 @@ export class OrderAheadDashboardPage extends BaseViewController {
 
   // fn callback for socket-events listener runs the orders through the same process as ionViewDidLoad
   onIncomingNewOrder(response) {
+
      let data = response.data;
      let order: Array<IOrderAhead> = this.setArrivalDates([data]);  // the new order
-     this.setTimerInterval();    // set arrival times
+     this.setTimerIntervalForEachOrder(this.orders);    // set arrival times
      this.orders = this.sortOrders([...this.orders, ...order]);  // sort orders by arrival times
   }
 
@@ -76,7 +89,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
                 console.log('response.data: ', response.data);
 
                 this.orders = this.setArrivalDates(response.data.activeOrders);
-                this.setTimerInterval(); 
+                this.setTimerIntervalForEachOrder(this.orders); 
                 this.orders = this.sortOrders(response.data.activeOrders);
 
                 this.dismissLoading();
@@ -114,20 +127,20 @@ export class OrderAheadDashboardPage extends BaseViewController {
     return orders;
   }
 
-  setTimerInterval(): void {
+  setTimerIntervalForEachOrder(orders): void {
     if (this.setIntervalHandler) clearInterval(this.setIntervalHandler);
 
     if (this.orders.length) {
-      this.runOrderTimers();  // runs on first tick
+      this.runOrderTimers(orders);  // runs on first tick
       this.setIntervalHandler = setInterval(() => {
-        this.runOrderTimers();
+        this.runOrderTimers(orders);
       }, 1000);
     }
   }
 
-  runOrderTimers(): void {
-    this.orders.forEach((x, index) => {
-     // debugger;
+  runOrderTimers(orders): void {
+    orders.forEach((x, index) => {
+     
       if (!x.isExpired) {
         let timeLeft = x.arrivalDate.getTime() - new Date().getTime();
 
@@ -138,7 +151,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
         if (x.arrivalSeconds < 10) x.arrivalSeconds = '0' + x.arrivalSeconds;
 
         // doesn't need to be async b/c handled on client side as well
-        if (x.isExpired) this.setOrderToIsExpired(x);
+        if (x.isExpired) this.setOrderExpired(x);
       }
     });
   }
@@ -146,6 +159,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
   onRefreshScreen() {}
 
   onProcessOrder(order, index): void {
+
     let toData = { 
       companyOid: this.auth.companyOid,
       transactionOid: order.transactionOid,
@@ -159,11 +173,13 @@ export class OrderAheadDashboardPage extends BaseViewController {
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  onSetIsActiveFalse(order, index) {
+  onSetInactive(order, index) {
+
     const toData = {
       transactionOid: order.transactionOid,
       userOid: order.userOid,
-      companyOid: this.auth.companyOid
+      companyOid: this.auth.companyOid,
+      customerNeverPickedUp: order.customerNeverPickedUp
     }
     // set isActive false
     this.API.stack(ROUTES.clearActiveOrderForOrderAhead, "POST", toData)
@@ -177,7 +193,8 @@ export class OrderAheadDashboardPage extends BaseViewController {
             }, this.errorHandler(this.ERROR_TYPES.API)); 
   }
 
-  setOrderToIsExpired(order) {
+  setOrderExpired(order) {
+
     // API 
     let toData = { 
       companyOid: this.auth.companyOid,
@@ -191,8 +208,9 @@ export class OrderAheadDashboardPage extends BaseViewController {
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  ionViewDidLeave() {
-    clearInterval(this.setIntervalHandler);
-    //this.connection.unsubscribe();
+  customerNeverPickedUp(order, index) {
+    order.customerNeverPickedUp = true;
   }
+
+  
 }

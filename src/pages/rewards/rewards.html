@@ -9,16 +9,16 @@
 
 <ion-content no-padding>
   <div class="rewards-top" text-center>
+    <!--
      <ion-card class="hover ion-card-top" no-padding no-margin>
         <img [src]="rewardImgSrc"/>
         <CompanyLogo [logo]="logoImgSrc"></CompanyLogo>
       </ion-card>
-      <div class="reward-card-container" text-center>
-        <div margin-top *ngIf="!rewards.length">
-          <ion-card>
-            <ion-card-content text-center>No results match your search.</ion-card-content>
-          </ion-card>
-        </div>
+    -->
+
+      <div class="margin-top reward-card-container" text-center>
+        <EmptyMessage *ngIf="!rewards.length" message="rewards"></EmptyMessage>
+        
         <ion-card tappable class=" reward-card" (click)="navRewardDetails(x)" *ngFor="let x of rewards" no-padding no-margin>
           <img [src]="x.imgSrc" onError="this.src='img/default.png';"/>
           <div class="reward-card-title">{{x.name}}</div>

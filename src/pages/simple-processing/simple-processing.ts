@@ -243,6 +243,7 @@ export class SimpleProcessingPage extends BaseViewController {
     // on dismiss: make api call to get userInfo
     let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
     enterMobileCardIdModal.onDidDismiss((data) => {
+      debugger;
       if (data && data.mobileCardId) {
          this.getUserDataForProcessOrderAPI(data.mobileCardId, CONST_ID_TYPES.PAYMENT);
       }

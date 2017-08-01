@@ -167,7 +167,7 @@ export const ROUTES = {
     processTransactionSimpleProcessing: '/api/cs/shared/processTransactionSimpleProcessing',
     getCompanyDetailsForTransaction: '/api/cs/shared/getCompanyDetailsForTransaction',
     getActiveOrders: '/api/cs/owner/getActiveOrders',
-    clearActiveOrderForOrderAhead: '/api/cs/ownwer/clearActiveOrderForOrderAhead',
+    clearActiveOrderForOrderAhead: '/api/cs/owner/clearActiveOrderForOrderAhead',
     processActiveOrderForOrderAheadRequest: '/api/cs/owner/processActiveOrderForOrderAheadRequest',
     loginSelectLocationAndReturnToken: '/api/cs/auth/loginSelectLocationAndReturnToken',
     processActiveOrderForOrderAhead: '/api/cs/owner/processActiveOrderForOrderAhead',

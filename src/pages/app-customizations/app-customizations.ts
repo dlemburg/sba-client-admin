@@ -77,7 +77,7 @@ export class AppCustomizationsPage extends BaseViewController {
       socialMediaMessageTwitter: [null],
       socialMediaImg: [null],
       pointsThreshold: [0, Validation.test("isNumbersOnly")],
-      pointsPerFiftyCents: [0, Validation.test("isNumbersOnly")],
+      pointsPerDollar: [0, Validation.test("isNumbersOnly")],
       hasPrinter: [false],
       acceptsPartialPayments: [false],
       homeScreenMyMobileCardSubtitle: [null],

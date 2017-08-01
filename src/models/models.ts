@@ -48,7 +48,7 @@ export interface ITransactionDetails {
     rewardsSavings: number;
     isSocialMediaUsed: boolean;
     socialMediaType: string;
-    socialMediaPointsBonus: number;
+    socialMediaPointsBonus?: number;
     isEdited: boolean;
     editAmount: number;
     reasonsForEdit: Array<any>;
@@ -394,7 +394,7 @@ export interface ICompanyDetails {
     allowsCommentsOnOrderAhead?: boolean;
 }
 
-export interface IGetEligibleRewardsProcessingTypeAutomaticForTransactionRequest {
+export interface IGetEligibleRewardsToData {
     date: string;
     day: number;
     hours: number;
@@ -424,4 +424,23 @@ export interface IClientAdminAppStartupInfoResponse {
   currentClientAdminVersionNumber: number;
   minClientAdminVersionNumber: number;
   mustUpdateClientAdminApp: boolean;
+}
+
+export interface IProcessOrderToData {
+    companyOid: number;
+    locationOid: number; 
+    userOid: number;
+    userEmail: string;
+    isOrderAhead: boolean;
+    eta: number;
+    employeeComment: string;
+    purchaseDate: string;
+    purchaseItems: Array<IPurchaseItem>;
+    transactionDetails: ITransactionDetails;
+}
+
+export interface IOrderConfirmation {
+  isConfirmed:boolean;
+  doesWantReceipt:boolean;
+  receiptType?:string
 }

@@ -26,4 +26,10 @@ page-order-ahead-dashboard {
     .name, .arriving {
         font-size: 12px !important;
     }
+
+    .customer-never-picked-up {
+        background-color: map-get($colors, danger);
+        color: white;
+        font-size: 18px;
+    }
 }

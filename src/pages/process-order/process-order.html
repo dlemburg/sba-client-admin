@@ -4,17 +4,18 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-buttons end>
-      <button class="comment-icon" *ngIf="currentIndex === 1" ion-button icon-only (click)="presentCommentModal()">
+      <button class="comment-icon" *ngIf="currentSlideIndex === 1" ion-button icon-only (click)="presentCommentModal()">
         <ion-icon  ios="ios-create" md="ios-create"></ion-icon>
       </button>
-      <button class="comment-icon" *ngIf="currentIndex === 1" ion-button icon-only (click)="presentEnterMobileCardIdModal()">
+      <button class="comment-icon" *ngIf="currentSlideIndex === 1" ion-button icon-only (click)="presentEnterMobileCardIdModal()">
         <ion-icon  ios="ios-unlock" md="md-unlock"></ion-icon>
       </button>
-       <ion-icon *ngIf="currentIndex === 0" class="subtotal-header">
+       <ion-icon *ngIf="currentSlideIndex === 0" class="subtotal-header">
           <span *ngIf="!order.transactionDetails.subtotal" color="primary">$0.00</span>
           <span *ngIf="order.transactionDetails.subtotal" color="primary">{{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
         </ion-icon>
     </ion-buttons>
+    <ion-title *ngIf="isEditInProgress.status">Edit-In-Progress...</ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -32,14 +33,14 @@
             <button 
               (click)="presentCategoriesModal()" 
               class="width-90 align-center process-order-header-btn" 
-              [ngClass]="{'process-order-header-btn-not-selected': !currentCategoryName, 'process-order-header-btn-selected': currentCategoryName}"
+              [ngClass]="{'process-order-header-btn-not-selected': !currentCategory.name, 'process-order-header-btn-selected': currentCategory.name}"
               ion-button 
               outline
               block>
-              <ion-col class="align-center bold" *ngIf="!currentCategoryName">Category </ion-col>
-              <ion-col class="align-center" col-9 *ngIf="currentCategoryName">{{ currentCategoryName }}</ion-col>
-              <ion-col text-left col-3 *ngIf="currentCategoryName">
-                <img class="rounded-edges" [src]="currentCategoryImgSrc" onError="this.src='img/default.png';" />
+              <ion-col class="align-center bold" *ngIf="!currentCategory.name">Category </ion-col>
+              <ion-col class="align-center" col-9 *ngIf="currentCategory.name">{{ currentCategory.name }}</ion-col>
+              <ion-col text-left col-3 *ngIf="currentCategory.name">
+                <img class="rounded-edges" [src]="currentCategory.imgSrc" onError="this.src='img/default.png';" />
               </ion-col>
             </button>
           </ion-col>
@@ -59,7 +60,7 @@
               <ion-col class="bold" *ngIf="!purchaseItem.selectedProduct.name">Product</ion-col>
               <ion-col class="align-center" col-9 *ngIf="purchaseItem.selectedProduct.name">{{ purchaseItem.selectedProduct.name }}</ion-col>
               <ion-col text-left col-3 *ngIf="purchaseItem.selectedProduct.name">
-                <img class="rounded-edges" [src]="currentProductImgSrc" onError="this.src='img/default.png';"/>
+                <img class="rounded-edges" [src]="currentProduct.imgSrc" onError="this.src='img/default.png';"/>
               </ion-col>
             </ion-row>
             </button>
@@ -68,7 +69,7 @@
 
 
         <!-- order details -->
-        <div *ngIf="currentCategoryOid && purchaseItem.selectedProduct">
+        <div *ngIf="currentCategory.oid && purchaseItem.selectedProduct">
           <div margin-top class="align-center product-details-container">
             <div *ngIf="isEditInProgress.status">What would you like to add to the order?</div>
 
@@ -172,7 +173,7 @@
           </div>
         </div>
         <button margin-top 
-                *ngIf="!isEditInProgress.status && currentCategoryOid && purchaseItem.selectedProduct && purchaseItem.selectedProduct.name" 
+                *ngIf="!isEditInProgress.status && currentCategory.oid && purchaseItem.selectedProduct && purchaseItem.selectedProduct.name" 
                 class="width-50" 
                 ion-button outline 
                 (click)="addToOrder(purchaseItem)">Add to Order</button>
@@ -208,7 +209,7 @@
                       </div>
                       <div *ngIf="x.addons && x.addons.length && x.addonsCost"><span class="bold">Total add-ons cost: {{ x.addonsCost * x.quantity | currency:symbolDisplay:true }} </span></div>
                     </div>
-                    <button class="" *ngIf="!isEditInProgress.status && isEditInProgress.index !== i" color="danger" ion-button full outline (click)="removePurchaseItemFromOrder(x, i)">Remove</button>
+                    <button class="" *ngIf="!isEditInProgress.status && isEditInProgress.index !== i" color="danger" ion-button full outline (click)="removePurchaseItemFromOrder(order,x, i)">Remove</button>
                     <div *ngIf="isEditInProgress.status && (isEditInProgress.index === i)"  class="edit-in-progress-text">Edit-in-progress</div>
                   </ion-card-content>
                 </ion-card>
@@ -236,62 +237,55 @@
     <ion-slide class="">
       <div class="slide-margin-bottom width-80 align-center">
         <h4>Complete Transaction</h4>
-        <ion-list class="customer-info-list">
-          <ion-row>
             <button ion-item (click)="showOrder = !showOrder">Order Items
               <span *ngIf="order.purchaseItems.length">({{ order.purchaseItems.length }})</span>
             </button>
             <div *ngIf="showOrder">
-              <ion-card *ngFor="let x of order.purchaseItems; let i = index;">
-                <ion-card-content>
-                  <div>
-                    <ion-col>
-                      <span>{{ x.quantity }} <span *ngIf="x.sizeAndOrPrice.name">{{ x.sizeAndOrPrice.name }}</span> {{ x.selectedProduct.name }}</span>
-                    </ion-col>
-                     <ion-col>
-                      <span text-right>{{ x.displayPriceWithoutDiscounts | currency:symbolDisplay:true}}</span>
-                    </ion-col>
-                    <ion-col class="discounts" *ngIf="x.discounts"> - {{ x.discounts | currency:symbolDisplay:true }} </ion-col>
-                  </div>
-                </ion-card-content>
-              </ion-card>
-              <div class="font-12">*Price includes the cost of extras</div>
-
+              <ion-item *ngFor="let x of order.purchaseItems; let i = index;">
+                <ion-row>
+                  <ion-col text-left col-9>
+                    <span>{{ x.quantity }} <span *ngIf="x.sizeAndOrPrice.name">{{ x.sizeAndOrPrice.name }}</span> {{ x.selectedProduct.name }}</span>
+                  </ion-col>
+                  <ion-col text-right col-3>
+                    <span text-right>{{ x.displayPriceWithoutDiscounts | currency:symbolDisplay:true}}</span>
+                  </ion-col>
+                </ion-row>
+                <div class="discounts" *ngIf="x.discounts"> - {{ x.discounts | currency:symbolDisplay:true }} </div>
+                <div *ngIf="x.addonsCost" class="font-12">*Price includes the cost of addons: {{ x.addonsCost }}</div>
+              </ion-item>
             </div>
-          </ion-row>
-          <ion-row>
             <button ion-item (click)="showRewards = !showRewards">Rewards 
               <span *ngIf="order.transactionDetails.rewards.length">({{ order.transactionDetails.rewards.length }})</span>
             </button>
-          </ion-row>
           <div *ngIf="showRewards">
-            <ion-card *ngFor="let x of order.transactionDetails.rewards; let i = index;">
-              <ion-card-content>
+            <ion-item *ngFor="let x of order.transactionDetails.rewards; let i = index;">
                 <div  class="width-80 align-center">
-                  <div>
-                    <span class="bold">{{x.name}}</span>
-                  </div>
-                  <div> {{ x.description }} </div>
-                  <div class="discounts" *ngIf="x.discountRule === REWARDS_DISCOUNT_RULE.PRODUCT">
-                    <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.PERCENT || x.discountType === REWARDS_DISCOUNT_TYPE.NEW_PRICE">
-                     <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
-                    </div>
-                    <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.MONEY">
-                     <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
-                    </div>
-                  </div>
-                  <!-- x.discount does not come from server- its a client prop given to track the discount of dtr -->
-                  <div class="discounts" *ngIf="x.discounts && x.discountRule === REWARDS_DISCOUNT_RULE.DATE_TIME_RANGE">
-                    <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.PERCENT"> 
-                      <span>Discount amount on order: </span>{{ x.discount.amount }}%
-                    </div>
-                    <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.MONEY">                     
-                      <span>Discount amount on order: </span> {{ x.discount.amount  | currency:symbolDisplay:true }}
-                    </div>
-                  </div>
+                  <ion-row>
+                    <ion-col>
+                      <span class="bold">{{x.name}}</span>
+                    </ion-col>
+                    <ion-col>
+                      <div class="discounts" *ngIf="x.discountRule === REWARDS_DISCOUNT_RULE.PRODUCT">
+                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.PERCENT || x.discountType === REWARDS_DISCOUNT_TYPE.NEW_PRICE">
+                        <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
+                        </div>
+                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.MONEY">
+                        <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
+                        </div>
+                      </div>
+                      <!-- x.discount does not come from server- its a client prop given to track the discount of dtr -->
+                      <div class="discounts" *ngIf="x.discounts && x.discountRule === REWARDS_DISCOUNT_RULE.DATE_TIME_RANGE">
+                        <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.PERCENT"> 
+                          <span>Discount amount on order: </span>{{ x.discount.amount }}%
+                        </div>
+                        <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.MONEY">                     
+                          <span>Discount amount on order: </span> {{ x.discount.amount  | currency:symbolDisplay:true }}
+                        </div>
+                      </div>
+                    </ion-col>
+                  </ion-row>
                 </div>
-              </ion-card-content>
-            </ion-card>
+            </ion-item>
           </div>
 
           <!--BUTTONS... REMINDER: only individual rewards can be scanned -->
@@ -315,9 +309,10 @@
             <button margin-top ion-button color="primary" outline (click)="onScanIndividualRewardBarcode()">Scan Individual Reward</button>
           </div>
           -->
+        <ion-list class="customer-info-list">
           <ion-item margin-top>
             <span>Subtotal:</span> 
-            <div tappable (click)="onEditSubtotal()" text-right> 
+            <div tappable (click)="presentEditSubtotalModal()" text-right> 
               <span *ngIf="order.transactionDetails.subtotal" class="edit-subtotal-background"> {{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
               <span *ngIf="!order.transactionDetails.subtotal" class="edit-subtotal-background">$0.00</span>
             </div>
@@ -326,22 +321,20 @@
               <span>
                 The subtotal has been edited by: {{ order.transactionDetails.editAmount | currency:symbolDisplay:true }}
               </span>
-
             </div>
           </ion-item> 
           <ion-item *ngIf="order.transactionDetails.rewardsSavings && order.transactionDetails.rewardsSavings > 0">
               <span>Discounts:</span> 
-              <div text-right class="discounts">- {{ order.transactionDetails.rewardsSavings | currency:symbolDisplay:true }}</div>
+              <div text-right class="discounts discounts-move-left">- {{ order.transactionDetails.rewardsSavings | currency:symbolDisplay:true }}</div>
           </ion-item>
           <ion-item>
             <span>Estimated Tax:</span> 
-            <div text-right> {{ order.transactionDetails.taxes | currency:symbolDisplay:true }}</div>
+            <div text-right><span class="bold taxes-move-right"> {{ order.transactionDetails.taxes | currency:symbolDisplay:true }}</span></div>
           </ion-item>
           <ion-item>
             <span>Total:</span> 
             <div class="inline-total" text-right>{{ order.transactionDetails.total | currency:symbolDisplay:true }}</div>
           </ion-item>
-          
         </ion-list>
       </div>
       <ion-footer>

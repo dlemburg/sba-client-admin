@@ -33,11 +33,16 @@ export class RewardsPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
-    const currentDate = DateUtils.toLocalIsoString(new Date().toString());
+   // const currentDate = DateUtils.toLocalIsoString(new Date().toString());
     
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
-    this.API.stack(ROUTES.getRewards + `/${this.auth.companyOid}/${currentDate}`, "GET")
+    let toData = {
+      companyOid: this.auth.companyOid,
+      date: DateUtils.toLocalIsoString(new Date().toString())
+    }
+    console.log("toData: ", toData);
+    this.API.stack(ROUTES.getRewards, "POST", toData)
         .subscribe(
             (response) => {
               this.rewards = Utils.getImgs(response.data.rewards);

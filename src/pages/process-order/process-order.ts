@@ -1,18 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
 import { Utils } from '../../utils/utils';
-import { IErrChecks, 
-        IBarcodeUserData, 
-        IBarcodeRewardData, 
-        ICompanyDetails, 
-        IOrder, 
-        IPurchaseItem, 
-        INameAndOid, 
-        IProductForProcessOrder, 
-        AuthUserInfo, 
-        IEditSubtotalDismiss, 
-        IUserDataForProcessOrder,
-        IGetEligibleRewardsProcessingTypeAutomaticForTransactionRequest } from '../../models/models';
+import { IBarcodeUserData, IBarcodeRewardData, ICompanyDetails, IOrder, IPurchaseItem, INameAndOid, IProductForProcessOrder, AuthUserInfo, IEditSubtotalDismiss, IUserDataForProcessOrder,IGetEligibleRewardsToData,IProcessOrderToData,IOrderConfirmation } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, Slides, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
@@ -23,18 +12,17 @@ import { CONST_ID_TYPES, CONST_RECEIPT_TYPES, CONST_REWARDS_TYPES, CONST_REWARDS
 import { NativeNotifications } from '../../global/native-notifications';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { Printer, PrintOptions } from '@ionic-native/printer';
+import { ProcessOrderUtils } from './process-order-utils';
 
-// cloneDeep(this.purchaseItem)
-// would rather copy by value with cloneDeep, but ionic?angular doesnt properly populate inputs with correct values
 @IonicPage()
 @Component({
   selector: 'page-process-order',
-  templateUrl: 'process-order.html'
+  templateUrl: 'process-order.html',
+  providers: [ProcessOrderUtils]
 })
 
 export class ProcessOrderPage extends BaseViewController {
   @ViewChild(Slides) slides: Slides;
-
   canViewProducts: boolean = false;
   initHasRun: boolean = false;
   rewards: Array<any> = [];
@@ -43,7 +31,7 @@ export class ProcessOrderPage extends BaseViewController {
   showEditBtn: boolean = false;
   dataFromRewardIndividualBarcodeScan: any = null;
   isUserBarcodeScanned: boolean = false;
-  currentIndex: number = 0;
+  currentSlideIndex: number = 0;
   selectedCategory: any;
   coupons: Array<any> = [];
   products: Array<INameAndOid> = [];
@@ -61,8 +49,6 @@ export class ProcessOrderPage extends BaseViewController {
   sufficientFunds: boolean = true;
   barcodeUserData: IBarcodeUserData;
   barcodeRewardData: IBarcodeRewardData;
-
-/* Constants */
   companyDetails: ICompanyDetails = {};
   ID_TYPES = CONST_ID_TYPES;
   REWARDS_TYPE = CONST_REWARDS_TYPES;
@@ -84,7 +70,7 @@ export class ProcessOrderPage extends BaseViewController {
       rewardsSavings: 0,
       isSocialMediaUsed: false,
       socialMediaType: null,
-      socialMediaPointsBonus: 0,
+     // socialMediaPointsBonus: 0,
       isEdited: false,
       editAmount: 0,
       reasonsForEdit: null,
@@ -101,7 +87,8 @@ export class ProcessOrderPage extends BaseViewController {
     dairy: [],
     variety: [],
     sweetener: [],
-    addonsCost: null,
+    addonsCost: 0,
+    dairyCost: 0,
     discounts: 0,
     displayPriceWithoutDiscounts: 0
   };
@@ -118,21 +105,13 @@ export class ProcessOrderPage extends BaseViewController {
     addonsPriceAboveLimit: null
   };
   quantities: Array<number> = Utils.getNumbersList();
-
-  isEditInProgress: any = {
-    status: false,
-    index: null
-  }
+  isEditInProgress: {status: boolean, index: number} = { status: false, index: null}
   showRewardDescription: boolean = false;
   showRewards: boolean = false;
   showOrder: boolean = false;
-  auth: AuthUserInfo;
-  currentCategoryOid: number = null;
-  currentCategoryName: string = null;
-  currentCategoryImgSrc: string = null;
-  currentProductOid: number;
-  currentProductImgSrc: string = null;
-  backgroundImg: string = 'url(../../../img/family.png) no-repeat;';   // will need to change this
+  auth: AuthUserInfo = this.authentication.getCurrentUser();
+  currentCategory: {oid: number, name: string, imgSrc: string} = {oid: null, name: null, imgSrc: ""};
+  currentProduct: { oid: number, name?: string, imgSrc: string } = { oid: null, name: null, imgSrc: ""};
 
   constructor(
     public navCtrl: NavController, 
@@ -145,188 +124,99 @@ export class ProcessOrderPage extends BaseViewController {
     public modalCtrl: ModalController, 
     public alertCtrl: AlertController, 
     public toastCtrl: ToastController, 
-    public loadingCtrl: LoadingController) {
+    public loadingCtrl: LoadingController,
+    public processOrderUtils: ProcessOrderUtils) {
       super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
-  ////////////////////////////////////////////////////////////// lifecycle methods //////////////////////////////////////////////////////////
+  ionViewDidLoad() { this.getCompanyDetails(); }
+  ionViewDidEnter() { this.initHasRun ? this.getCompanyDetails() : this.initHasRun = true; }
 
-  ionViewDidLoad() {
-    this.auth = this.authentication.getCurrentUser();
-    
-    this.getCompanyDetailsAPI();
-  }
-
-  ionViewDidEnter() {
-    if (this.initHasRun) {
-      this.getCompanyDetailsAPI();
-    }
-    this.initHasRun = true;
-  }
-
-// [compareWith]="compareFn"
-  compareFn(c1, c2): boolean {
-      return c1 && c2 ? c1.oid === c2.oid : c1 === c2;
-  }
-
-  findByOid(arr, oid) {
-    if (arr.length) {
-      return arr.find((x) => {
-        return x.oid === oid;
-      });
-    }
-  }
+  compareFn(c1, c2): boolean { return c1 && c2 ? c1.oid === c2.oid : c1 === c2;}   // [compareWith]="compareFn"
 
   slideChanged() {
-      const isGoingBack = this.currentIndex > this.slides.getActiveIndex();
-      this.currentIndex = this.slides.getActiveIndex();
-
-
-      /* 
-        1. All discounts change the subtotal, not product price. so clearing just resets subtotal to original value w/o discounts
-        2. Every time slide changes from slide 1 to 2, rewards and freePurchaseItem recalculated
-
-        if isGoingBack:  clears subtotal, rewardsSavings, rewards except for individual rewards, isEdited, reasonsForEdit
-        
-      */
-
-      if (this.order.purchaseItems.length) {
-        if (isGoingBack) {
-          this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
-          this.order.transactionDetails.total = 0;
-          this.order.transactionDetails.taxes = 0;
-          this.order.transactionDetails.rewardsSavings = 0;
-          this.order.transactionDetails.rewards = [...this.getIndividualRewards(this.order.transactionDetails.rewards)];
-          this.order.transactionDetails.isEdited = false;
-          this.order.transactionDetails.reasonsForEdit = [];
-          this.order.transactionDetails.editAmount = 0;
-          this.order.transactionDetails.isRewardUsed = false;
-
-          this.order.purchaseItems.forEach((x, index) => {
-            x.discounts = 0;
-            x.isFreePurchaseItem = false;
-          });
-          this.order.transactionDetails.rewards.forEach((x, index) => {
-            x.discounts = 0;
-          });
-
-        } else {
-            console.log("checking rewards....");
-            this.getEligibleRewards();
-        }
-      }
+    /* if isGoingBack: clear all transactionDetails... if isGoingForward: api call */
+    this.currentSlideIndex = this.slides.getActiveIndex();
+    if (this.order.purchaseItems.length && (this.currentSlideIndex > this.slides.getActiveIndex()) ) {
+      this.order.purchaseItems = this.order.purchaseItems.map((x, index) => {
+        x.discounts = 0;
+        x.isFreePurchaseItem = false;
+        return x;
+      });
+      this.order.transactionDetails = this.processOrderUtils.clearTransactionDetails(this.processOrderUtils.calculateSubtotal(this.order, this.companyDetails), this.order.transactionDetails);
+    } else this.getEligibleRewards();
   }
 
   btnSlideChange() {     
-    this.currentIndex += 1;
+    this.currentSlideIndex += 1;
     this.slides.slideNext();
   }
 
-
-  //////////////////////////////////////////////// end lifecycle ///////////////////////////////////////////////////////
-
-
-
-
-
-  ////////////////////////////////////////////////// APIs //////////////////////////////////////////////////////////////
-
-  //API doesn't need to be async
-  getCompanyDetailsAPI() {
+  getCompanyDetails() {
     this.presentLoading();
     this.API.stack(ROUTES.getCompanyDetailsForTransaction, "POST", {companyOid: this.auth.companyOid})
-        .subscribe(
-            (response) => {
-              console.log('response.data: ', response.data);
-              this.companyDetails = response.data.companyDetails;
-
-              this.getCategoriesAPI();
-
-            }, this.errorHandler(this.ERROR_TYPES.API));
+      .subscribe( (response) => {
+        this.companyDetails = response.data.companyDetails;
+        this.getCategories();
+      }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  getCategoriesAPI() {
-    this.API.stack(ROUTES.getCategories + `/${this.auth.companyOid}`, "GET")
-        .subscribe(
-            (response) => {
-              console.log('response.data: ', response.data);
-              this.dismissLoading();
-              this.categories = response.data.categories;
-            },this.errorHandler(this.ERROR_TYPES.API));
+  getCategories() {
     this.products = []; // reset products
+    this.API.stack(ROUTES.getCategories + `/${this.auth.companyOid}`, "GET")
+      .subscribe( (response) => {
+        this.dismissLoading();
+        this.categories = response.data.categories;
+      }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  onCategoryChangeGetProductsAPI(): void {
-     this.API.stack(ROUTES.getProducts + `/${this.auth.companyOid}/${this.currentCategoryOid}`, "GET")
-        .subscribe(
-            (response) => {
-              console.log('response.data: ' , response.data);
-              this.products = response.data.products;
-              this.productDetails = this.clearProductDetails();
-              this.purchaseItem = this.clearPurchaseItem();
-              this.canViewProducts = true;
-            }, this.errorHandler(this.ERROR_TYPES.API));
+  getCategoryInfo(currentCategory): void {
+    this.API.stack(ROUTES.getProducts + `/${this.auth.companyOid}/${currentCategory.oid}`, "GET")
+      .subscribe( (response) => {
+        this.products = response.data.products;
+        this.productDetails = this.processOrderUtils.clearProductDetails();
+        this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
+        this.canViewProducts = true;
+      }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  onProductChangeGetProductInfoAPI(currentProductOid) {
-     //let productOid = this.purchaseItem.selectedProduct.oid;
-
+  getProductInfo(currentProductOid) {     
      this.API.stack(ROUTES.getProductDetails + `/${this.auth.companyOid}/${currentProductOid}`, "GET")
-        .subscribe(
-            (response) => {
-              this.productDetails = response.data.productDetails;
-              console.log('response.data: ' , response.data);
-             // let { sizesAndPrices, addonsToClient, flavorsToClient, dairyToClient, varietyToClient, sweetenerToClient, oid, numberOfFreeAddonsUntilCharged, addonsPriceAboveLimit } = response.data.productDetails;
+        .subscribe( (response) => {
+          this.productDetails = response.data.productDetails;
 
-              // init size info
-              if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
-                this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
-              }
-            }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+          if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
+            this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
+          }
+        }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
   }
 
-  getUserDataForProcessOrderAPI(userOidOrPaymentID, type, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
+  getUserData(userOidOrPaymentID, type, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
     let toData = { ID: userOidOrPaymentID, companyOid: this.auth.companyOid, type};
 
-    // get user data
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
-      .subscribe(
-          (response) => {
-            console.log('response.data: ', response.data);
-            this.dismissLoading();
-            this.userData.userOid = response.data.userData.userOid;
-            this.userData.balance = response.data.userData.balance;
-            this.userData.companyOid = response.data.userData.companyOid;
-            this.userData.email = response.data.userData.email;
-            this.userData.socialMediaType = socialMediaOpts.socialMediaType;
-            this.userData.isSocialMediaUsed = socialMediaOpts.isSocialMediaUsed;
+      .subscribe( (response) => {
+        this.dismissLoading();
+        this.userData = response.data.userData;
 
-            // do checks
-            if (this.userData.balance < this.order.transactionDetails.total) {
-              if (this.companyDetails.acceptsPartialPayments) {
-                if (this.userData.isSocialMediaUsed) {
-                    this.order.transactionDetails.isSocialMediaUsed = true;
-                    this.order.transactionDetails.socialMediaType = this.userData.socialMediaType;
-                } 
-              } else {
-                this.showPopup({
-                  title: 'Uh oh!', 
-                  message: "The customer doesn't have the proper funds. This company doesn't allow partial payments (application and cash/card).", 
-                  buttons: [{text: "OK"}]
-                });
-                this.sufficientFunds = false;
-              }
-            } 
-          }, this.errorHandler(this.ERROR_TYPES.API));
+        if (this.processOrderUtils.transactionIsValid(this.userData.balance, this.order.transactionDetails.total, this.companyDetails.acceptsPartialPayments)) {
+          if (socialMediaOpts.isSocialMediaUsed) {
+              this.order.transactionDetails.isSocialMediaUsed = true;
+              this.order.transactionDetails.socialMediaType = socialMediaOpts.socialMediaType;
+          } 
+        } else {
+          this.sufficientFunds = false;
+          this.showPopup({
+            title: 'Uh oh!', 
+            message: "The customer doesn't have the proper funds. This company doesn't allow partial payments (application and cash/card).", 
+            buttons: [{text: "OK"}]
+          });
+        }
+      }, this.errorHandler(this.ERROR_TYPES.API));
   }
-
-
-  //////////////////////////////////////////////////// end APIs //////////////////////////////////////////////////////////////////
-
   
   ////////////////////////////////////////////////   modals //////////////////////////////////////////////////
-
   presentReasonsForEditModal() {
     if (this.order.transactionDetails.reasonsForEdit && this.order.transactionDetails.reasonsForEdit.length) {
       let modal = this.modalCtrl.create('ReasonsForEditPage', {reasons: this.order.transactionDetails.reasonsForEdit}, {enableBackdropDismiss: true, showBackdrop: true});
@@ -338,10 +228,9 @@ export class ProcessOrderPage extends BaseViewController {
     let selectProductModal = this.modalCtrl.create('ProcessOrderProductsPage', { products: this.products });
     selectProductModal.onDidDismiss((data) => {
       if (data) {
-        this.currentProductOid = data.oid;
-        this.currentProductImgSrc = AppViewData.getDisplayImgSrc(data.img);
-        this.purchaseItem.selectedProduct = {oid: data.oid, name: data.name, imgSrc: this.currentProductImgSrc };
-        this.onProductChangeGetProductInfoAPI(data.oid);
+        this.currentProduct = { oid: data.oid, imgSrc: AppViewData.getDisplayImgSrc(data.img)};
+        this.purchaseItem.selectedProduct = {oid: data.oid, name: data.name, imgSrc: this.currentProduct.imgSrc };
+        this.getProductInfo(data.oid);
       }
     });
     selectProductModal.present();
@@ -353,30 +242,30 @@ export class ProcessOrderPage extends BaseViewController {
     let selectCategoryModal = this.modalCtrl.create('ProcessOrderCategoriesPage', { categories: this.categories });
     selectCategoryModal.onDidDismiss((data) => {
       if (data) {
-        this.currentCategoryOid = data.oid;
-        this.currentCategoryName = data.name;
-        this.currentCategoryImgSrc = AppViewData.getDisplayImgSrc(data.img);
-        this.onCategoryChangeGetProductsAPI();
+        this.currentCategory = { oid: data.oid, name: data.name, imgSrc: AppViewData.getDisplayImgSrc(data.img)};
+        this.getCategoryInfo(this.currentCategory);
       }
     });
     selectCategoryModal.present();
   }
 
   presentEditSubtotalModal() {
+    this.orderHasBeenEdited = true;
+
     let editSubtotalModal = this.modalCtrl.create('EditSubtotalPage', { subtotal: this.order.transactionDetails.subtotal }, {enableBackdropDismiss: false});
     editSubtotalModal.onDidDismiss((data: IEditSubtotalDismiss) => {
       if (data.isEdited) {
         let reasonsForEdit = this.order.transactionDetails.reasonsForEdit.length ? this.order.transactionDetails.reasonsForEdit : [];
-        let editAmount = this.calculateEditAmount(data.subtotal, data.cacheSubtotal);
-        let priceDown = data.subtotal < data.cacheSubtotal ? true : false;
+        let editAmount = this.order.transactionDetails.editAmount + (this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal));
 
-        
-        this.order.transactionDetails.isEdited = true;
-        this.order.transactionDetails.subtotal = data.subtotal;
-        this.order.transactionDetails.editAmount += editAmount;
-        this.order.transactionDetails.reasonsForEdit = [...reasonsForEdit, {reason: data.reasonForEdit, amount: editAmount, priceDown}];
-        this.order.transactionDetails.taxes = this.calculateTaxes(this.order.transactionDetails.subtotal, this.companyDetails.taxRate);
-        this.order.transactionDetails.total = this.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.total);
+        this.order.transactionDetails = Object.assign({}, this.order.transactionDetails, {
+          isEdited: true, 
+          subtotal: data.subtotal,
+          editAmount,
+          reasonsForEdit: [...reasonsForEdit, {reason: data.reasonForEdit, amount: this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal), priceDown: data.subtotal < data.cacheSubtotal ? true : false}],
+          taxes: this.processOrderUtils.calculateTaxes(this.order.transactionDetails.subtotal, this.companyDetails.taxRate),
+          total:  this.processOrderUtils.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes)
+        });
       }
     });
     editSubtotalModal.present();
@@ -384,224 +273,97 @@ export class ProcessOrderPage extends BaseViewController {
 
   presentCommentModal() {
     let commentModal = this.modalCtrl.create('CommentPage', {comment: this.employeeComment}, {showBackdrop: true, enableBackdropDismiss: false});
-
     commentModal.onDidDismiss((data) => {
-      if (data && data.comment) {
-        this.employeeComment = data.comment;
-      }
+      this.employeeComment = data && data.comment ? data.comment : null;
     });
     commentModal.present();
   }
 
-  ///////////////////////////////////////////////////////////////// end modals /////////////////////////////////////////////////////
-
-
   onEditPurchaseItem(purchaseItem, index) {
     this.isEditInProgress = this.setEditInProgress(index);
-    this.onProductChangeGetProductInfoAPI(purchaseItem.selectedProduct.oid);
+    this.getProductInfo(purchaseItem.selectedProduct.oid);
     this.purchaseItem = purchaseItem;
-
   }
 
   finishEditPurchaseItem() {
-    let index = this.isEditInProgress.index;
+    const index = this.isEditInProgress.index;
 
     this.order.purchaseItems[index] = this.purchaseItem;
     this.isEditInProgress = this.clearEditInProgress();
-    this.purchaseItem = this.clearPurchaseItem();
-    this.productDetails = this.clearProductDetails();
+    this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
+    this.productDetails = this.processOrderUtils.clearProductDetails();
 
-    // calculate addons
-    if (this.order.purchaseItems[index].addonsCost) {
-      this.order.purchaseItems[index].addonsCost = this.calculateAddonsCost(this.order.purchaseItems[index]);
-    }
-
-    // calculate dairy
-    if (this.order.purchaseItems[index].dairyCost) {
-      this.order.purchaseItems[index].dairyCost = this.calculateDairyCost(this.order.purchaseItems[index]);
-    } 
-
-    // calculate subtotal
-    this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
+    this.order.purchaseItems[index].addonsCost = this.processOrderUtils.calculateAddonsCost(this.order.purchaseItems[index], this.productDetails, this.companyDetails);
+    this.order.purchaseItems[index].dairyCost = this.processOrderUtils.calculateDairyCost(this.order.purchaseItems[index]);
+    this.order.transactionDetails.subtotal = this.processOrderUtils.calculateSubtotal(this.order, this.companyDetails);
   }
 
-  setEditInProgress(index) {
-    this.slides.lockSwipes(true);
-    return { status: true, index: index }
+  setEditInProgress(index) { return { status: true, index: index };}
+  clearEditInProgress() { return {status: false, index: null};}
+  selectDairyQuantity(purchaseItemIndex, quantity) { this.purchaseItem.dairy[purchaseItemIndex].quantity = quantity;}
 
-  }
-
-  clearEditInProgress() {
-    this.slides.lockSwipes(false);
-    return {status: false, index: null};
-  }
-  
-  clearPurchaseItem() {
-    return {
-      addons: [],
-      flavors: [],
-      dairy: [],
-      variety: [],
-      sweetener: [],
-      selectedProduct: { name: null, oid: null, imgSrc: null},
-      sizeAndOrPrice: { name: null, oid: null, price: null},
-      addonsCost: 0,
-      dairyCost: 0,
-      quantity: 1,
-      discounts: 0
-    } 
-  }
-
-  clearProductDetails() {
-    return {
-      sizesAndPrices: [],
-      addonsToClient: [],
-      flavorsToClient: [],
-      dairyToClient: [],
-      sweetenerToClient: [],
-      varietyToClient: [],
-      fixedPrice: null,
-      oid: null,
-      numberOfFreeAddonsUntilCharged: null,
-      addonsPriceAboveLimit: null
-    };
-  }
-
-  doChecksPurchaseItem(purchaseItem): IErrChecks {
-    let errs = [];
-
-    if (!purchaseItem.selectedProduct.name) {
-      errs.push('You forgot to select a product!');
-      return {isValid: false, errs: errs};
-    }
-    if (!purchaseItem.sizeAndOrPrice.name && this.productDetails.sizesAndPrices.length) {
-      errs.push('You forgot to select a size!');
-      return {isValid: false, errs: errs};
-    }
-    return {isValid: true, errs};
-  }
-
-  selectDairyQuantity(purchaseItemIndex, quantity) {
-    this.purchaseItem.dairy[purchaseItemIndex].quantity = quantity;
-  }
-
-  addToOrder(item): void {
-    let checks = this.doChecksPurchaseItem(this.purchaseItem);
+  addToOrder(purchaseItem): void {
+    let checks = this.processOrderUtils.doChecksPurchaseItem(purchaseItem, this.productDetails);
     
-    if (!checks.isValid) {
-      this.presentToast(false, checks.errs.join(". "));
-    }
+    if (!checks.isValid) this.presentToast(false, checks.errs.join(". "));
     else {
-      // const purchaseItem = cloneDeep(this.purchaseItem);   // not using
       this.presentToast(false, "Added item!");
-
-      // business logic
-      this.purchaseItem.addonsCost = this.calculateAddonsCost(this.purchaseItem);
-      this.purchaseItem.dairyCost = this.calculateDairyCost(this.purchaseItem);
-      this.order.purchaseItems = [...this.order.purchaseItems, this.purchaseItem];
-      this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
-
-      // clear
-      this.purchaseItem = this.clearPurchaseItem();
-      this.productDetails = this.clearProductDetails();
+      this.order = this.processOrderUtils.addToOrder(this.order, purchaseItem, this.productDetails, this.companyDetails);
+      this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
+      this.productDetails = this.processOrderUtils.clearProductDetails();
     }
   }
 
-  removePurchaseItemFromOrder(purchaseItem, index) {
-    // have to clear edit in progress for now b/c <div> click is triggered on nested <button> click
+  removePurchaseItemFromOrder(order, purchaseItem, index) {
     const confirmFn = () => {
-      let item = this.order.purchaseItems[index];
-      this.order.purchaseItems = this.order.purchaseItems.filter((x, i) => {
-        return i !== index;
+      this.order = Object.assign({}, order, {
+        purchaseItems: order.purchaseItems.filter((x, i) => i !== index),
+        subtotal: this.processOrderUtils.calculateSubtotal(order, this.companyDetails)
       });
-
-      this.purchaseItem = this.clearPurchaseItem();
-      this.productDetails = this.clearProductDetails();
-      this.isEditInProgress = this.clearEditInProgress(); 
-      this.order.transactionDetails.subtotal = Utils.round(this.calculateSubtotal(this.order, this.companyDetails));
-    }
-    
-    const cancelFn = () => {
+      this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
+      this.productDetails = this.processOrderUtils.clearProductDetails();
       this.isEditInProgress = this.clearEditInProgress();
     }
+    const cancelFn = () => { this.isEditInProgress = this.clearEditInProgress(); }
 
     this.showPopup({
       title: "Please confirm",
       message: "Are you sure you want to remove this item?",
       buttons: [{text: AppViewData.getPopup().defaultCancelButtonText, handler: cancelFn}, {text: AppViewData.getPopup().defaultConfirmButtonText, handler: confirmFn}]
     });
-
   }
 
   getIndividualRewards(rewards): Array<any> {
-    const individualRewards = rewards.filter((x) => {
-      return x.type && x.type === this.REWARDS_TYPE.REWARDS_INDIVIDUAL;
-    });
-
-    return individualRewards;
+    return rewards.length ? rewards.filter((x) => x.type && x.type === this.REWARDS_TYPE.REWARDS_INDIVIDUAL) : [];
   }
 
   getEligibleRewards() { 
-    this.presentLoading();
+    if (this.order.purchaseItems.length) {
+      this.presentLoading();
 
-    const dateInfo = DateUtils.getCurrentDateInfo();
-    const toData: IGetEligibleRewardsProcessingTypeAutomaticForTransactionRequest = {
-      date: DateUtils.toLocalIsoString(dateInfo.date.toString()), // get all rewards where expiry date < date
-      day: dateInfo.day, 
-      hours: dateInfo.hours,
-      mins: dateInfo.mins, 
-      purchaseItems: this.order.purchaseItems,
-      companyOid: this.auth.companyOid,
-      taxRate: this.companyDetails.taxRate,
-    };
+      const dateInfo = DateUtils.getCurrentDateInfo();
+      const toData: IGetEligibleRewardsToData = {
+        date: DateUtils.toLocalIsoString(dateInfo.date.toString()),
+        day: dateInfo.day, 
+        hours: dateInfo.hours,
+        mins: dateInfo.mins, 
+        purchaseItems: this.order.purchaseItems,
+        companyOid: this.auth.companyOid,
+        taxRate: this.companyDetails.taxRate,
+      };
 
-    this.API.stack(ROUTES.getEligibleRewardsProcessingTypeAutomaticForTransaction, "POST", toData )
-      .subscribe(
-          (response) => {
-            console.log('response.data: ' , response.data);
-
-            this.order.transactionDetails = response.data.transactionDetails;
-            this.order.purchaseItems = response.data.purchaseItems;
-
-            // calculate freePurchaseItem (easiest to do this on the client for now, 
-            // bc can do it before/after making trip to server) in other cases
-            this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, ...this.getIndividualRewards(this.order.transactionDetails.rewards)];
-            this.order = this.roundAllWithFreePurchaseItem(this.order, this.companyDetails.taxRate, this.calculateFreePurchaseItem(this.order));
-            this.dismissLoading();
-
-          }, this.errorHandler(this.ERROR_TYPES.API));
+      this.API.stack(ROUTES.getEligibleRewardsProcessingTypeAutomaticForTransaction, "POST", toData)
+        .subscribe( (response) => {
+          this.order.purchaseItems = response.data.purchaseItems;
+          this.order.transactionDetails = Object.assign({}, response.data.transactionDetails);
+          this.dismissLoading();
+        }, this.errorHandler(this.ERROR_TYPES.API));
+    }
   }
 
-  // this is optional- but helps with aggregating information about rewards used
-  addManualRewardToTransaction() {
-    // will do later
-  }
-
-  roundAllWithFreePurchaseItem(order, taxRate, freePurchaseItemAmount = 0) {
-    order.transactionDetails.subtotal = Utils.round(order.transactionDetails.subtotal);
-    order.transactionDetails.rewardsSavings = Utils.round(order.transactionDetails.rewardsSavings + freePurchaseItemAmount);
-    order.transactionDetails.taxes = Utils.round(this.calculateTaxes((order.transactionDetails.subtotal - order.transactionDetails.rewardsSavings), taxRate));
-    order.transactionDetails.total = Utils.round(order.transactionDetails.total - order.transactionDetails.rewardsSavings);
-
-    return order;
-  }
-
-
-  // slide 2
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////////////
-  ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /// new
   onScanIndividualRewardBarcode() {
     this.barcodeScanner.scan({resultDisplayDuration: 0}).then((barcodeData) => {
-      console.log("barcodeData: ", barcodeData);
-
-      /*
-        // barcode data will only have rewardOid, isFreePurchaseItem, userOid
-        // i.e.: 139$1$28
-      */
+      // barcode data will only have rewardOid, isFreePurchaseItem, userOid... i.e.: 139$1$28
       if (!barcodeData.cancelled) {
         if (barcodeData.text.indexOf("$") > -1) {
           let barcodeRewardData: Array<string> = barcodeData.text.split("$");
@@ -610,282 +372,116 @@ export class ProcessOrderPage extends BaseViewController {
             isFreePurchaseItem: +barcodeRewardData[1] === 0 ? false : true,
             userOid: +barcodeRewardData[2]
           }
-        
           if (this.barcodeRewardData.isFreePurchaseItem) {
-            this.order.transactionDetails.rewards = [...this.order.transactionDetails.rewards, ...this.getIndividualRewards(this.order.transactionDetails.rewards)];
-            this.order = this.roundAllWithFreePurchaseItem(this.order, this.companyDetails.taxRate, this.calculateFreePurchaseItem(this.order));
-
-          } else {
-            // do nothing: don't support any other option right now
+            const freePurchaseItemPrice = this.processOrderUtils.calculateFreePurchaseItem(this.order, this.getIndividualRewards(this.order.transactionDetails.rewards));
+            this.order.transactionDetails = Object.assign({}, this.order.transactionDetails, {
+              rewards: [...this.order.transactionDetails.rewards, ...this.getIndividualRewards(this.order.transactionDetails.rewards)],
+              rewardsSavings: Utils.round(this.order.transactionDetails.rewardsSavings + freePurchaseItemPrice),
+              subtotal: Utils.round(this.order.transactionDetails.subtotal),
+              taxes: this.processOrderUtils.calculateTaxes((this.order.transactionDetails.subtotal - this.order.transactionDetails.rewardsSavings), this.companyDetails.taxRate),
+              total: Utils.round(this.order.transactionDetails.total - this.order.transactionDetails.rewardsSavings)
+            });
           }
         }
       } 
     }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
   }
 
- 
   onScanUserBarcode() {
     this.barcodeScanner.scan({resultDisplayDuration: 0}).then((barcodeData) => {
-      console.log("barcodeData: ", barcodeData);
-
-      /*
-        // barcode data will have  userOid, companyOid, isSocialMediaUsed, socialMediaType: string separated by $
-        // i.e.:  148$12$0$17
-      */
-      if (!barcodeData.cancelled) {
-        if (barcodeData.text.indexOf("$") > -1) {
-          let barcodeUserDataArr: Array<string> = barcodeData.text.split("$");
-          let barcodeUserData = {
-            userOid: +barcodeUserDataArr[0],
-            companyOid: +barcodeUserDataArr[1],
-            isSocialMediaUsed: +barcodeUserDataArr[2] === 0 ? false : true,
-            socialMediaType: +barcodeUserDataArr[3]
-          }
-           // do conditional social media accept here
-          if (barcodeUserData.isSocialMediaUsed) {
-            this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
-              this.finishOnScanUserBarcode(data.barcodeUserData);
-            })
-          } else this.finishOnScanUserBarcode(barcodeUserData);
-          this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType}); 
+      if (!barcodeData.cancelled && barcodeData.text.indexOf("$") > -1) {
+        const barcodeUserDataArr: Array<string> = barcodeData.text.split("$");
+        const barcodeUserData = {
+          userOid: +barcodeUserDataArr[0],
+          companyOid: +barcodeUserDataArr[1],
+          isSocialMediaUsed: +barcodeUserDataArr[2] === 0 ? false : true,
+          socialMediaType: +barcodeUserDataArr[3]
         }
+        if (barcodeUserData.isSocialMediaUsed) {
+          this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
+            if (!data.isAccepted) {
+              barcodeUserData.socialMediaType = null;
+              barcodeUserData.isSocialMediaUsed = false;
+            }
+            this.finishOnScanUserBarcode(barcodeUserData);
+          })
+        } else this.finishOnScanUserBarcode(barcodeUserData);
       }
     }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
   }
 
   finishOnScanUserBarcode(barcodeUserData: IBarcodeUserData) {
     this.barcodeUserData = barcodeUserData;
-    this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType});
+    this.getUserData(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType});
   }
 
-  presentAcceptOrRejectSocialMediaAlert(barcodeUserData: IBarcodeUserData): Promise<{barcodeUserData: IBarcodeUserData}> {
+  presentAcceptOrRejectSocialMediaAlert(barcodeUserData: IBarcodeUserData): Promise<{isAccepted: boolean}> {
     return new Promise((resolve, reject) => {
       let acceptOrRejectSocialMediaAlert = this.alertCtrl.create({
         title: "Social Media Used!", 
         message: `Type of social media used: ${barcodeUserData.socialMediaType}`,
         buttons: [
-          {
-            text: "REJECT", 
-            handler: () => {
-              barcodeUserData.socialMediaType = null;
-              barcodeUserData.isSocialMediaUsed = false;
-
-              resolve({barcodeUserData});
-            }
-          }, {
-            text: "ACCEPT",
-            handler: () => {
-              resolve({barcodeUserData});
-            }
-          }
+          { text: "REJECT", handler: () => resolve({isAccepted: false})},
+          { text: "ACCEPT", handler: () => resolve({isAccepted: true})}
         ]});
         acceptOrRejectSocialMediaAlert.present();
     });
   }
 
-  // manual entering paymentID
   presentEnterMobileCardIdModal() {
     let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
-    
     enterMobileCardIdModal.onDidDismiss((data) => {
-      if ( data && data.mobileCardId) {
-         // API get user info
-         this.getUserDataForProcessOrderAPI(data.mobileCardId, this.ID_TYPES.PAYMENT);
-      }
+      (data && data.mobileCardId) ? this.getUserData(data.mobileCardId, this.ID_TYPES.PAYMENT) : null;
     });
     enterMobileCardIdModal.present();
   }
 
-  // right now, calculates highest price item... can change this if needed
-  calculateFreePurchaseItem(order: IOrder): number {
-    let highItem: IPurchaseItem = null; 
-    let highItemIndex: number = 0;
-
-    if (this.getIndividualRewards(order.transactionDetails.rewards).length) {
-      order.purchaseItems.forEach((x, i) => {
-        if (x.sizeAndOrPrice.price > highItem.sizeAndOrPrice.price) {
-            highItem = Object.assign({}, x);
-            highItem.sizeAndOrPrice.price = x.sizeAndOrPrice.price;
-            highItemIndex = i;
-        }
-      });
-
-      // account for discounts already on it
-      if (highItem.discounts > 0) {
-        highItem.sizeAndOrPrice.price -= highItem.discounts;
-      } 
-
-      return highItem.sizeAndOrPrice.price;
-    } else return 0;
-  }
-
-  calculateSubtotal(order: IOrder, COMPANY_DETAILS: ICompanyDetails): number {
-      this.order.transactionDetails.subtotal = 0;
-      order.purchaseItems.forEach((x, index) => {
-          let addonsCost = x.addonsCost !== null ? x.addonsCost : 0;
-          let dairyCost = x.dairyCost !== null ? x.dairyCost: 0;
-
-          x.displayPriceWithoutDiscounts = (x.sizeAndOrPrice.price * x.quantity) + (x.addonsCost * x.quantity) + (x.dairyCost);
-          order.transactionDetails.subtotal += (x.sizeAndOrPrice.price * x.quantity) + (addonsCost * x.quantity) + (x.dairyCost);
-      });
-      
-      return Utils.round(order.transactionDetails.subtotal);
-  }
-
-  calculateAddonsCost(purchaseItem: IPurchaseItem): number {
-    let addonsCost = 0;
-    if (purchaseItem.addons && purchaseItem.addons.length) {
-      if (this.companyDetails.doesChargeForAddons && this.productDetails.numberOfFreeAddonsUntilCharged !== null) {
-          if (purchaseItem.addons.length > this.productDetails.numberOfFreeAddonsUntilCharged) {
-              let numberOfChargedAddons = purchaseItem.addons.length - this.productDetails.numberOfFreeAddonsUntilCharged;
-              addonsCost = numberOfChargedAddons * this.productDetails.addonsPriceAboveLimit;
-
-              return addonsCost;
-          }
-      }
-    }
-    return addonsCost;
-  }
-
-  public calculateDairyCost(purchaseItem): number {
-      let dairyCost = 0;
-      if (purchaseItem.dairy && purchaseItem.dairy.length) {
-          purchaseItem.dairy.forEach((x) => {
-              dairyCost += x.price;
-          });
-      }
-      return dairyCost;
-  }
-
-  calculateTaxes(subtotal: number, TAX_RATE: number): number {
-    return subtotal * TAX_RATE;
-  }
-
-  calculateTotal(subtotal: number, taxes: number): number {
-    return subtotal + taxes;
-  }
-  
-  calculateEditAmount(subtotal: number, editAmount: number) {
-    return subtotal - editAmount;
-  }
-
-  onEditSubtotal() {
-    this.orderHasBeenEdited = true;
-    this.presentEditSubtotalModal();
-  }
-
-
   completeOrderConfirmationModal() {
-    console.log("about to hit promise");
     return new Promise((resolve, reject) => {
-
       let completeOrderConfirmationModal = this.modalCtrl.create('CompleteOrderConfirmationPage', { hasPrinter: this.companyDetails.hasPrinter });
-      completeOrderConfirmationModal.onDidDismiss((data) => {
-        resolve(data);
-      });
+      completeOrderConfirmationModal.onDidDismiss((data) => resolve(data));
       completeOrderConfirmationModal.present();
-
     });
   }
 
-  cordovaPrinter() {
-    this.presentLoading("Printing...");
-    const receiptHTML = ReceiptTemplates.generateReceiptHTML(this.order, this.auth);
-    
-    this.printer.isAvailable().then(() => {
-      return this.printer.check();
-    })
-    .then(() => {
-      return this.printer.pick();
-    })
-    .then((data) => {
-      let options: PrintOptions = {
-        name: 'Receipt',
-        //printerId: 'printer007',
-        duplex: true,
-        landscape: true,
-        grayscale: true
-      };
-      return this.printer.print(receiptHTML, options)
-    })
-    .then(() => {
-      console.log("printer success");
-      this.dismissLoading("Done Printing!");
-      this.navCtrl.setRoot("TabsPage");
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.PRINTER));
-  }
-
-  finishSubmit(navToReceiptPage = false) {
-    this.dismissLoading(AppViewData.getLoading().complete);
-
-    if (!navToReceiptPage) {
-       this.navCtrl.setRoot('TabsPage');
-    } /* else {
-      this.showReceiptModalWhilePrinting();
-    } */
+  printReceiptCordova() {
+    this.presentLoading("Printing...");    
+    this.printer.isAvailable()
+      .then(() => this.printer.check())
+      .then(() => this.printer.pick())
+      .then((data) => this.printer.print(ReceiptTemplates.generateReceiptHTML(this.order, this.auth), { name: 'Receipt', duplex: true, landscape: true, grayscale: true }))
+      .then(() => {
+        this.dismissLoading("Done Printing!");
+        this.navCtrl.setRoot("TabsPage");
+      })
+      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.PRINTER));
   }
 
   submit() {
-    // popup are you sure?/receipt options
     this.completeOrderConfirmationModal().then((data: IOrderConfirmation) => {
-        console.log("dismissed and inside of .then");
-        if (!data) return;
-        if (data.isConfirmed) {
-          this.presentLoading(AppViewData.getLoading().processing);
+      if (!data) return;
+      else if (data.isConfirmed) {
+        this.presentLoading(AppViewData.getLoading().processing);
+        let toData: IProcessOrderToData = { companyOid: this.auth.companyOid, locationOid: this.auth.locationOid, userOid: this.userData.userOid, userEmail: this.userData.email, isOrderAhead: false,eta: null,employeeComment: this.employeeComment,purchaseDate: DateUtils.toLocalIsoString(new Date().toString()),purchaseItems: this.order.purchaseItems,transactionDetails: this.order.transactionDetails};
 
-          let toData = { 
-            companyOid: this.auth.companyOid, 
-            locationOid: this.auth.locationOid, 
-            userOid: this.userData.userOid,
-            userEmail: this.userData.email,
-            isOrderAhead: false,
-            eta: null,
-            employeeComment: this.employeeComment,
-            purchaseDate: DateUtils.toLocalIsoString(new Date().toString()),
-            purchaseItems: this.order.purchaseItems,
-            transactionDetails: this.order.transactionDetails
-          };
-
-          console.log("toData: ", toData);
-
-          // process transaction
-          this.API.stack(ROUTES.processTransaction, "POST", toData)
-            .subscribe(
-                (response) => {
-                  console.log("response: ", response.data);
-                  if (data.doesWantReceipt) {
-                    if (data.receiptType === this.RECEIPT_TYPES.EMAIL) {
-                      // send email
-                      this.API.stack(ROUTES.generateReceipt, "POST", {
-                            order: this.order, 
-                            date: DateUtils.toLocalIsoString(new Date().toString()), 
-                            companyOid: this.auth.companyOid, 
-                            email: this.auth.email, 
-                            userOid: this.userData.userOid
-                        })
-                        .subscribe(
-                          (response) => {
-                            console.log("response: ", response.data);
-                            this.finishSubmit();  
-                        },this.errorHandler(this.ERROR_TYPES.API));  
-                    } else if (data.receiptType === this.RECEIPT_TYPES.PRINTER) {
-                      this.cordovaPrinter();
-                    }
-                  } else {
-                    this.finishSubmit();
-                  }
-                }, this.errorHandler(this.ERROR_TYPES.API));
+        this.API.stack(ROUTES.processTransaction, "POST", toData)
+          .subscribe( (response) => {
+            if (data.doesWantReceipt && data.receiptType === this.RECEIPT_TYPES.EMAIL) {  // email
+              this.API.stack(ROUTES.generateReceipt, "POST", { order: this.order, date: DateUtils.toLocalIsoString(new Date().toString()), companyOid: this.auth.companyOid, email: this.auth.email, userOid: this.userData.userOid})
+                .subscribe( (response) => { 
+                  this.finishSubmit();  
+                }, this.errorHandler(this.ERROR_TYPES.API));  
+            } else if (data.receiptType === this.RECEIPT_TYPES.PRINTER) this.printReceiptCordova();  // printer
+              else this.finishSubmit();
+          }, this.errorHandler(this.ERROR_TYPES.API));
         }
-      });
-        
-    }      
-}
+      });  
+    } 
 
-interface IOrderConfirmation {
-  isConfirmed:boolean;
-  doesWantReceipt:boolean;
-  receiptType?:string
+    finishSubmit(navToReceiptPage = false) {
+      this.dismissLoading(AppViewData.getLoading().complete);
+      this.navCtrl.setRoot("TabsPage");
+    }     
 }
 
 
