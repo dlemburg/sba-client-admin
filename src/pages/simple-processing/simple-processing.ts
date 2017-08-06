@@ -38,7 +38,7 @@ export class SimpleProcessingPage extends BaseViewController {
   sufficientFunds: boolean = false;
   barcodeRewardData: IBarcodeRewardData;
   companyDetails: ICompanyDetails = {};
-  
+  taxesAlreadyCalculated: boolean = false;
 
   constructor(
     public navCtrl: NavController, 
@@ -72,10 +72,16 @@ export class SimpleProcessingPage extends BaseViewController {
   }
 
   calculateTaxes(total) {
-    if (!isNaN(+total)) {
+    if (!isNaN(+total) && !this.taxesAlreadyCalculated) {
       this.taxes = +Utils.roundAndAppendZero(+total * this.companyDetails.taxRate);
       this.total = Utils.roundAndAppendZero(+total + (this.taxes));
     }
+  }
+
+  clear() {
+    this.taxesAlreadyCalculated = false;
+    this.total = "0";
+    this.taxes = 0;
   }
 
   onKeypressTotal(e) {

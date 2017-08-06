@@ -25,6 +25,7 @@ export class API implements ErrorHandler {
         let headers = new Headers();
         headers.append('Content-Type', 'application/json');
         headers.append('Authorization', `Bearer ${this.token}`);
+        headers.append('Access-Control-Allow-Origin', `*`);
         let options = new RequestOptions({ headers: headers });
 
 
@@ -205,5 +206,8 @@ export const ROUTES = {
 
     // error logging
     logClientError: '/api/node/errorHandler/logClientError', // cs call built too
-    getClientAdminVersionNumber: '/api/cs/appData/getClientAdminVersionNumber'
+    getClientAdminVersionNumber: '/api/cs/appData/getClientAdminVersionNumber',
+
+    testNode: '/api/node/appData/test',
+    testDotnet: '/api/cs/appData/test'
 }

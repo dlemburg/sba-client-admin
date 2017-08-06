@@ -52,6 +52,8 @@ export class MyApp {
 
   init() {
     this.platform.ready().then(() => {
+      this.test();
+
       this.appStartup = new AppStartup(this.API, this.socketIO);
 
       if (this.authentication.isLoggedIn()) {
@@ -71,56 +73,24 @@ export class MyApp {
       }
     });
   }
-/*
-  getAppStartupInfo() {
-    return new Promise((resolve, reject) => {
-      this.API.stack(ROUTES.getClientAdminAppStartupInfo, "POST", {companyOid: this.auth.companyOid})
-        .subscribe(
-          (response) => {
-            const res: IClientAdminAppStartupInfoResponse = response.data.appStartupInfo;
-            const defaultImg = res.defaultImg;
-            const logoImg = res.logoImg;
-            const hasProcessOrder = res.hasProcessOrder;
-            const clientAdminVersionNumber = res.currentClientAdminVersionNumber;
-            const minClientAdminVersionNumber = res.minClientAdminVersionNumber;
-            const mustUpdateClientAdminApp = res.mustUpdateClientAdminApp;
 
-            console.log("response.data: ", response.data);
+  test() {
+    this.API.stack(ROUTES.testDotnet, "GET")
+      .subscribe(
+        (response) => {
+          console.log("DOTNET: response.data: ", response.data);
+        }, (err) => {
+          console.log("err on DOTNET test: ", err);
+        });
 
-            resolve({
-              defaultImg, 
-              logoImg, 
-              clientAdminVersionNumber, 
-              minClientAdminVersionNumber,
-              mustUpdateClientAdminApp,
-              hasProcessOrder
-            });
-
-          }, (err) => {
-
-            resolve();
-            console.log("Problem downloading images on app startup");
-          });
-    });
+    this.API.stack(ROUTES.testNode, "GET")
+      .subscribe(
+        (response) => {
+          console.log("NODEjs: response.data: ", response.data);
+        }, (err) => {
+          console.log("err on NODEjs test: ", err);
+        });
   }
-  */
-  /*
-
-  initializeApp(data: IClientAdminAppStartupInfoResponse) {
-    AppViewData.setImgs({
-      logoImgSrc: `${ROUTES.downloadImg}?img=${data.logoImg}`,
-      defaultImgSrc: data.defaultImg ? `${ROUTES.downloadImg}?img=${data.defaultImg}` : "img/default.png"
-    });
-    AppFeatures.setFeatures({
-      hasProcessOrder: data.hasProcessOrder
-    });
-
-    const room = this.auth.companyOid + this.auth.locationOid;
-    this.socketIO.connect(room);
-    this.nav.setRoot('TabsPage');
-    this.doNativeThingsOnAppStartup(data.currentClientAdminVersionNumber, data.minClientAdminVersionNumber, data.mustUpdateClientAdminApp);
-  }
-  */
 
   doNativeThingsOnAppStartup(currentClientAdminVersionNumber = 0, minClientAdminVersionNumber = 0, mustUpdateClientAdminVersion = false) {
 

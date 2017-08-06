@@ -28,7 +28,8 @@
       </ion-col>
       <ion-col col-6>
         <div margin-top>
-          <button (click)="calculateTaxes(total)" color="secondary" ion-button>Calculate Taxes</button>
+          <button *ngIf="!taxesAlreadyCalculated" (click)="calculateTaxes(total)" color="secondary" ion-button>Calculate Taxes</button>
+          <button *ngIf="taxesAlreadyCalculated" (click)="clear()" color="secondary" ion-button>Clear</button>
           <div *ngIf="taxes > 0">Taxes applied: <span class="bold">{{ taxes | currency:symbolDisplay:true }}</span> </div>
         </div>
       </ion-col>
