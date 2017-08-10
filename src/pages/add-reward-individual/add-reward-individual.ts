@@ -76,8 +76,7 @@ export class AddRewardIndividualPage extends BaseViewController {
     //this.myForm.get('dateRuleTimeEnd').valueChanges.subscribe(data => this.onChange(data, 'end'));    // all
    // this.myForm.get('hasExpiryDate').valueChanges.subscribe(data => this.onHasExpiryDateChanged(data));
 
-    // get lkps
-    this.API.stack(ROUTES.getRewardIndividualTypes + `/${this.auth.companyOid}/uncreated-add`, "GET")
+    this.API.stack(ROUTES.getRewardsIndividualAvailable + `/${this.auth.companyOid}`, "GET")
       .subscribe(
           (response) => {
             this.dismissLoading();
@@ -115,7 +114,7 @@ export class AddRewardIndividualPage extends BaseViewController {
     });
   }
 
-   getImgCordova() {
+  getImgCordova() {
     this.presentLoading("Retrieving...");
     this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
     this.ImageUtility.getImgCordova().then((data) => {
@@ -140,11 +139,9 @@ export class AddRewardIndividualPage extends BaseViewController {
     })
   }
 
-
-
   submit(myForm): void {
     /*** package ***/
-    let expiryDate = myForm.expiryDate.toString();
+    let expiryDate = myForm.expiryDate ? myForm.expiryDate.toString() : null;
     if (myForm.hasExpiryDate)  myForm.expiryDate = expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : expiryDate;
     this.presentLoading(AppViewData.getLoading().saving);
 
@@ -163,9 +160,7 @@ export class AddRewardIndividualPage extends BaseViewController {
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
             setTimeout(() => {
-              this.myForm.reset();
-              this.img = null;
-              this.imgSrc = null;
+             this.navCtrl.pop();
             }, 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
   }

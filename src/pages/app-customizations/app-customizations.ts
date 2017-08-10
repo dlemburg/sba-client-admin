@@ -68,7 +68,7 @@ export class AppCustomizationsPage extends BaseViewController {
       customCompanyEmailReceiptMessage: [" "],
       customCompanyEmailFooterMessage: [" "],
       hasSocialMediaRewards: [false],
-      socialMediaBonusPoints: [0, Validation.test("isNumbersOnly")],
+      socialMediaPointsBonus: [0, Validation.test("isNumbersOnly")],
       hasFacebook: [false],
       hasTwitter: [false],
       hasInstagram: [false],

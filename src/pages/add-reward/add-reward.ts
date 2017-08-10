@@ -234,9 +234,12 @@ export class AddRewardPage extends BaseViewController {
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
             setTimeout(() => {
+              this.navCtrl.pop();
+              /*
               this.myForm.reset();
               this.img = null;
               this.imgSrc = null;
+              */
             }, 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
   }

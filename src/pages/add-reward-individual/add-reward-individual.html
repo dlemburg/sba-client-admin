@@ -17,9 +17,7 @@
     <div>
       All individual rewards will be generated automatically for the user when appropriate. These individual
       rewards will not be available for everyone; rather, they will be given to the user based on meeting at least one of the following criteria:
-      <div>1.) A reward given for a birthday </div>
-      <div>2.) A reward given for the first time a user loads money onto the mobile card</div>
-      <div>3.) A reward given for when a user crosses the company point threshold amount currently in place. All of these are optional and are up to the company to implement.</div>
+      <div> A reward given for the first time a user loads money onto the mobile card</div>
     </div>
   </ion-item>
   <div *ngIf="individualRewardTypes.length" class="width-90 align-center">
@@ -29,7 +27,7 @@
       <ion-item margin-top>
         <ion-label>Individual Reward Type</ion-label>
         <ion-select formControlName="individualRewardType">
-          <ion-option *ngFor="let x of individualRewardTypes; let i = index;" [value]="x">{{ x }}</ion-option>            
+          <ion-option *ngFor="let x of individualRewardTypes; let i = index;" [value]="x.name">{{ x.name }}</ion-option>            
         </ion-select>
       </ion-item>
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpIndividualRewardType"></control-messages>

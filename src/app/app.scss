@@ -224,6 +224,59 @@
    }
 }
 
+.card-title {
+    position: absolute;
+    top: 30%;
+    font-size: 34px;
+    width: 100%;
+    font-weight: bold;
+    color: #fff;
+}
+
+    /* MEDIA QUERY EXAMPLES
+    /* Large phones 
+    @media only screen and (min-width: 376px) and (max-width: 480px) {
+    }
+
+    /* Tablets 
+    @media only screen and (min-width: 481px) and (max-width: 800px ) {
+    }
+
+    /* Laptops 
+    @media only screen and (min-width: 801px) {
+
+    }
+    */
+
+@media screen and (min-width: 481px) {
+    .phone-hide {
+        display: block;
+    }
+}
+
+@media only screen and (min-width: 1px) and (max-width: 480px) {
+    .phone-hide {
+        display: none;
+    }
+
+    .footer-btn {
+        height: 40px;
+        font-size: 16px;
+        font-weight: bold;
+        border-top: none !important;
+        width: 100% !important;
+    }
+    
+    .card-title {
+        font-size: 24px;
+    }
+
+    .app-btn {
+        height: 60px !important;
+        font-size: 15px;
+        margin-top: 20px !important;
+    }
+}
 
 
 /* using flexbox to give vertical spacing 1:1:1

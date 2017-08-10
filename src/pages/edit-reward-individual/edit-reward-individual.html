@@ -19,22 +19,26 @@
     <div>
       All individual rewards will be generated automatically for the user when appropriate. These individual
       rewards will not be available for everyone; rather, they will be given to the user based on meeting at least one of the following criteria:
-      <div>1.) A reward given for a birthday </div>
-      <div>2.) A reward given for the first time a user loads money onto the mobile card</div>
-      <div>3.) A reward given for when a user crosses the company point threshold amount currently in place. All of these are optional and are up to the company to implement.</div>
+      <div> A reward given for the first time a user loads money onto the mobile card</div>
     </div>
     <div class="margin-top individual-rewards-not-enabled" *ngIf="!individualRewardTypes.length">***You have not created any individual rewards yet!***</div>
   </ion-item>
     <ion-list margin-top>
       <ion-item class="outline">
         <ion-label>Select the individual reward to edit</ion-label>
-        <ion-select [disabled]="!values.length" [(ngModel)]="editOid" (ionChange)="editValueChange()">
-          <ion-option *ngFor="let x of values; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
+        <ion-select [disabled]="!rewardsIndividual.length" [(ngModel)]="rewardIndividual" (ionChange)="editValueChange()">
+          <ion-option *ngFor="let x of rewardsIndividual; let i = index;" [value]="x">{{ x.name }}</ion-option>
         </ion-select>
       </ion-item>
     </ion-list>
-    <div *ngIf="editOid" class="width-80 align-center">
+    <div *ngIf="rewardIndividual" class="width-80 align-center">
       <form margin-top [formGroup]="myForm" (ngSubmit)="submit(myForm.value)" novalidate>
+
+         <!-- don't allow edits here -->
+        <ion-item margin-top>
+          <ion-label floating>Individual Reward Type</ion-label>
+          <ion-input formControlName="individualRewardType" type="text" readonly></ion-input>
+        </ion-item>
         <!-- general info -->
         <ion-item>
           <ion-label floating>Reward Name</ion-label>
@@ -57,15 +61,7 @@
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.exclusions"></control-messages>
 
-        <!-- individual reward type -->
-        <ion-item margin-top>
-          <ion-label>Individual Reward Type</ion-label>
-          <ion-select formControlName="lkpRewardIndividualTypeOid" (ionChange)="individualRewardTypeChanged($event)">
-            <ion-option *ngFor="let x of lkps.individualRewardTypes; let i = index;" [value]="x.oid">{{ x.name }}</ion-option>            
-          </ion-select>
-        </ion-item>
-        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpIndividualRewardType"></control-messages>
-
+       
         <!-- Is free purchase item? 
         <ion-item margin-top class="width-80">
           <ion-checkbox formControlName="isFreePurchaseItem"></ion-checkbox>

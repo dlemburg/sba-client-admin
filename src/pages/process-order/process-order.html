@@ -34,14 +34,14 @@
               (click)="presentCategoriesModal()" 
               class="width-90 align-center process-order-header-btn" 
               [ngClass]="{'process-order-header-btn-not-selected': !currentCategory.name, 'process-order-header-btn-selected': currentCategory.name}"
-              ion-button 
-              outline
-              block>
-              <ion-col class="align-center bold" *ngIf="!currentCategory.name">Category </ion-col>
-              <ion-col class="align-center" col-9 *ngIf="currentCategory.name">{{ currentCategory.name }}</ion-col>
-              <ion-col text-left col-3 *ngIf="currentCategory.name">
+              ion-button outline block>
+              <div class="align-center bold" *ngIf="!currentCategory.name">Category </div>
+              <div *ngIf="currentCategory.name">{{ currentCategory.name }}</div>
+              <!--
+              <ion-col class="no-display-phone" text-left col-3 *ngIf="currentCategory.name">
                 <img class="rounded-edges" [src]="currentCategory.imgSrc" onError="this.src='img/default.png';" />
               </ion-col>
+              -->
             </button>
           </ion-col>
 
@@ -53,15 +53,15 @@
             class="width-90 align-center"
             [ngClass]="{'process-order-header-btn-not-selected': !purchaseItem.selectedProduct.name
                         , 'process-order-header-btn-selected': purchaseItem.selectedProduct.name}"
-            ion-button
-             outline 
-             block>
+            ion-button outline block>
              <ion-row>
-              <ion-col class="bold" *ngIf="!purchaseItem.selectedProduct.name">Product</ion-col>
-              <ion-col class="align-center" col-9 *ngIf="purchaseItem.selectedProduct.name">{{ purchaseItem.selectedProduct.name }}</ion-col>
-              <ion-col text-left col-3 *ngIf="purchaseItem.selectedProduct.name">
+              <div class="align-center bold" *ngIf="!purchaseItem.selectedProduct.name">Product</div>
+              <div class="align-center" *ngIf="purchaseItem.selectedProduct.name">{{ purchaseItem.selectedProduct.name }}</div>
+              <!--
+              <ion-col class="no-display-phone" text-left *ngIf="purchaseItem.selectedProduct.name">
                 <img class="rounded-edges" [src]="currentProduct.imgSrc" onError="this.src='img/default.png';"/>
               </ion-col>
+              -->
             </ion-row>
             </button>
           </ion-col>

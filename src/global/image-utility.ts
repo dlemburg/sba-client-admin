@@ -37,7 +37,6 @@ export class ImageUtility {
   uploadImg(fileKey: string, img: string, imgSrc: string, route: string): Promise<{message: string}> {
 
     return new Promise((resolve, reject) => {
-        let failedUploadImgAttempts = 0;
         let message = "Uploaded Successfully!";
         let options: FileUploadOptions = {
           fileKey: fileKey, 

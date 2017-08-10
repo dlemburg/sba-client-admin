@@ -56,6 +56,7 @@ export class AddGeneralPage extends BaseViewController {
     this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
     this.ImageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
+      debugger;
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
         img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})

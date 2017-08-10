@@ -8,9 +8,7 @@ export class AppStartup {
     constructor(
         public API: API,
         public socketIO: SocketIO
-    ) {
-
-    }
+    ) { }
     public getAppStartupInfo(companyOid: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.API.stack(ROUTES.getClientAdminAppStartupInfo, "POST", {companyOid})

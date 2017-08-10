@@ -40,7 +40,8 @@ export class EditRewardIndividualPage extends BaseViewController {
   imgChanged: boolean = false;
   failedUploadImgAttempts = 0;
   ImageUtility: ImageUtility;
-
+  rewardIndividual: any;
+  rewardsIndividual: Array<any> = [];
 
   constructor(
     public navCtrl: NavController, 
@@ -82,34 +83,25 @@ export class EditRewardIndividualPage extends BaseViewController {
    // this.myForm.get('hasExpiryDate').valueChanges.subscribe(data => this.onHasExpiryDateChanged(data));
 
 
-    // get lkps
-    this.API.stack(ROUTES.getRewardIndividualTypes + `/${this.auth.companyOid}/created-edit`, "GET")
+    // get all rewardsIndividual that the company has
+    this.API.stack(ROUTES.getRewardsIndividual + `/${this.auth.companyOid}`, "GET")
       .subscribe(
           (response) => {
-            this.values = response.data.individualRewardTypes;
-           // this.getEditValues();
+            this.rewardsIndividual = response.data.rewardsIndividual;
             console.log('response.data: ', response.data);
             this.dismissLoading();
           },this.errorHandler(this.ERROR_TYPES.API));
   }
-/*
-  getEditValues(): void {
-    this.API.stack(ROUTES.getRewardsIndividualNameAndOid + `/${this.auth.companyOid}`, "GET")
-        .subscribe(
-            (response) => {
-              this.dismissLoading();
-              this.values = response.data.values;
-              console.log('response.data: ', response.data);
-            }, this.errorHandler(this.ERROR_TYPES.API));
-  }
-*/
+
+
+  /*
   getRewardIndividual(): void {
     this.presentLoading();
-    this.API.stack(ROUTES.getRewardIndividualTypes + `/${this.editOid}`, "GET")
+    this.API.stack(ROUTES.getRewardIndividualToEdit + `${this.auth.companyOid}/${this.editOid}`, "GET")
       .subscribe(
           (response) => {
             this.dismissLoading();
-            let { name, img, description, exclusions, hasExpiryDate, expiryDate, isFreePurchaseItem, individualRewardType } = response.data.reward;
+            let { name, img, description, exclusions, hasExpiryDate, expiryDate, isFreePurchaseItem, individualRewardType } = response.data.individualReward;
             this.myForm.patchValue({
               name, 
               img, 
@@ -129,9 +121,33 @@ export class EditRewardIndividualPage extends BaseViewController {
 
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
+        */
 
   editValueChange(): void {
-    if (this.editOid) this.getRewardIndividual();
+    if (this.rewardIndividual) {
+      debugger;
+      //this.getRewardIndividual();
+      let { 
+        name, 
+        img, 
+        description, 
+        exclusions, 
+        hasExpiryDate, 
+        expiryDate, 
+        isFreePurchaseItem, 
+        individualRewardType } = this.rewardIndividual;
+
+      this.myForm.patchValue({
+        name, 
+        img, 
+        description, 
+        exclusions, 
+        hasExpiryDate, 
+        expiryDate: new Date(expiryDate).toISOString(), 
+        isFreePurchaseItem, 
+        individualRewardType
+      });
+    }
   }
 
   navExplanations() {

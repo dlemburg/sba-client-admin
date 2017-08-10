@@ -215,8 +215,27 @@ page-process-order {
         right: 8px;
     }
 
-
     .icon-primary {
         color: map-get($colors, primary) !important;
     }
+
+
+    // tablet
+    @media screen and (min-width: 481px) {
+        
+    }
+
+    // phone
+    @media only screen and (min-width: 1px) and (max-width: 480px) {
+           .process-order-header-btn-not-selected { 
+               font-size: 14px;
+               letter-spacing: 1px;
+           }
+            .process-order-header-btn-selected {                
+                font-size: 12px !important;
+                letter-spacing: 2px !important;
+                font-weight: none !important;
+            }
+    }
+
 }

@@ -1,17 +1,13 @@
 page-process-order-categories {
-     ion-card {
+     .ion-card {
         position: relative;
         text-align: center;
         border-top: 5px solid map-get($colors,primary);
         border-radius: 8px !important;
     }
 
-    .card-title {
-        position: absolute;
-        top: 36%;
-        font-size: 2.5em;
-        width: 100%;
-        font-weight: bold;
-        color: #fff;
+    .ion-card img {
+        height: 110px;
     }
+
 }

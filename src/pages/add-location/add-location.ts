@@ -260,9 +260,7 @@ export class AddLocationPage extends BaseViewController {
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
             setTimeout(() => {
-              this.myForm.reset();
-              this.img = null;
-              this.imgSrc = null;
+             this.navCtrl.pop();
             }, 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
   }

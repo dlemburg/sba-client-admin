@@ -89,7 +89,7 @@ constructor(
 
   setDefaultSettings() {
     return [
-      {name: 'App Customizations and Settings', img: 'img/app-settings.jpeg', component: 'AppCustomizationsPage' },
+      {name: 'Company Settings', img: 'img/app-settings.jpeg', component: 'AppCustomizationsPage' },
       {name: 'App Images', img: 'img/app-images.jpeg', component: 'AppImagesPage' },
       {name: 'Admin Passwords', img: 'img/admin-passwords.jpeg', component: 'EditPasswordsPage', type: CONST_PASSWORD_TYPES.ADMIN },
       {name: 'Owner Passwords', img: 'img/owner-passwords.jpg', component: 'EditPasswordsPage', type: CONST_PASSWORD_TYPES.OWNER },

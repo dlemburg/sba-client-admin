@@ -83,7 +83,7 @@ export class MyApp {
           console.log("err on DOTNET test: ", err);
         });
 
-    this.API.stack(ROUTES.testNode, "GET")
+    this.API.stack(ROUTES.testNode, "POST")
       .subscribe(
         (response) => {
           console.log("NODEjs: response.data: ", response.data);
