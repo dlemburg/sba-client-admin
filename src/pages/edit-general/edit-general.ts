@@ -29,7 +29,7 @@ export class EditGeneralPage extends BaseViewController {
   img: string = null;
   oldImg: string = null;
   imgSrc: string = null;
-  imgChanged: boolean = false;
+  imgDidChange: boolean = false;
   failedUploadImgAttempts: number = 0;
   GENERAL_TYPES = {
     CATEGORIES: "Categories"
@@ -60,8 +60,8 @@ constructor(
 
 //this page uses: keyword, category, flavor, size, addons
   ionViewDidLoad() {
+    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
     this.type = this.navParams.data.type;
-    console.log("this.type: ", this.type);
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
 
@@ -103,6 +103,9 @@ constructor(
         },this.errorHandler(this.ERROR_TYPES.API));
   }
 
+  onImgDidChange(data) { this.imgDidChange = true }
+
+
   getImgCordova() {
     this.presentLoading("Retrieving...");
     this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
@@ -132,7 +135,7 @@ constructor(
     this.presentLoading(AppViewData.getLoading().saving);
     let type: string = this.type.toLowerCase();
     
-    if (type === this.GENERAL_TYPES.CATEGORIES && myForm.img) {
+    if (type === this.GENERAL_TYPES.CATEGORIES && myForm.img && this.didImgChange) {
         this.uploadImg(myForm).then(() => {
           this.finishSubmit(type, myForm);
         }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));

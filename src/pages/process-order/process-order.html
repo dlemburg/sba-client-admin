@@ -5,15 +5,15 @@
     </button>
     <ion-buttons end>
       <button class="comment-icon" *ngIf="currentSlideIndex === 1" ion-button icon-only (click)="presentCommentModal()">
-        <ion-icon  ios="ios-create" md="ios-create"></ion-icon>
+        <ion-icon  ios="ios-create-outline" md="ios-create-outline"></ion-icon>
       </button>
       <button class="comment-icon" *ngIf="currentSlideIndex === 1" ion-button icon-only (click)="presentEnterMobileCardIdModal()">
-        <ion-icon  ios="ios-unlock" md="md-unlock"></ion-icon>
+         <ion-icon ios="ios-keypad-outline" md="ios-keypad-outline"></ion-icon>
       </button>
-       <ion-icon *ngIf="currentSlideIndex === 0" class="subtotal-header">
-          <span *ngIf="!order.transactionDetails.subtotal" color="primary">$0.00</span>
-          <span *ngIf="order.transactionDetails.subtotal" color="primary">{{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
-        </ion-icon>
+      <ion-icon *ngIf="currentSlideIndex === 0" class="subtotal-header">
+        <span *ngIf="!order.transactionDetails.subtotal" color="primary">$0.00</span>
+        <span *ngIf="order.transactionDetails.subtotal" color="primary">{{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
+      </ion-icon>
     </ion-buttons>
     <ion-title *ngIf="isEditInProgress.status">Edit-In-Progress...</ion-title>
   </ion-navbar>
@@ -70,7 +70,7 @@
         <!-- order empty -->
         <div class="align-center empty-order-container" margin-top text-center *ngIf="!order.purchaseItems.length">
           <ion-card class="width-50 align-center">
-            <ion-card-content text-center>Order is empty.</ion-card-content>
+            <ion-card-content text-center>Order is empty</ion-card-content>
           </ion-card>
         </div>
         <!-- order has items, category selected, no product selected -->

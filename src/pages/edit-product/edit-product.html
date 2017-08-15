@@ -80,7 +80,7 @@
 
         <ion-list *ngIf="companyDetails.hasAddons">
           <ion-item>
-            <ion-label>Add-Ons (if necessary)</ion-label>
+            <ion-label>Add-Ons</ion-label>
             <ion-select formControlName="addons" multiple="true">
               <!-- <ion-option [value]="'all'">ALL</ion-option> -->       
               <ion-option *ngFor="let x of addons;" [value]="x.oid">{{x.name}}</ion-option>
@@ -92,7 +92,7 @@
         <!-- dairy -->
         <ion-list *ngIf="companyDetails.hasDairy">
           <ion-item>
-            <ion-label>Dairy (optional)</ion-label>
+            <ion-label>Dairy </ion-label>
             <ion-select formControlName="dairy" multiple="true">
              <!-- <ion-option [value]="'all'">ALL</ion-option> -->  
               <ion-option *ngFor="let x of dairy;" [value]="x.oid">{{x.name}}</ion-option>
@@ -104,7 +104,7 @@
         <!-- variety -->
         <ion-list *ngIf="companyDetails.hasVariety">
           <ion-item>
-            <ion-label>Variety (optional)</ion-label>
+            <ion-label>Variety </ion-label>
             <ion-select formControlName="variety" multiple="true">
              <!-- <ion-option [value]="'all'">ALL</ion-option> -->    
               <ion-option *ngFor="let x of variety;" [value]="x.oid">{{x.name}}</ion-option>
@@ -116,7 +116,7 @@
         <!-- sweetener -->
         <ion-list *ngIf="companyDetails.hasSweetener">
           <ion-item>
-            <ion-label>Sweetener (optional)</ion-label>
+            <ion-label>Sweetener </ion-label>
             <ion-select formControlName="sweetener" multiple="true">
               <!-- <ion-option [value]="'all'">ALL</ion-option> -->      
               <ion-option *ngFor="let x of sweetener;" [value]="x.oid">{{x.name}}</ion-option>
@@ -128,7 +128,7 @@
     <!-- dynamic sizesAndPrices -->
         <ion-list>
           <ion-item>
-            <ion-label>Does product have a fixed price or multiple sizes?</ion-label>
+            <ion-label>Fixed price or multiple sizes?</ion-label>
             <ion-select [(ngModel)]="sizesAndPricesType" [ngModelOptions]="{standalone: true}"  (ionChange)="onSizesAndPricesTypeChange()">
               <ion-option *ngFor="let x of sizesAndPricesTypesArr; let i = index;" [value]="x">{{x}}</ion-option>      
             </ion-select>

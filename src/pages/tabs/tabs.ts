@@ -6,6 +6,7 @@ import { AppViewData } from '../../global/app-data';
 
 @IonicPage()
 @Component({
+  selector: 'tabs',
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
