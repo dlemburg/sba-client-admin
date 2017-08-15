@@ -69,7 +69,7 @@ constructor(
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
      this.myForm = this.formBuilder.group({
-      name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
+      name: ['', Validators.compose([Validators.required, Validators.maxLength(45)])],
       img: [''],
       description: ['', Validators.compose([Validators.required, Validators.maxLength(200)])],
       exclusions: ['', Validators.compose([Validators.maxLength(200)])],
@@ -273,7 +273,6 @@ constructor(
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      debugger;
       this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
@@ -286,7 +285,6 @@ constructor(
 
 
   submit(myForm): void {
-    debugger;
     this.presentLoading(AppViewData.getLoading().saving);
 
     let expiryDate = myForm.expiryDate.toString();

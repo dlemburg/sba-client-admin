@@ -139,7 +139,6 @@ export class AddRewardPage extends BaseViewController {
 
   onSetProcessingType(processingType): void {
     // changes validation/errors
-    debugger;
     let formCtrls = ['discountType', 'discountRule', 'discountAmount', 'dateRuleDays', 'dateRuleTimeStart', 'dateRuleTimeEnd'];
     let newValue = null;
 
@@ -216,7 +215,6 @@ export class AddRewardPage extends BaseViewController {
 
   finishSubmit(myForm) {
     const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid};
-    debugger;
     console.log("toData: ", toData);
     this.API.stack(ROUTES.saveReward, "POST", toData)
       .subscribe(

@@ -55,7 +55,7 @@ export class AddRewardIndividualPage extends BaseViewController {
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
      this.myForm = this.formBuilder.group({
-      name: [null, Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
+      name: [null, Validators.compose([Validators.required, Validators.maxLength(45)])],
       img: [null],
       description: [null, Validators.compose([Validators.required, Validators.maxLength(200)])],
       exclusions: [null, Validators.compose([Validators.maxLength(200)])],

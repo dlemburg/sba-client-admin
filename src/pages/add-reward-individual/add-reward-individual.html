@@ -13,12 +13,15 @@
 </ion-header>
 
 <ion-content padding  class="width-100">
-  <ion-item margin-top color="primary" text-wrap><span class="bold"> Note:</span> 
+  <ion-item *ngIf="individualRewardTypes.length" margin-top color="primary" text-wrap><span class="bold"> Note:</span> 
     <div>
-      All individual rewards will be generated automatically for the user when appropriate. These individual
+      All individual rewards will be generated automatically for the user when appropriate. The individual reward will allow a free purchase item. These individual
       rewards will not be available for everyone; rather, they will be given to the user based on meeting at least one of the following criteria:
       <div> A reward given for the first time a user loads money onto the mobile card</div>
     </div>
+  </ion-item>
+  <ion-item *ngIf="!individualRewardTypes.length" margin-top color="primary" class="bold" text-wrap>
+    You have already created a reward for each available individual reward. You can edit/remove them if necessary on the "Edit" Page.
   </ion-item>
   <div *ngIf="individualRewardTypes.length" class="width-90 align-center">
     <form margin-top [formGroup]="myForm" (ngSubmit)="submit(myForm.value)" novalidate>

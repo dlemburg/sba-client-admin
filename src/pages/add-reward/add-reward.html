@@ -104,6 +104,7 @@
       </ion-item>
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountTypeOid"></control-messages>
 
+      <h4 *ngIf="currentDiscountType === DISCOUNT_TYPE.PERCENT" margin-top text-center>Make sure percent is a whole number; i.e. If 15% off, type 15.</h4>
       <ion-item margin-top *ngIf="currentDiscountType">
         <ion-label *ngIf="currentDiscountType !== DISCOUNT_TYPE.NEWPRICE" floating>
           <span *ngIf="currentDiscountType === DISCOUNT_TYPE.MONEY"><dollar-icon></dollar-icon></span> 

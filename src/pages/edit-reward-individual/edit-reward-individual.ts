@@ -60,7 +60,7 @@ export class EditRewardIndividualPage extends BaseViewController {
       super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
       this.myForm = this.formBuilder.group({
-        name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
+        name: ['', Validators.compose([Validators.required, Validators.maxLength(45)])],
         img: [''],
         description: ['', Validators.compose([Validators.required, Validators.maxLength(200)])],
         exclusions: ['', Validators.compose([Validators.maxLength(200)])],
@@ -136,6 +136,7 @@ export class EditRewardIndividualPage extends BaseViewController {
         isFreePurchaseItem: this.rewardIndividual.isFreePurchaseItem, 
         individualRewardType: this.rewardIndividual.individualRewardType
       });
+      this.editOid = this.rewardIndividual.oid;
     }
   }
 
@@ -173,9 +174,7 @@ export class EditRewardIndividualPage extends BaseViewController {
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          setTimeout(() => {
-            this.navCtrl.pop();
-          }, 1000);
+          setTimeout(() => this.navCtrl.pop(), 1000);
           console.log('response: ', response); 
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
@@ -209,10 +208,10 @@ export class EditRewardIndividualPage extends BaseViewController {
 
   submit(myForm): void {
     this.presentLoading(AppViewData.getLoading().saving);
-    let expiryDate = myForm.expiryDate.toString();
+    //let expiryDate = myForm.expiryDate ? myForm.expiryDate.toString() : null;
     
     /*** package ***/
-    if (myForm.hasExpiryDate)  myForm.expiryDate = expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : expiryDate;
+    if (myForm.hasExpiryDate)  myForm.expiryDate = myForm.xpiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : myForm.expiryDate;
     
     if (myForm.img && this.imgDidChange) {
       this.uploadImg(myForm).then(() => {
@@ -224,6 +223,7 @@ export class EditRewardIndividualPage extends BaseViewController {
   finishSubmit(myForm) {
     const toData: ToDataSaveOrEditReward = {toData: this.myForm.value, companyOid: this.auth.companyOid, editOid: this.editOid};
 
+    console.log("toData: ", toData);
     this.API.stack(ROUTES.editRewardIndividual, "POST", toData)
       .subscribe(
         (response) => {

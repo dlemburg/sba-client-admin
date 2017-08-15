@@ -15,15 +15,16 @@
 <ion-content padding class="width-100">
   <div class="width-90 align-center">
     <h4 text-center>Descriptive Info</h4>
-   <ion-item margin-top color="primary" text-wrap><span class="bold"> Note:</span> 
+   <ion-item *ngIf="rewardsIndividual.length" margin-top color="primary" text-wrap><span class="bold"> Note:</span> 
     <div>
       All individual rewards will be generated automatically for the user when appropriate. These individual
       rewards will not be available for everyone; rather, they will be given to the user based on meeting at least one of the following criteria:
       <div> A reward given for the first time a user loads money onto the mobile card</div>
     </div>
-    <div class="margin-top individual-rewards-not-enabled" *ngIf="!individualRewardTypes.length">***You have not created any individual rewards yet!***</div>
   </ion-item>
-    <ion-list margin-top>
+  <EmptyMessage text-wrap *ngIf="!rewardsIndividual.length" longMessage="***You have not created any individual rewards yet***"></EmptyMessage>
+  
+    <ion-list *ngIf="rewardsIndividual.length" margin-top>
       <ion-item class="outline">
         <ion-label>Select the individual reward to edit</ion-label>
         <ion-select [disabled]="!rewardsIndividual.length" [(ngModel)]="rewardIndividual" (ionChange)="editValueChange()">
@@ -48,7 +49,6 @@
 
         <!-- image -->
         <Image (getImgCordova)="getImgCordova()" header="Rewward Individual Image" [imgSrc]="imgSrc"></Image>
-
         
         <ion-item margin-top>
           <ion-label class="text-area-label" stacked>Description</ion-label>
@@ -61,8 +61,15 @@
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.exclusions"></control-messages>
 
-       
-        <!-- Is free purchase item? 
+        <button class="width-60 app-btn align-center" color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
+      </form>
+    </div>
+    <div *ngIf="editOid !== null" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>
+  </div>
+</ion-content>
+
+
+<!-- Is free purchase item? 
         <ion-item margin-top class="width-80">
           <ion-checkbox formControlName="isFreePurchaseItem"></ion-checkbox>
           <ion-label>Is this a "one free purchase item (on the order)" reward? </ion-label>
@@ -84,9 +91,3 @@
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.expiryDate"></control-messages>
         </div> -->
-        <button class="width-60 app-btn align-center" color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
-      </form>
-    </div>
-    <div *ngIf="editOid" margin-top text-center><button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button></div>
-  </div>
-</ion-content>

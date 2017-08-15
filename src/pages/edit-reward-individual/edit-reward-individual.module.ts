@@ -6,7 +6,8 @@ import { EditRewardIndividualPage } from './edit-reward-individual';
 import { ControlMessagesComponentModule } from '../../components/control-messages/control-messages.component.module';
 import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-icon.component.module';
 import { ImageComponentModule } from '../../components/image/image.component.module';
- 
+import { EmptyMessageComponentModule } from '../../components/empty-message/empty-message.component.module';
+
 @NgModule({
   declarations: [
    EditRewardIndividualPage,
@@ -15,7 +16,8 @@ import { ImageComponentModule } from '../../components/image/image.component.mod
     IonicPageModule.forChild(EditRewardIndividualPage),
     ControlMessagesComponentModule,
     DollarIconComponentModule,
-    ImageComponentModule
+    ImageComponentModule,
+    EmptyMessageComponentModule
   ],
   exports: [
    EditRewardIndividualPage

@@ -16,7 +16,7 @@
 <ion-content padding class="width-100">
   <div class="width-90 align-center">
     <h2 text-center>Edit Reward</h2>
-    <ion-list>
+    <ion-list *ngIf="values.length">
       <ion-item class="outline">
         <ion-label>Select Reward</ion-label>
         <ion-select [disabled]="!values.length" [(ngModel)]="editOid" (ionChange)="editValueChange()">
@@ -24,6 +24,7 @@
         </ion-select>
       </ion-item>
     </ion-list>
+    <EmptyMessage *ngIf="!values.length" message="rewards"></EmptyMessage>
 
     <div *ngIf="editOid" class="width-80 align-center">
       <h4 text-center>Descriptive Info</h4>
@@ -73,13 +74,14 @@
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountTypeOid"></control-messages>
 
+        <h4 *ngIf="currentDiscountType === DISCOUNT_TYPE.PERCENT" margin-top text-center>Make sure percent is a whole number; i.e. If 15% off, type 15.</h4>
         <ion-item  margin-top *ngIf="currentDiscountType">
-            <ion-label *ngIf="currentDiscountType !== DISCOUNT_TYPE.NEWPRICE" floating>
-              <span *ngIf=" currentDiscountType === DISCOUNT_TYPE.MONEY"><dollar-icon></dollar-icon></span> 
-                    Amount ( {{ currentDiscountType }} )
-            </ion-label>
-            <ion-label *ngIf=" currentDiscountType === DISCOUNT_TYPE.NEWPRICE" floating><dollar-icon></dollar-icon> New Price</ion-label>
-            <ion-input formControlName="discountAmount" type="tel"></ion-input>
+          <ion-label *ngIf="currentDiscountType !== DISCOUNT_TYPE.NEWPRICE" floating>
+            <span *ngIf=" currentDiscountType === DISCOUNT_TYPE.MONEY"><dollar-icon></dollar-icon></span> 
+                  Amount ( {{ currentDiscountType }} )
+          </ion-label>
+          <ion-label *ngIf=" currentDiscountType === DISCOUNT_TYPE.NEWPRICE" floating><dollar-icon></dollar-icon> New Price</ion-label>
+          <ion-input formControlName="discountAmount" type="tel"></ion-input>
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.discountAmount"></control-messages>
           
@@ -107,7 +109,7 @@
 
             <!-- if date-range -->
           <div margin-top *ngIf="currentDiscountRule === DISCOUNT_RULE.DATE">
-            <h4 margin-top text-center>Customer visitation day/times</h4>
+              <h4 margin-top text-center>Customer visitation day/times</h4>
               <ion-item margin-top>
                 <ion-label>Days</ion-label>
                 <ion-select formControlName="dateRuleDays" multiple="true">
@@ -141,7 +143,7 @@
         <button class="width-60 app-btn align-center" color="primary" type="submit" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>
       </form>
     </div>
-    <div *ngIf="editOid" margin-top text-center>
+    <div *ngIf="editOid !== null" margin-top text-center>
       <button class="width-50 margin-top" ion-button color="danger" (click)="remove()">Remove</button>
     </div>
   </div>

@@ -135,7 +135,7 @@ constructor(
     this.presentLoading(AppViewData.getLoading().saving);
     let type: string = this.type.toLowerCase();
     
-    if (type === this.GENERAL_TYPES.CATEGORIES && myForm.img && this.didImgChange) {
+    if (type === this.GENERAL_TYPES.CATEGORIES && myForm.img && this.imgDidChange) {
         this.uploadImg(myForm).then(() => {
           this.finishSubmit(type, myForm);
         }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
