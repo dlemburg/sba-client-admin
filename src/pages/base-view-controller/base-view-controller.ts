@@ -51,8 +51,13 @@ export class BaseViewController {
       } else {
         toastOpts.duration = 5000;
         toastOpts.cssClass = 'dl-custom-toast-container';
+        // authentication credentials failed
         if (errorType === this.ERROR_TYPES.API && parseInt(err.status) === 401) {
           message = `Sorry, there was an issue validating your current session. If the issue persists, try logging out and then logging back in; then fill out an issue report. Sorry for the inconvenience`;
+        // camera plugin didn't select img. this stops err from displaying (bc not an error);
+        } else if (errorType === this.ERROR_TYPES.PLUGIN.CAMERA && err === "Selection cancelled.") {
+          this.dismissLoading();
+          return;
         } else {
           switch(errorType) {
             case this.ERROR_TYPES.API:

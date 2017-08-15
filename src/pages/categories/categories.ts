@@ -37,6 +37,7 @@ export class CategoriesPage extends BaseViewController {
               this.dismissLoading();
               this.categories = Utils.getImgs(response.data.categories);
               
+              console.log("response categories: ", this.categories);
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 

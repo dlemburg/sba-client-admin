@@ -318,7 +318,7 @@ export class ProcessOrderPage extends BaseViewController {
     const confirmFn = () => {
       this.order = Object.assign({}, order, {
         purchaseItems: order.purchaseItems.filter((x, i) => i !== index),
-        subtotal: this.processOrderUtils.calculateSubtotal(order, this.companyDetails)
+        subtotal: this.processOrderUtils.calculateSubtotal(this.order, this.companyDetails)
       });
       this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
       this.productDetails = this.processOrderUtils.clearProductDetails();

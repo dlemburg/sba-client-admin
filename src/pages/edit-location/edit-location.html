@@ -59,9 +59,9 @@
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.zipcode"></control-messages>
 
-          <div margin-top text-left><span class="bold">Note:</span> if you would like to keep your password the same, do not change the passwords listed below.</div>
+          <div margin-top text-left><span class="bold">Note:</span> if you would like to keep your current password, do not change the passwords listed below.</div>
           <ion-item margin-top>
-            <ion-label floating>Location Password</ion-label>
+            <ion-label floating>New Location Password</ion-label>
             <ion-input formControlName="password" type="password" (keypress)="onDidPasswordChange()"></ion-input>
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.password"></control-messages>

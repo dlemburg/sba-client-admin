@@ -34,8 +34,7 @@ export class EditGeneralPage extends BaseViewController {
   GENERAL_TYPES = {
     CATEGORIES: "Categories"
   }
-  ImageUtility: ImageUtility;
-
+  imageUtility: ImageUtility;
 
 constructor(
   public navCtrl: NavController, 
@@ -62,11 +61,12 @@ constructor(
 //this page uses: keyword, category, flavor, size, addons
   ionViewDidLoad() {
     this.type = this.navParams.data.type;
+    console.log("this.type: ", this.type);
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
 
-    const route = this.type === "categories" ? ROUTES.getOwnerCategories : ROUTES.getOwnerEditGeneral
-    this.API.stack(route + `/${this.type.toLowerCase()}/${this.auth.companyOid}`, 'GET')
+    //const route = this.type === this.GENERAL_TYPES.CATEGORIES ? ROUTES.getOwnerCategories : ROUTES.getOwnerEditGeneral
+    this.API.stack(ROUTES.getOwnerEditGeneral + `/${this.type.toLowerCase()}/${this.auth.companyOid}`, 'GET')
       .subscribe(
         (response) => {
           this.dismissLoading();
@@ -77,8 +77,8 @@ constructor(
 
   editValueChange(event, value): void {
     if (this.editValue && this.editValue.name) {
-      if (this.type === "categories") {
-
+      if (this.type === this.GENERAL_TYPES.CATEGORIES) {
+        console.log("edit category, this.editValue: ", this.editValue);
         // init everything
         this.myForm.patchValue({name: this.editValue.name, img: this.editValue.img});
         this.imgSrc = AppViewData.getDisplayImgSrc(this.editValue.img);
@@ -105,8 +105,8 @@ constructor(
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -118,7 +118,7 @@ constructor(
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
       .catch((err) => {
@@ -129,29 +129,27 @@ constructor(
   }
 
   submit(myForm, isValid): void {
+    this.presentLoading(AppViewData.getLoading().saving);
+    let type: string = this.type.toLowerCase();
     
-      this.presentLoading(AppViewData.getLoading().saving);
-      let type: string = this.type.toLowerCase();
-      
-      if (type === "categories" && myForm.img) {
-          this.uploadImg(myForm).then(() => {
-            this.finishSubmit(type, myForm);
-          }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
-      } else this.finishSubmit(type, myForm);
+    if (type === this.GENERAL_TYPES.CATEGORIES && myForm.img) {
+        this.uploadImg(myForm).then(() => {
+          this.finishSubmit(type, myForm);
+        }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
+    } else this.finishSubmit(type, myForm);
   }
 
   finishSubmit(type, myForm) {
     const toData: ToDataEditGeneral = {toData: myForm, editOid: this.editOid, companyOid: this.auth.companyOid };
 
     this.API.stack(ROUTES.saveOwnerGeneralEdit + `/${this.type}`, 'POST', toData)
-        .subscribe(
-          (response) => {
-            this.dismissLoading(AppViewData.getLoading().saved);
-            setTimeout(() => {
-              this.navCtrl.pop();
-            }, 1000);            console.log('response: ', response);
-          }, this.errorHandler(this.ERROR_TYPES.API));
-  }
+      .subscribe(
+        (response) => {
+          this.dismissLoading(AppViewData.getLoading().saved);
+          setTimeout(() => this.navCtrl.pop(), 1000);            
+          console.log('response: ', response);
+        }, this.errorHandler(this.ERROR_TYPES.API));
+  } 
 }
 
 interface ToDataEditGeneral {

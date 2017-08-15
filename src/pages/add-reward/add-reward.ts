@@ -30,7 +30,6 @@ export class AddRewardPage extends BaseViewController {
   PROCESSING_TYPE = CONST_PROCESSING_TYPE;
   DISCOUNT_TYPE = CONST_DISCOUNT_TYPE;
   DISCOUNT_RULE = CONST_DISCOUNT_RULE;
-  
   lkps: any = {
     discountType: [],
     discountRule: []
@@ -40,7 +39,7 @@ export class AddRewardPage extends BaseViewController {
   img: string = null;
   imgSrc: string = null;
   failedUploadImgAttempts: number = 0;
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
 
   constructor(
     public navCtrl: NavController, 
@@ -67,7 +66,7 @@ export class AddRewardPage extends BaseViewController {
       processingType: [this.PROCESSING_TYPE.MANUAL],
       lkpDiscountTypeOid: [null],
       lkpDiscountRuleOid: [null],
-      discountAmount: [null],
+      discountAmount: [0],
       productOid: [null],
       dateRuleDays: [null],
       dateRuleTimeStart: [null],
@@ -75,7 +74,6 @@ export class AddRewardPage extends BaseViewController {
       startDate: ['', Validators.required],
       expiryDate: ['', Validators.required ],
       type: ["rewards_all"],
-
     }, {validator: Validators.compose([Validation.isDiscountAmountInvalid('lkpDiscountTypeOid', 'discountAmount'), Validation.isInvalidDate('startDate', 'expiryDate'), Validation.isInvalidTime('dateRuleTimeStart', 'dateRuleTimeEnd')])});
   }
 
@@ -88,21 +86,20 @@ export class AddRewardPage extends BaseViewController {
     // SUBSCRIBE TO FORM
     //this.myForm.valueChanges.subscribe(data => this.onChange(data, 'start'));    // all
     //this.myForm.get('dateRuleTimeEnd').valueChanges.subscribe(data => this.onChange(data, 'end'));    // all
-    this.myForm.get('processingType').valueChanges.subscribe(data => this.onProcessingTypeChanged(data));
-
+    //this.myForm.get('processingType').valueChanges.subscribe(data => this.onProcessingTypeChanged(data));
 
     // get lkps
     this.API.stack(ROUTES.getProcessingAndDiscountLkps, "GET")
-        .subscribe(
-            (response) => {
-              let { discountType, discountRule } = response.data.processingAndDiscountLkps;
-              this.lkps.discountType = discountType;
-              this.lkps.discountRule = discountRule;
+      .subscribe(
+        (response) => {
+          let { discountType, discountRule } = response.data.processingAndDiscountLkps;
+          this.lkps.discountType = discountType;
+          this.lkps.discountRule = discountRule;
 
-              this.dismissLoading();
-              console.log('response.data: ', response.data);
-              
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          this.dismissLoading();
+          console.log('response.data: ', response.data);
+          
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navExplanations() {
@@ -112,9 +109,7 @@ export class AddRewardPage extends BaseViewController {
 
 
   getCurrentDiscountRule(event): string {
-    let lkpObj = this.lkps.discountRule.find((x) => {
-        return x.oid === event;
-    });
+    const lkpObj = this.lkps.discountRule.find((x) => x.oid === event);
     return lkpObj.value;
   }
  
@@ -126,43 +121,42 @@ export class AddRewardPage extends BaseViewController {
     if (conditions) {
       this.API.stack(ROUTES.getProductsNameAndOid + `/${this.auth.companyOid}`, "GET")
         .subscribe(
-            (response) => {
-              this.doCallGetProducts = false;
-              let {products} = response.data;            
-              this.products = products;
-              
-              console.log('response.data: ' ,response.data);
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          (response) => {
+            this.doCallGetProducts = false;
+            this.products = response.data.products;            
+            
+            console.log('response.data: ' ,response.data);
+          }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 
   discountTypeChanged(event): void {
-    let obj = this.lkps.discountType.find((x) => {
-        return x.oid === event;
-    });
+    const obj = this.lkps.discountType.find((x) => x.oid === event);
     this.currentDiscountType = obj.value;
     
     this.myForm.patchValue({discountAmount: null});
   }
 
-  onProcessingTypeChanged(data): void {
+  onSetProcessingType(processingType): void {
     // changes validation/errors
+    debugger;
     let formCtrls = ['discountType', 'discountRule', 'discountAmount', 'dateRuleDays', 'dateRuleTimeStart', 'dateRuleTimeEnd'];
     let newValue = null;
 
     this.myForm.patchValue({ 
         discountType: newValue,
         discountRule: newValue,
-        discountAmount: newValue, 
         productOid: newValue,
         dateRuleDays: newValue,
         dateRuleTimeStart: newValue,
         dateRuleTimeEnd: newValue,
+        discountAmount: 0, 
+        processingType: processingType
     });
     
     formCtrls.forEach((key, index) => {
       if (this.myForm.controls && this.myForm.controls[key]) {
-        if (data === this.PROCESSING_TYPE.AUTOMATIC) {
+        if (processingType === this.PROCESSING_TYPE.AUTOMATIC) {
            this.myForm.controls[key].setValidators([Validators.required]);
            this.myForm.controls[key].setErrors(null);
            this.myForm.controls[key].markAsUntouched();
@@ -175,17 +169,10 @@ export class AddRewardPage extends BaseViewController {
     });
   }
 
-   // also triggers observable subscription
-  onSetProcessingType(type): void {
-    this.myForm.patchValue({ 
-      processingType: type
-    });
-  }
-
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -197,7 +184,7 @@ export class AddRewardPage extends BaseViewController {
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
       .catch((err) => {
@@ -229,18 +216,13 @@ export class AddRewardPage extends BaseViewController {
 
   finishSubmit(myForm) {
     const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid};
+    debugger;
+    console.log("toData: ", toData);
     this.API.stack(ROUTES.saveReward, "POST", toData)
       .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
-            setTimeout(() => {
-              this.navCtrl.pop();
-              /*
-              this.myForm.reset();
-              this.img = null;
-              this.imgSrc = null;
-              */
-            }, 500);  
+            setTimeout(() => this.navCtrl.pop(), 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

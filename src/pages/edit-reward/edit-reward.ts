@@ -47,9 +47,9 @@ export class EditRewardPage extends BaseViewController {
   imgSrc: string = null;
   img: string = null;
   oldImg: string = null;
-  imgChanged: boolean = false;
+  imgDidChange: boolean = false;
   failedUploadImgAttempts = 0;
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
 
 
 constructor(
@@ -98,7 +98,7 @@ constructor(
     // SUBSCRIBE TO FORM
     this.myForm.valueChanges.subscribe(data => this.onFormChanged(data));    // all
     this.myForm.get('processingType').valueChanges.subscribe(data => this.onProcessingTypeChanged(data));
-
+    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
     this.presentLoading();
     // get name and oid of all rewards
     this.API.stack(ROUTES.getRewardsNameAndOid + `/${this.auth.companyOid}`, "GET")
@@ -129,6 +129,7 @@ constructor(
 
 
   onFormChanged(data) {}
+  onImgDidChange(data) { this.imgDidChange = true }
 
   // reward to edit is selected
   editValueChange(): void {
@@ -172,13 +173,13 @@ constructor(
             if (this.doCallGetProducts) { // reward.productOid !== null
               this.API.stack(ROUTES.getProductsNameAndOid + `/${this.auth.companyOid}`, "GET")
                 .subscribe(
-                    (response) => {
-                      //this.dismissLoading();
-                      this.doCallGetProducts = false;
-                      this.products = response.data.products;
-                      
-                      console.log('response.data: ', response.data);
-                    }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false} ));
+                  (response) => {
+                    //this.dismissLoading();
+                    this.doCallGetProducts = false;
+                    this.products = response.data.products;
+                    
+                    console.log('response.data: ', response.data);
+                  }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false} ));
             }
           },this.errorHandler(this.ERROR_TYPES.API));
     }
@@ -252,17 +253,15 @@ constructor(
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          setTimeout(() => {
-            this.navCtrl.pop();
-          }, 1000);
+          setTimeout(() => this.navCtrl.pop(), 1000);
           console.log('response: ', response); 
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -274,7 +273,8 @@ constructor(
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      debugger;
+      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
       .catch((err) => {
@@ -286,6 +286,7 @@ constructor(
 
 
   submit(myForm): void {
+    debugger;
     this.presentLoading(AppViewData.getLoading().saving);
 
     let expiryDate = myForm.expiryDate.toString();
@@ -296,9 +297,9 @@ constructor(
     myForm.startDate = startDate.indexOf("T00:00:00") < 0 ? DateUtils.patchStartTime(myForm.startDate) : startDate;
     myForm.dateRuleTimeStart = myForm.dateRuleTimeStart ? DateUtils.getHours(myForm.dateRuleTimeStart) : null,
     myForm.dateRuleTimeEnd = myForm.dateRuleTimeEnd ? DateUtils.getHours(myForm.dateRuleTimeEnd) : null,
-    myForm.dateRuleDays = myForm.dateRuleDays ? myForm.dateRuleDays.split(",") : null
+    myForm.dateRuleDays = myForm.dateRuleDays ? myForm.dateRuleDays.join(",") : null
     
-    if (myForm.img) {
+    if (myForm.img && this.imgDidChange) {
       this.uploadImg(myForm).then(() => {
         this.finishSubmit(myForm);
       }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
@@ -312,9 +313,7 @@ constructor(
       .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
-            setTimeout(() => {
-              this.navCtrl.pop();
-            }, 1000);  
+            setTimeout(() => this.navCtrl.pop(), 1000);  
             console.log('response: ', response);            
           }, this.errorHandler(this.ERROR_TYPES.API));
   }

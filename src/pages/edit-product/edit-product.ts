@@ -41,16 +41,14 @@ export class EditProductPage extends BaseViewController {
   sizesAndPricesType: string = null;
   sizesAndPricesTypesArr: Array<string> = ["Fixed Price", "Sizes"];
   companyDetails: ICompanyDetails = {};
-
+  imgDidChange: boolean = false;
   SIZES_AND_PRICES_TYPE = {
     FIXED_PRICE: "Fixed Price",
     SIZES: "Sizes"
   };
-
   imgSrc: string = null;
   img: string = null;
   oldImg: string = null;
-  imgChanged: boolean = false;
   failedUploadImgAttempts = 0;
   ImageUtility: ImageUtility;
 
@@ -70,69 +68,70 @@ constructor(
   private platform: Platform) { 
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
-      this.myForm = this.formBuilder.group({
-        name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
-        img: ['', Validators.required],
-        caloriesLow: ['', Validators.compose([Validation.test('isAboveZero'), Validation.test("isNumbersOnly")])],
-        caloriesHigh: ['', Validators.compose([Validation.test("isAboveZero"), Validation.test("isNumbersOnly")])],
-        description: ['', Validators.compose([Validators.required, Validators.maxLength(150)])],
-        categoryOid: ['', Validators.required],
-        flavors: [ [] ],
-        addons: [ [] ],
-        dairy: [ [] ],
-        variety: [ [] ],
-        sweetener: [ [] ],
-        sizesAndPrices: this.formBuilder.array([]),   // init to empty  (could also build the group here if wanted)
-        fixedPrice: ['', Validation.test("numbersOnly")],
-        numberOfFreeAddonsUntilCharged: [0, Validation.test("numbersOnly")],
-        addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, Validation.test("money")]) ],
-        lkpNutritionOid: ['', Validators.required],
-        lkpSeasonOid: ['', Validators.required],
-        keywords: ['', Validators.required],
-        hasDefaultProductHealthWarning: [false]
-      }, {validator: Validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')});
+    this.myForm = this.formBuilder.group({
+      name: ['', Validators.compose([Validators.required, Validators.maxLength(45), Validators.minLength(2)])],
+      img: ['', Validators.required],
+      caloriesLow: ['', Validators.compose([Validation.test('isAboveZero'), Validation.test("isNumbersOnly")])],
+      caloriesHigh: ['', Validators.compose([Validation.test("isAboveZero"), Validation.test("isNumbersOnly")])],
+      description: ['', Validators.compose([Validators.required, Validators.maxLength(150)])],
+      categoryOid: ['', Validators.required],
+      flavors: [ [] ],
+      addons: [ [] ],
+      dairy: [ [] ],
+      variety: [ [] ],
+      sweetener: [ [] ],
+      sizesAndPrices: this.formBuilder.array([]),   // init to empty  (could also build the group here if wanted)
+      fixedPrice: ['', Validation.test("numbersOnly")],
+      numberOfFreeAddonsUntilCharged: [0, Validation.test("numbersOnly")],
+      addonsPriceAboveLimit: [0.00, Validators.compose([ Validators.required, Validation.test("money")]) ],
+      lkpNutritionOid: ['', Validators.required],
+      lkpSeasonOid: ['', Validators.required],
+      keywords: ['', Validators.required],
+      hasDefaultProductHealthWarning: [false]
+    }, {validator: Validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')});
   }
 
   ionViewDidLoad() {
+    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
 
     this.API.stack(ROUTES.getCompanyDetails, "POST", {companyOid: this.auth.companyOid})
       .subscribe(
-          (response) => {
-            this.companyDetails = response.data.companyDetails;
-          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+        (response) => {
+          this.companyDetails = response.data.companyDetails;
+        }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
 
     // already had top call made; doesn't need to be async
     this.API.stack(ROUTES.getProductsNameAndOid + `/${this.auth.companyOid}`, 'GET')
       .subscribe(
-          (response) => {
-            console.log('response.data: ', response.data);
-            this.values = response.data.products;
-            this.getAllProductOptionsAPI();
-          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+        (response) => {
+          console.log('response.data: ', response.data);
+          this.values = response.data.products;
+          this.getAllProductOptionsAPI();
+        }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
   }
 
   getAllProductOptionsAPI() {
     this.API.stack(ROUTES.getAllProductOptions + `/${this.auth.companyOid}`, "GET")
       .subscribe(
-          (response) => {
-            let { categories, flavors, addons, dairy, variety, sweetener, sizes, keywords, nutritions, seasons } = response.data.productInfo;
-            
-            this.categories = categories;
-            this.flavors = flavors;
-            this.addons = addons;
-            this.dairy = dairy;
-            this.variety = variety;
-            this.sweetener = sweetener;
-            this.sizes = sizes;
-            this.keywords = keywords;
-            this.nutritions = nutritions;
-            this.seasons = seasons;
-            
-            console.log('response.data: ', response.data);
-            this.dismissLoading(); // this one is needed first, so just dismiss here
-          }, this.errorHandler(this.ERROR_TYPES.API));
+        (response) => {
+          let { categories, flavors, addons, dairy, variety, sweetener, sizes, keywords, nutritions, seasons } = response.data.productInfo;
+          
+          this.categories = categories;
+          this.flavors = flavors;
+          this.addons = addons;
+          this.dairy = dairy;
+          this.variety = variety;
+          this.sweetener = sweetener;
+          this.sizes = sizes;
+          this.keywords = keywords;
+          this.nutritions = nutritions;
+          this.seasons = seasons;
+          
+          console.log('response.data: ', response.data);
+          this.dismissLoading(); // this one is needed first, so just dismiss here
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   editValueChange() {
@@ -192,6 +191,7 @@ constructor(
     return arr;
   }
 
+  // resets formArray. best way to do it so far
   resetFormArray(arr) {
     if (arr && arr.length) {
       for (let i = 0; i < arr.length; i++) {
@@ -203,14 +203,11 @@ constructor(
     }
   }
 
-  onSizesAndPricesTypeChange() {
-    
-  }
+  onSizesAndPricesTypeChange() {}
 
   onSizeChange(sizes: Array<any>): void {
     let arr = this.myForm.controls.sizesAndPrices;
 
-    // resets formArray. best way to do it so far
     this.resetFormArray(arr);
 
     // build form array
@@ -223,11 +220,10 @@ constructor(
     });
   }
 
-   navExplanations() {
+  navExplanations() {
     let modal = this.modalCtrl.create('ExplanationsPage', {type: "Products"}, {enableBackdropDismiss: true, showBackdrop: true})
     modal.present();
   }
-
 
   remove(): void {
     this.presentLoading(AppViewData.getLoading().removing);
@@ -235,12 +231,13 @@ constructor(
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          setTimeout(() => {
-            this.navCtrl.pop();
-          }, 1000);
+          setTimeout(() => this.navCtrl.pop(), 1000);
           console.log('response: ', response); 
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
+
+  onImgDidChange(data) { this.imgDidChange = true }
+
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
@@ -260,24 +257,19 @@ constructor(
       this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
-      .catch((err) => {
-        console.log("catch from upload img");
-        reject(err);
-      })
+      .catch((err) => reject(err))
     })
   }
 
   submit(myForm, isValid: boolean): void {
-
     // validate size -- this is a hack- should be cleaned up later
     if (myForm.fixedPrice && myForm.sizesAndPrices.length) {
       this.presentToast(false, "Looks like you have values for fixed price and multiple sizes.");
       return;
     }
+
     this.presentLoading(AppViewData.getLoading().saving);
-
-
-    if (myForm.img) {
+    if (myForm.img && this.imgDidChange) {
       this.uploadImg(myForm).then(() => {
         this.finishSubmit(myForm);
       }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
@@ -289,13 +281,10 @@ constructor(
 
     this.API.stack(ROUTES.editProduct, "POST", toData)
       .subscribe(
-          (response) => {
-            this.dismissLoading(AppViewData.getLoading().saved);
-              setTimeout(() => {
-              this.navCtrl.pop();
-            }, 1000);  
-            console.log('response: ', response);
-          }, this.errorHandler(this.ERROR_TYPES.API));
+        (response) => {
+          this.dismissLoading(AppViewData.getLoading().saved);
+          setTimeout(() => this.navCtrl.pop(), 1000);  
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 

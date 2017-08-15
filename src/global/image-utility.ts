@@ -28,6 +28,7 @@ export class ImageUtility {
                     console.log("imageData, ", imageData);
                     resolve({imageData});
                 }).catch((err) => {
+                    console.log("err in getImgCordova: ", err);
                     reject(err);
                 });
             });
@@ -50,7 +51,7 @@ export class ImageUtility {
                 console.log("uploaded successfully... ");
                 resolve({message});
             }).catch((err) => {
-                console.log("rejecting from uploadImg");
+                console.log("rejecting from uploadImg, err: ", err);
                 reject(err);
             });
         })

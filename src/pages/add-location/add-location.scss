@@ -13,6 +13,17 @@ page-add-location {
     .close-toggle {
         position: relative;
         bottom: 10px;
-        left: 5vw;
+        left: 3vw;
     }
+
+    @media screen and (max-width: 481px) {
+        .open-close-container > ion-row > ion-col {
+            font-size: 8px !important;
+            margin-left: none !important;
+            padding-left: none !important;
+            
+        }
+
+    }
+
 }

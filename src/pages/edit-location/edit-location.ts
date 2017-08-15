@@ -38,10 +38,10 @@ export class EditLocationPage extends BaseViewController {
   imgSrc: string = null;
   img: string = null;
   oldImg: string = null;
-  imgChanged: boolean = false;
+  imgDidChange: boolean = false;
   failedUploadImgAttempts = 0;
   initHasRun: boolean = false;
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
 
 constructor(
   public navCtrl: NavController, 
@@ -90,15 +90,17 @@ constructor(
   }
 
   ionViewDidLoad() {
-     this.presentLoading();
-     this.API.stack(ROUTES.getLocations + `/${this.auth.companyOid}`, "GET")
+    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
+
+    this.presentLoading();
+    this.API.stack(ROUTES.getLocations + `/${this.auth.companyOid}`, "GET")
       .subscribe(
-          (response) => {
-            this.dismissLoading();
-            console.log('response: ', response);
-            this.locations = response.data.locations;
-            this.values = response.data.locations;         // did this b/c already had call made and didn't want to do another call
-          }, this.errorHandler(this.ERROR_TYPES.API));
+        (response) => {
+          this.dismissLoading();
+          console.log('response: ', response);
+          this.locations = response.data.locations;
+          this.values = response.data.locations;         // did this b/c already had call made and didn't want to do another call
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   // coords are set in a service b/c nav and subsequent pop of MapPage
@@ -161,8 +163,8 @@ constructor(
         phoneNumber: this.editValue.phoneNumber,
         coordsLat: this.editValue.coordsLat,
         coordsLong: this.editValue.coordsLong,
-        password: this.editValue.password,
-        password2: this.editValue.password2,
+        password: null,
+        password2: null,
         img: this.editValue.img
       });
 
@@ -280,11 +282,12 @@ constructor(
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
+  onImgDidChange(data) { this.imgDidChange = true }
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -296,7 +299,7 @@ constructor(
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
       .catch((err) => {
@@ -327,14 +330,16 @@ constructor(
       .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
-            this.navCtrl.pop();
+            setTimeout(() => {
+              this.navCtrl.pop();
+            }, 1000);
             console.log('response: ', response);
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   submit(myForm, isValid: boolean): void {    
     this.presentLoading(AppViewData.getLoading().saving);
-    if (myForm.img) {
+    if (myForm.img && this.imgDidChange) {
       this.uploadImg(myForm).then(() => {
         this.finishSubmit(myForm);
       }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD))
@@ -349,20 +354,4 @@ interface ToDataEditLocation {
 }
 
 
-     /*
-      myForm.sundayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
-      myForm.sundayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
-      myForm.mondayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
-      myForm.mondayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayClose),
-      myForm.tuesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayOpen),
-      myForm.tuesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayClose),
-      myForm.wednesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayOpen),
-      myForm.wednesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayClose),
-      myForm.thursdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayOpen),
-      myForm.thursdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayClose),
-      myForm.fridayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayOpen),
-      myForm.fridayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
-      myForm.saturdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
-      myForm.saturdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
-    */
     

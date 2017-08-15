@@ -19,7 +19,6 @@ import { Utils } from '../../utils/utils';
   templateUrl: 'add-product.html'
 })
 export class AddProductPage extends BaseViewController {
-  
   auth: AuthUserInfo;
   myForm: any;
   sizes: Array<INameOidCompanyOid> = [];
@@ -44,7 +43,7 @@ export class AddProductPage extends BaseViewController {
     FIXED_PRICE: "Fixed Price",
     SIZES: "Sizes"
   };
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
 
 
   constructor(
@@ -153,8 +152,8 @@ export class AddProductPage extends BaseViewController {
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -166,7 +165,7 @@ export class AddProductPage extends BaseViewController {
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
       .catch((err) => {

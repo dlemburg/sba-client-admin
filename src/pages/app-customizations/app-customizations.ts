@@ -32,7 +32,7 @@ export class AppCustomizationsPage extends BaseViewController {
   oldImg: string = null;
   imgSrc: string = null;
   imgDidChange: boolean = false;
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
 
  constructor(
    public navCtrl: NavController, 
@@ -127,8 +127,8 @@ export class AppCustomizationsPage extends BaseViewController {
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -145,7 +145,7 @@ export class AppCustomizationsPage extends BaseViewController {
       let action = this.oldImg ? 'upload-img-and-unlink' : 'upload-img-no-callback';
 
      
-      this.ImageUtility.uploadImg(action, myForm.socialMediaImg, this.imgSrc, route).then((data) => {
+      this.imageUtility.uploadImg(action, myForm.socialMediaImg, this.imgSrc, route).then((data) => {
         resolve();
       })
       .catch((err) => {

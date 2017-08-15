@@ -72,7 +72,9 @@ export class SimpleProcessingPage extends BaseViewController {
   }
 
   calculateTaxes(total) {
-    if (!isNaN(+total) && !this.taxesAlreadyCalculated) {
+    if (!+total || isNaN(total)) {
+      this.total = "0";
+    } else if (!isNaN(+total) && !this.taxesAlreadyCalculated) {
       this.taxes = +Utils.roundAndAppendZero(+total * this.companyDetails.taxRate);
       this.total = Utils.roundAndAppendZero(+total + (this.taxes));
     }

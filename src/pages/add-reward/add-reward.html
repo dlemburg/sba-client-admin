@@ -52,78 +52,75 @@
 
     <!-- if processingType === 'automatic'-->
     <div margin-top *ngIf="myForm.controls.processingType.value === PROCESSING_TYPE.AUTOMATIC">
-      <h4 text-center>Automatic Processing Info</h4>
-
-       <ion-item margin-top>
-        <ion-label>Discount Rule</ion-label>
-        <ion-select formControlName="lkpDiscountRuleOid" (ionChange)="discountRuleChanged($event)">
-          <ion-option *ngFor="let x of lkps.discountRule; let i = index;" [value]="x.oid">{{x.value}}</ion-option>        
+      <h4 text-center>Automatic Processing Discount Info</h4>
+      <ion-item margin-top>
+      <ion-label>Rule</ion-label>
+      <ion-select formControlName="lkpDiscountRuleOid" (ionChange)="discountRuleChanged($event)">
+        <ion-option *ngFor="let x of lkps.discountRule; let i = index;" [value]="x.oid">{{x.value}}</ion-option>        
+      </ion-select>
+    </ion-item>
+    <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountRuleOid"></control-messages>
+    <!-- if product -->
+    <div *ngIf="currentDiscountRule === DISCOUNT_RULE.PRODUCT">
+      <h4 margin-top>Select the product that is linked to reward</h4>
+      <ion-item margin-top>
+        <ion-label>Product</ion-label>
+        <ion-select formControlName="productOid">
+          <ion-option *ngFor="let x of products; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
         </ion-select>
       </ion-item>
-      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountRuleOid"></control-messages>
-      <!-- if product -->
-      <div margin-top *ngIf="currentDiscountRule === DISCOUNT_RULE.PRODUCT">
-        <ion-item>
-          <ion-label>Select the product that is linked to reward</ion-label>
-          <ion-select formControlName="productOid">
-            <ion-option *ngFor="let x of products; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
-          </ion-select>
-        </ion-item>
-        <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.product"></control-messages>
-      </div>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.product"></control-messages>
+    </div>
 
-      <!-- if date-range -->
-      <div margin-top *ngIf="currentDiscountRule === DISCOUNT_RULE.DATE">
-          <ion-item margin-top>
-            <ion-label>Customer visitation days</ion-label>
-            <ion-select formControlName="dateRuleDays" multiple="true">
-              <ion-option *ngFor="let x of days; let i = index;" [value]="i">{{x}}</ion-option>        
-            </ion-select>
-          </ion-item>
-          <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleDays"></control-messages>
-
-          <ion-item margin-top>
-            <ion-label>Customer visitation Time of Day Start</ion-label>
-            <ion-datetime displayFormat="hh a" pickerFormat="hh a" formControlName="dateRuleTimeStart"></ion-datetime>
-          </ion-item>
-          <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeStart"></control-messages>
-
-          <ion-item margin-top>
-            <ion-label>Customer visitation Time of Day End</ion-label>
-            <ion-datetime displayFormat="hh a" pickerFormat="hh a" formControlName="dateRuleTimeEnd"></ion-datetime>
-          </ion-item>
-          <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeEnd"></control-messages>
-      </div>
+    <!-- if date-range -->
+    <div *ngIf="currentDiscountRule === DISCOUNT_RULE.DATE">
+      <h4 margin-top text-center>Customer visitation day/times</h4>
+      <ion-item margin-top>
+        <ion-label>Days</ion-label>
+        <ion-select formControlName="dateRuleDays" multiple="true">
+          <ion-option *ngFor="let x of days; let i = index;" [value]="i">{{x}}</ion-option>        
+        </ion-select>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleDays"></control-messages>
 
       <ion-item margin-top>
-        <ion-label>Discount Type</ion-label>
+        <ion-label>Start Time</ion-label>
+        <ion-datetime displayFormat="hh a" pickerFormat="hh a" formControlName="dateRuleTimeStart"></ion-datetime>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeStart"></control-messages>
+
+      <ion-item margin-top>
+        <ion-label>End Time</ion-label>
+        <ion-datetime displayFormat="hh a" pickerFormat="hh a" formControlName="dateRuleTimeEnd"></ion-datetime>
+      </ion-item>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeEnd"></control-messages>
+    </div>
+
+      <ion-item margin-top>
+        <ion-label>Type</ion-label>
         <ion-select formControlName="lkpDiscountTypeOid" (ionChange)="discountTypeChanged($event)">
           <ion-option *ngFor="let x of lkps.discountType; let i = index;" [value]="x.oid">{{ x.value }}</ion-option>            
         </ion-select>
       </ion-item>
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountTypeOid"></control-messages>
 
-      <ion-item class="width-50" margin-top *ngIf="currentDiscountType">
-          <ion-label *ngIf="currentDiscountType !== DISCOUNT_TYPE.NEWPRICE" floating>
-            <span *ngIf="currentDiscountType === DISCOUNT_TYPE.MONEY"><dollar-icon></dollar-icon></span> 
-                  Discount Amount ( {{ currentDiscountType }} )
-          </ion-label>
-          <ion-label *ngIf="currentDiscountType === DISCOUNT_TYPE.NEWPRICE" floating><dollar-icon></dollar-icon> New Price</ion-label>
-          <ion-input formControlName="discountAmount" type="tel"></ion-input>
+      <ion-item margin-top *ngIf="currentDiscountType">
+        <ion-label *ngIf="currentDiscountType !== DISCOUNT_TYPE.NEWPRICE" floating>
+          <span *ngIf="currentDiscountType === DISCOUNT_TYPE.MONEY"><dollar-icon></dollar-icon></span> 
+                Amount ( {{ currentDiscountType }} )
+        </ion-label>
+        <ion-label *ngIf="currentDiscountType === DISCOUNT_TYPE.NEWPRICE" floating><dollar-icon></dollar-icon> New Price</ion-label>
+        <ion-input formControlName="discountAmount" type="tel"></ion-input>
       </ion-item>
-      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.discountAmount"></control-messages>
-      
-
-
-      
-  </div>
-      <h4 text-center>Reward Start and Expiration Date</h4>
+      <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.discountAmount"></control-messages>    
+    </div>
+      <h4 margin-top text-center>Reward Start and Expiration Date (if today, enter today's date)</h4>
       <ion-item>
-        <ion-label>Reward Start Date (if today, enter today's date)</ion-label>
+        <ion-label>Start Date</ion-label>
         <ion-datetime displayFormat="MMM DD, YYYY" pickerFormat="YYYY MMMM DD" formControlName="startDate"></ion-datetime>
       </ion-item>
       <ion-item>
-        <ion-label>Reward Expiration Date (if today, enter today's date)</ion-label>
+        <ion-label>Expiration Date</ion-label>
         <ion-datetime displayFormat="MMM DD, YYYY" pickerFormat="YYYY MMMM DD" formControlName="expiryDate" hoursValues="11" minuteValues="59"></ion-datetime>
       </ion-item>
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.expiryDate"></control-messages>

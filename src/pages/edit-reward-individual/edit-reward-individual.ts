@@ -37,9 +37,9 @@ export class EditRewardIndividualPage extends BaseViewController {
   imgSrc: string = null;
   img: string = null;
   oldImg: string = null;
-  imgChanged: boolean = false;
+  imgDidChange: boolean = false;
   failedUploadImgAttempts = 0;
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
   rewardIndividual: any;
   rewardsIndividual: Array<any> = [];
 
@@ -73,6 +73,7 @@ export class EditRewardIndividualPage extends BaseViewController {
 
 
   ionViewDidLoad() {
+    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
     this.auth = this.authentication.getCurrentUser();
     this.days = Utils.getDays();
     this.presentLoading();
@@ -125,27 +126,15 @@ export class EditRewardIndividualPage extends BaseViewController {
 
   editValueChange(): void {
     if (this.rewardIndividual) {
-      debugger;
-      //this.getRewardIndividual();
-      let { 
-        name, 
-        img, 
-        description, 
-        exclusions, 
-        hasExpiryDate, 
-        expiryDate, 
-        isFreePurchaseItem, 
-        individualRewardType } = this.rewardIndividual;
-
       this.myForm.patchValue({
-        name, 
-        img, 
-        description, 
-        exclusions, 
-        hasExpiryDate, 
-        expiryDate: new Date(expiryDate).toISOString(), 
-        isFreePurchaseItem, 
-        individualRewardType
+        name: this.rewardIndividual.name, 
+        img: this.rewardIndividual.img, 
+        description: this.rewardIndividual.description, 
+        exclusions: this.rewardIndividual.exclusions, 
+        hasExpiryDate: this.rewardIndividual.hasExpiryDate, 
+        expiryDate: new Date(this.rewardIndividual.expiryDate).toISOString(), 
+        isFreePurchaseItem: this.rewardIndividual.isFreePurchaseItem, 
+        individualRewardType: this.rewardIndividual.individualRewardType
       });
     }
   }
@@ -154,7 +143,6 @@ export class EditRewardIndividualPage extends BaseViewController {
     let modal = this.modalCtrl.create('ExplanationsPage', {type: "RewardsIndividual"}, {enableBackdropDismiss: true, showBackdrop: true})
     modal.present();
   }
-
 
   onHasExpiryDateChanged(data): void {
     let formCtrls = ['expiryDate'];
@@ -192,10 +180,12 @@ export class EditRewardIndividualPage extends BaseViewController {
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
+  onImgDidChange(data) { this.imgDidChange = true }
+
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -207,7 +197,7 @@ export class EditRewardIndividualPage extends BaseViewController {
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
         resolve();
       })
       .catch((err) => {
@@ -224,7 +214,7 @@ export class EditRewardIndividualPage extends BaseViewController {
     /*** package ***/
     if (myForm.hasExpiryDate)  myForm.expiryDate = expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : expiryDate;
     
-    if (myForm.img) {
+    if (myForm.img && this.imgDidChange) {
       this.uploadImg(myForm).then(() => {
         this.finishSubmit(myForm);
       }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
@@ -236,13 +226,11 @@ export class EditRewardIndividualPage extends BaseViewController {
 
     this.API.stack(ROUTES.editRewardIndividual, "POST", toData)
       .subscribe(
-          (response) => {
-            console.log("response: ", response.data);
-            this.dismissLoading(AppViewData.getLoading().saved);
-            setTimeout(() => {
-              this.navCtrl.pop();
-            }, 1000);  
-          }, this.errorHandler(this.ERROR_TYPES.API));
+        (response) => {
+          console.log("response: ", response.data);
+          this.dismissLoading(AppViewData.getLoading().saved);
+          setTimeout(() => this.navCtrl.pop(), 1000);  
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }
 interface ToDataSaveOrEditReward {

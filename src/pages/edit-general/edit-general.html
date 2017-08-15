@@ -23,7 +23,7 @@
           <ion-label floating>{{type}} Name</ion-label>
           <ion-input type="text" formControlName="name"></ion-input>
         </ion-item>
-        <div *ngIf="type === 'Category'">
+        <div *ngIf="type === GENERAL_TYPES.CATEGORIES">
             <Image (getImgCordova)="getImgCordova()" header="Category Image" [imgSrc]="imgSrc"></Image>
         </div>
         <button class="width-60 app-btn align-center" color="primary" [disabled]="!myForm.valid && !editOid" ion-button block margin-top>Submit</button>

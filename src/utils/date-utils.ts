@@ -55,8 +55,10 @@ constructor() { }
         if (militaryHours >= 12) amOrPm = "pm";
         else if (militaryHours === 0 || militaryHours < 12) amOrPm = "am";
 
+        const minutesAndHoursStr = `${militaryHours}:${minutes}${amOrPm}`;
+        console.log("location minutesAndHoursStr: ", minutesAndHoursStr);
 
-        return `${militaryHours}:${minutes}${amOrPm}`
+        return minutesAndHoursStr;
     }
 
     // gets all relevant date information about client to send to server

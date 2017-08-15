@@ -42,7 +42,7 @@ export class AppImagesPage extends BaseViewController {
     {label: "Added-To-Cart", name: CONST_APP_IMGS[12], appImgIndex: 12, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
   ];
   editValue = {label: null, appImgIndex: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
 
  constructor(
   public navCtrl: NavController, 
@@ -78,8 +78,8 @@ export class AppImagesPage extends BaseViewController {
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova({targetHeight: 400, targetWidth: 600}).then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova({targetHeight: 400, targetWidth: 600}).then((data) => {
       this.dismissLoading();
       this.editValue.imgSrc = data.imageData;
       this.editValue.img = Utils.generateImgName({appImgIndex: this.editValue.appImgIndex, name: "", /*this.editValue.label.replace(/\s+/g, '-') */ companyOid: this.auth.companyOid});
@@ -88,7 +88,7 @@ export class AppImagesPage extends BaseViewController {
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('company-app-img', this.editValue.img, this.editValue.imgSrc, ROUTES.uploadCompanyAppImg).then((data) => {
+      this.imageUtility.uploadImg('company-app-img', this.editValue.img, this.editValue.imgSrc, ROUTES.uploadCompanyAppImg).then((data) => {
         resolve();
       })
       .catch((err) => {
