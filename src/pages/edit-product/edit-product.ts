@@ -91,6 +91,8 @@ constructor(
     }, {validator: Validation.isLowerMustBeHigher('caloriesLow', 'caloriesHigh')});
   }
 
+  compareFn(c1, c2): boolean { return c1 && c2 ? c1.oid === c2.oid : c1 === c2;}   // [compareWith]="compareFn"
+
   ionViewDidLoad() {
     this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
     this.auth = this.authentication.getCurrentUser();
@@ -170,16 +172,21 @@ constructor(
               // init all values
               this.imgSrc = AppViewData.getDisplayImgSrc(product.img);
               this.oldImg = product.img;
-              this.onSizeChange(product.sizesAndPrices);   // build formArray
-              if (product.fixedPrice) this.sizesAndPricesType = this.SIZES_AND_PRICES_TYPE.FIXED_PRICE;
-
+              if (product.fixedPrice) {
+                this.sizesAndPricesType = this.SIZES_AND_PRICES_TYPE.FIXED_PRICE;
+              } else {
+                this.sizesAndPricesType = this.SIZES_AND_PRICES_TYPE.SIZES;  // set price type
+                this.onSizeChange(product.sizesAndPrices);   // build formArray
+                this.selectedSizes = this.getSelectedSizes(product.sizesAndPrices); // hack to pre-select sizes
+              }
               this.dismissLoading();
+
             }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 
 
-// [(ngModel)]="selectedSizes" [ngModelOptions]="{standalone: true}"
+// this is a hack [(ngModel)]="selectedSizes" [ngModelOptions]="{standalone: true}"
   getSelectedSizes(sizesAndPrices): Array<any> {
     let arr = [];
     this.sizes.forEach( (x) => {
@@ -192,7 +199,16 @@ constructor(
   }
 
   // resets formArray. best way to do it so far
-  resetFormArray(arr) {
+  onSizesAndPricesTypeChange() {
+    if (this.sizesAndPricesType ===  this.SIZES_AND_PRICES_TYPE.SIZES) {
+      this.myForm.patchValue({ fixedPrice: null});
+    }
+    this.resetFormArr(this.myForm.controls.sizesAndPrices);
+
+  }
+
+  // 1.) resets form array. best way to do it so far
+  resetFormArr(arr) {
     if (arr && arr.length) {
       for (let i = 0; i < arr.length; i++) {
         arr.removeAt(i);
@@ -203,21 +219,21 @@ constructor(
     }
   }
 
-  onSizesAndPricesTypeChange() {}
-
   onSizeChange(sizes: Array<any>): void {
     let arr = this.myForm.controls.sizesAndPrices;
+    this.resetFormArr(arr);
 
-    this.resetFormArray(arr);
-
-    // build form array
-    sizes.forEach((x, index) => {
-      arr.push(this.formBuilder.group({
-        name: x.name,
-        oid: x.oid, 
-        price: [x.price || null, Validators.compose([Validators.required, Validation.test("isMoney")])]
-      }))
-    });
+    // 2.) dynamically adds input for price:size
+    if (sizes.length) {
+      sizes.forEach((x, index) => {
+        console.log('x: ', x);
+        arr.push(this.formBuilder.group({
+          name: x.name,
+          oid: x.oid,
+          price: [x.price ? x.price : null, Validators.compose([Validators.required, Validation.test("isMoney")])]
+        }))
+      })
+    }
   }
 
   navExplanations() {
@@ -237,7 +253,6 @@ constructor(
   }
 
   onImgDidChange(data) { this.imgDidChange = true }
-
 
   getImgCordova() {
     this.presentLoading("Retrieving...");

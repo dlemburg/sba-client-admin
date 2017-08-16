@@ -88,6 +88,13 @@ export class AddProductPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
+    /*
+    this.myForm.valueChanges.subscribe((data) => {
+      console.log("this.myForm: ", this.myForm);
+      console.log("this.myForm.value: ", this.myForm.value);
+    });
+    */
+
     this.presentLoading();
 
     this.API.stack(ROUTES.getCompanyDetails, "POST", {companyOid: this.auth.companyOid})
@@ -120,17 +127,23 @@ export class AddProductPage extends BaseViewController {
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
-  onSizesAndPricesTypeChange() {}
   
   navExplanations() {
     let modal = this.modalCtrl.create('ExplanationsPage', {type: "Products"}, {enableBackdropDismiss: true, showBackdrop: true})
     modal.present();
   }
 
-  onSizeChange(sizes: Array<any>): void {
-    let arr = this.myForm.controls.sizesAndPrices;
 
-    // 1.) resets form array. best way to do it so far
+  onSizesAndPricesTypeChange() {
+    if (this.sizesAndPricesType ===  this.SIZES_AND_PRICES_TYPE.SIZES) {
+      this.myForm.patchValue({ fixedPrice: null});
+    }
+    this.resetFormArr(this.myForm.controls.sizesAndPrices);
+
+  }
+
+  // 1.) resets form array. best way to do it so far
+  resetFormArr(arr) {
     if (arr && arr.length) {
       for (let i = 0; i < arr.length; i++) {
         arr.removeAt(i);
@@ -138,8 +151,15 @@ export class AddProductPage extends BaseViewController {
       while (arr.length) {
         arr.removeAt(arr.length - 1);
       }
-    }-
-      // 2.) dynamically adds input for price:size
+    }
+  }
+
+  onSizeChange(sizes: Array<any>): void {
+    let arr = this.myForm.controls.sizesAndPrices;
+    this.resetFormArr(arr);
+
+    // 2.) dynamically adds input for price:size
+    if (sizes.length) {
       sizes.forEach((x, index) => {
         console.log('x: ', x);
         arr.push(this.formBuilder.group({
@@ -148,6 +168,7 @@ export class AddProductPage extends BaseViewController {
           price: [null, Validators.compose([Validators.required, Validation.test("isMoney")])]
         }))
       })
+    }
   }
 
   getImgCordova() {
@@ -197,11 +218,7 @@ export class AddProductPage extends BaseViewController {
         .subscribe(
             (response) => {
               this.dismissLoading(AppViewData.getLoading().saved);
-              setTimeout(() => {
-                this.myForm.reset();
-                this.img = null;
-                this.imgSrc = null;
-              }, 500);  
+              setTimeout(() => this.navCtrl.pop(), 500);  
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

@@ -129,7 +129,7 @@
         <ion-list>
           <ion-item>
             <ion-label>Fixed price or multiple sizes?</ion-label>
-            <ion-select [(ngModel)]="sizesAndPricesType" [ngModelOptions]="{standalone: true}"  (ionChange)="onSizesAndPricesTypeChange()">
+            <ion-select  [(ngModel)]="sizesAndPricesType" [ngModelOptions]="{standalone: true}"  (ionChange)="onSizesAndPricesTypeChange()">
               <ion-option *ngFor="let x of sizesAndPricesTypesArr; let i = index;" [value]="x">{{x}}</ion-option>      
             </ion-select>
           </ion-item>
@@ -137,7 +137,7 @@
 
         <div *ngIf="sizesAndPricesType === SIZES_AND_PRICES_TYPE.FIXED_PRICE">
           <ion-item>
-            <ion-label floating>Fixed Price</ion-label>
+            <ion-label floating><dollar-icon></dollar-icon> Fixed Price</ion-label>
             <ion-input formControlName="fixedPrice" type="tel"></ion-input>
           </ion-item>
           <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.fixedPrice"></control-messages>
@@ -146,7 +146,7 @@
           <ion-list>
             <ion-item>
               <ion-label>Sizes</ion-label>
-              <ion-select  multiple="true"  (ionChange)="onSizeChange($event, myForm.controls.sizes)">
+              <ion-select [compareWith]="compareFn" [(ngModel)]="selectedSizes" [ngModelOptions]="{standalone: true}" multiple="true"  (ionChange)="onSizeChange($event, myForm.controls.sizes)">
                 <ion-option *ngFor="let x of sizes;" [value]="x">{{x.name}}</ion-option>      
               </ion-select>
             </ion-item>
