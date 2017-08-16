@@ -16,6 +16,10 @@ page-add-location {
         left: 3vw;
     }
 
+    ion-datetime {
+        font-size: 10px !important;
+    }
+
     @media screen and (max-width: 481px) {
         .open-close-container > ion-row > ion-col {
             font-size: 8px !important;
@@ -23,7 +27,6 @@ page-add-location {
             padding-left: none !important;
             
         }
-
     }
 
 }

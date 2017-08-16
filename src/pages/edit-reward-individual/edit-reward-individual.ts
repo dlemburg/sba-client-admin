@@ -65,25 +65,14 @@ export class EditRewardIndividualPage extends BaseViewController {
         description: ['', Validators.compose([Validators.required, Validators.maxLength(200)])],
         exclusions: ['', Validators.compose([Validators.maxLength(200)])],
         individualRewardType: [null, Validators.required],
-      //  hasExpiryDate: [false, Validators.required],
-      // isFreePurchaseItem: [true, Validators.required],
-      // expiryDate: ['']
       });
   }
 
-
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
+    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.auth = this.authentication.getCurrentUser();
     this.days = Utils.getDays();
     this.presentLoading();
-
-    // SUBSCRIBE TO FORM
-    //this.myForm.valueChanges.subscribe(data => this.onChange(data, 'start'));    // all
-    //this.myForm.get('dateRuleTimeEnd').valueChanges.subscribe(data => this.onChange(data, 'end'));    // all
-   // this.myForm.get('hasExpiryDate').valueChanges.subscribe(data => this.onHasExpiryDateChanged(data));
-
-
     // get all rewardsIndividual that the company has
     this.API.stack(ROUTES.getRewardsIndividual + `/${this.auth.companyOid}`, "GET")
       .subscribe(
@@ -137,6 +126,7 @@ export class EditRewardIndividualPage extends BaseViewController {
         individualRewardType: this.rewardIndividual.individualRewardType
       });
       this.editOid = this.rewardIndividual.oid;
+      this.imgSrc = AppViewData.getDisplayImgSrc(this.rewardIndividual.img);
     }
   }
 

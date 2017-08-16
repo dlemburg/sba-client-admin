@@ -43,7 +43,6 @@ export class EditRewardPage extends BaseViewController {
     longDescription: `This description will be on the reward page (and what your employees will use to verify processing manually.)`,
     shortDescription: 'This description will appear on the rewards list page.'
   };
-  originalValue: string = null;
   imgSrc: string = null;
   img: string = null;
   oldImg: string = null;
@@ -96,18 +95,19 @@ constructor(
     this.auth = this.authentication.getCurrentUser();
 
     // SUBSCRIBE TO FORM
-    this.myForm.valueChanges.subscribe(data => this.onFormChanged(data));    // all
-    this.myForm.get('processingType').valueChanges.subscribe(data => this.onProcessingTypeChanged(data));
-    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
+    this.myForm.valueChanges.subscribe(data => {this.onFormChanged(data)});    // all
+    this.myForm.get('processingType').valueChanges.subscribe((data) => {this.onProcessingTypeChanged(data)});
+    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.presentLoading();
+    
     // get name and oid of all rewards
     this.API.stack(ROUTES.getRewardsNameAndOid + `/${this.auth.companyOid}`, "GET")
       .subscribe(
-          (response) => {
-            this.values = response.data.values;
-            console.log('response.data: ', response.data);
-            
-          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+        (response) => {
+          this.values = response.data.values;
+          console.log('response.data: ', response.data);
+          
+        }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
 
      // get lkps- doesn't need to be async
     this.API.stack(ROUTES.getProcessingAndDiscountLkps, "GET")
@@ -158,16 +158,12 @@ constructor(
               expiryDate: reward.expiryDate,
             });
 
-            console.log("response.data.reward: ", response.data.reward);
-
             // init everything with value to init dynamic value changes
             this.imgSrc = AppViewData.getDisplayImgSrc(reward.img);
             this.oldImg = reward.img;
-            this.originalValue = reward.name;
             this.onProcessingTypeChanged(reward.processingType);
             this.currentDiscountRule = this.setCurrentDiscountRule(reward.lkpDiscountRuleOid);
             this.currentDiscountType = this.setCurrentDiscountType(reward.lkpDiscountTypeOid);
-
 
             // call once
             if (this.doCallGetProducts) { // reward.productOid !== null

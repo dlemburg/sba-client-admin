@@ -32,6 +32,7 @@ constructor() { }
 
     // comes in as military hours, keeps as military hours
     public static convertTimeStringToIsoString(timeString: string): string {
+        debugger;
         let time = this.sliceZero(timeString);
         let hours = this.getHours(time);
         let minutes = this.getMinutes(time);
@@ -114,14 +115,11 @@ constructor() { }
         return time;
     }
 
-    // converts timeString   "09:00" ->  9
+    // converts timeString   "09:00" or "09" ->  9
     public static getHours(time:string): number {
-        let index = time.indexOf(":");
-        let isPm = time.indexOf("a") < 0 ? true : false;
-
-        //debugger;
-        //let hours = Dates.to24Hour(time.slice(0, index), isPm);
-        let hours = time.slice(0, index);
+        const delimiterIndex = time.indexOf(":");
+        const sliceIndex = delimiterIndex === -1 ? time.length : delimiterIndex;
+        const hours = time.slice(0, sliceIndex);
     
         return +hours;
     }

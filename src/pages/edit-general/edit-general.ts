@@ -60,7 +60,7 @@ constructor(
 
 //this page uses: keyword, category, flavor, size, addons
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
+    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.type = this.navParams.data.type;
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();

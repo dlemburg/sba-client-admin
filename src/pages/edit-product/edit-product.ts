@@ -94,7 +94,7 @@ constructor(
   compareFn(c1, c2): boolean { return c1 && c2 ? c1.oid === c2.oid : c1 === c2;}   // [compareWith]="compareFn"
 
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
+    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
 

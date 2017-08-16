@@ -84,13 +84,14 @@ constructor(
       saturdayOpen: [null, Validators.required],
       saturdayClose: [null, Validators.required],
       password: [null],
-      password2: [null]
+      password2: [null],
+      img: [null]
     }, {validator: Validation.isMismatch('password', 'password2')});
     this.auth = this.authentication.getCurrentUser();
   }
 
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe(data => this.onImgDidChange(data));
+    this.myForm.get('img').valueChanges.subscribe((data) => {this.onImgDidChange(data)});
 
     this.presentLoading();
     this.API.stack(ROUTES.getLocations + `/${this.auth.companyOid}`, "GET")
@@ -275,9 +276,7 @@ constructor(
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().removed);
-          setTimeout(() => {
-            this.navCtrl.pop();
-          }, 1000);
+          setTimeout(() => this.navCtrl.pop(), 1000);
           console.log('response: ', response); 
         }, this.errorHandler(this.ERROR_TYPES.API));
   }
@@ -330,9 +329,7 @@ constructor(
       .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
-            setTimeout(() => {
-              this.navCtrl.pop();
-            }, 1000);
+            setTimeout(() => this.navCtrl.pop(), 1000);
             console.log('response: ', response);
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
