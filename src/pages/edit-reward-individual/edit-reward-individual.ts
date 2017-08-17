@@ -13,6 +13,8 @@ import { File } from '@ionic-native/file';
 import { CONST_DISCOUNT_RULE, CONST_DISCOUNT_TYPE, CONST_PROCESSING_TYPE } from '../../global/global';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
+import { CONST_NODE_MULTER_ACTIONS } from '../../global/global';
+
 
 @IonicPage()
 @Component({
@@ -186,7 +188,7 @@ export class EditRewardIndividualPage extends BaseViewController {
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg(CONST_NODE_MULTER_ACTIONS.UPLOAD_IMG_AND_UNLINK, myForm.img, this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`).then((data) => {
         resolve();
       })
       .catch((err) => {

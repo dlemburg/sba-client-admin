@@ -1,5 +1,5 @@
 // operation constants
-export const ENV = { development: false };
+export const ENV = { development: true };
 export const SERVER_URL_NODE = ENV.development ? 'http://localhost:2800' : 'http://sba-api-node-ts.vigueqqgxy.us-west-2.elasticbeanstalk.com'  /* 'http://localhost:2800' : 'http://192.168.1.76:2800'; */
 export const SERVER_URL_CSHARP = ENV.development ? 'http://localhost:2345' : 'http://sba-api-dotnet.us-west-2.elasticbeanstalk.com'   /* 'http://localhost:60158' :  'http://192.168.1.76:60158'; */
 export const CONST_TOKEN_NAME = "sba-admin";
@@ -9,6 +9,11 @@ export const CONST_TOKEN_NAME = "sba-admin";
 export const prependImgString = 'data:image/jpeg;base64,';
 export const DEFAULT_IMG = 'img/default.png';
 
+export const CONST_NODE_MULTER_ACTIONS = {
+    UPLOAD_IMG_AND_UNLINK: 'upload-img-and-unlink',
+    UPLOAD_IMG_NO_CALLBACK:'upload-img-no-callback',
+    COMPANY_APP_IMG: 'company-app-img'
+}
 
 // app data constants
 

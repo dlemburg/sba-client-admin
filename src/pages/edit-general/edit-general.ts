@@ -10,6 +10,7 @@ import { Camera } from '@ionic-native/camera';
 import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { ImageUtility } from '../../global/image-utility';
+import { CONST_NODE_MULTER_ACTIONS } from '../../global/global';
 import { Utils } from '../../utils/utils';
 
 
@@ -64,6 +65,7 @@ constructor(
     this.type = this.navParams.data.type;
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
+    console.log("this.type: ", this.type);
 
     //const route = this.type === this.GENERAL_TYPES.CATEGORIES ? ROUTES.getOwnerCategories : ROUTES.getOwnerEditGeneral
     this.API.stack(ROUTES.getOwnerEditGeneral + `/${this.type.toLowerCase()}/${this.auth.companyOid}`, 'GET')
@@ -121,7 +123,7 @@ constructor(
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.imageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg(CONST_NODE_MULTER_ACTIONS.UPLOAD_IMG_AND_UNLINK, myForm.img, this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`).then((data) => {
         resolve();
       })
       .catch((err) => {
@@ -133,13 +135,11 @@ constructor(
 
   submit(myForm, isValid): void {
     this.presentLoading(AppViewData.getLoading().saving);
-    let type: string = this.type.toLowerCase();
-    
-    if (type === this.GENERAL_TYPES.CATEGORIES && myForm.img && this.imgDidChange) {
+    if (this.type === this.GENERAL_TYPES.CATEGORIES && myForm.img && this.imgDidChange) {
         this.uploadImg(myForm).then(() => {
-          this.finishSubmit(type, myForm);
+          this.finishSubmit(this.type, myForm);
         }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD));
-    } else this.finishSubmit(type, myForm);
+    } else this.finishSubmit(this.type, myForm);
   }
 
   finishSubmit(type, myForm) {

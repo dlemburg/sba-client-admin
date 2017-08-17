@@ -74,8 +74,8 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
   submit(myForm, isValid): void {
     this.presentLoading(AppViewData.getLoading().saving);
 
-    const toData: ToDataEditDairyVarietySweetener = {toData: myForm, editOid: this.editOid, companyOid: this.auth.companyOid, name: myForm.name };
-    this.API.stack(ROUTES.editDairyVarietySweetener + `/${this.type}`, 'POST', toData)
+    const toData: ToDataEditDairyVarietySweetener = { editOid: this.editOid, companyOid: this.auth.companyOid, name: myForm.name, type: this.type };
+    this.API.stack(ROUTES.editDairyVarietySweetener, 'POST', toData)
       .subscribe(
         (response) => {
           this.dismissLoading(AppViewData.getLoading().saved);
@@ -88,7 +88,7 @@ export class EditDairyVarietySweetenerPage extends BaseViewController {
 }
 
 interface ToDataEditDairyVarietySweetener {
-  toData: any;
+  type: string;
   companyOid: number;
   editOid: number;
   name: string;

@@ -13,6 +13,8 @@ import { Transfer } from '@ionic-native/transfer';
 import { File } from '@ionic-native/file';
 import { ImageUtility } from '../../global/image-utility';
 import { Utils } from '../../utils/utils';
+import { CONST_NODE_MULTER_ACTIONS } from '../../global/global';
+
 
 @IonicPage()
 @Component({
@@ -50,7 +52,7 @@ export class EditProductPage extends BaseViewController {
   img: string = null;
   oldImg: string = null;
   failedUploadImgAttempts = 0;
-  ImageUtility: ImageUtility;
+  imageUtility: ImageUtility;
 
 constructor(
   public navCtrl: NavController, 
@@ -256,8 +258,8 @@ constructor(
 
   getImgCordova() {
     this.presentLoading("Retrieving...");
-    this.ImageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.ImageUtility.getImgCordova().then((data) => {
+    this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
+    this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
@@ -269,7 +271,7 @@ constructor(
 
   uploadImg(myForm): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.ImageUtility.uploadImg('upload-img-no-callback', myForm.img, this.imgSrc, ROUTES.uploadImgNoCallback).then((data) => {
+      this.imageUtility.uploadImg(CONST_NODE_MULTER_ACTIONS.UPLOAD_IMG_AND_UNLINK, myForm.img, this.imgSrc, ROUTES.uploadImgAndUnlink + `/${this.oldImg}`).then((data) => {
         resolve();
       })
       .catch((err) => reject(err))

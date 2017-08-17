@@ -56,7 +56,7 @@ export class EditDairyPage extends BaseViewController {
   
 
 
-    this.API.stack(ROUTES.getDairy + `/${this.type}/${this.auth.companyOid}`, 'GET')
+    this.API.stack(ROUTES.getDairy + `/${this.auth.companyOid}`, 'GET')
       .subscribe(
         (response) => {
           this.dismissLoading();
@@ -72,7 +72,7 @@ export class EditDairyPage extends BaseViewController {
 
   selectedValueChange(event, value): void {
     if (this.selectedValue && this.selectedValue.name) {
-      this.myForm.patchValue({name: this.selectedValue.name, price: this.selectedValue.price || 0});
+      this.myForm.patchValue({name: this.selectedValue.name, hasQuantity: this.selectedValue.hasQuantity, price: this.selectedValue.price || 0});
       this.editOid = this.selectedValue.oid;
     }
   }
