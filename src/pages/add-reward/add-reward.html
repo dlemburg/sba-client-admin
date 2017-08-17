@@ -60,6 +60,7 @@
       </ion-select>
     </ion-item>
     <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountRuleOid"></control-messages>
+
     <!-- if product -->
     <div *ngIf="currentDiscountRule === DISCOUNT_RULE.PRODUCT">
       <h4 margin-top>Select the product that is linked to reward</h4>
@@ -96,10 +97,13 @@
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.dateRuleTimeEnd"></control-messages>
     </div>
 
+      <!-- don't allow "New Price" if currentDiscountRule is "Date-Time-Range"... reason:
+           unlikely a company would want "new price" on an entire order
+       -->
       <ion-item margin-top>
         <ion-label>Type</ion-label>
         <ion-select formControlName="lkpDiscountTypeOid" (ionChange)="discountTypeChanged($event)">
-          <ion-option *ngFor="let x of lkps.discountType; let i = index;" [value]="x.oid">{{ x.value }}</ion-option>            
+            <ion-option [disabled]="currentDiscountRule === DISCOUNT_RULE.DATE && x.value === DISCOUNT_TYPE.NEWPRICE" *ngFor="let x of lkps.discountType; let i = index;" [value]="x.oid">{{ x.value }}</ion-option>   
         </ion-select>
       </ion-item>
       <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountTypeOid"></control-messages>

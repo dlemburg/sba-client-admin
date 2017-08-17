@@ -69,7 +69,7 @@
         <ion-item margin-top>
           <ion-label>Type</ion-label>
           <ion-select formControlName="lkpDiscountTypeOid" (ionChange)="discountTypeChanged($event)">
-            <ion-option *ngFor="let x of lkps.discountType; let i = index;" [value]="x.oid">{{ x.value }}</ion-option>            
+            <ion-option [disabled]="currentDiscountRule === DISCOUNT_RULE.DATE && x.value === DISCOUNT_TYPE.NEWPRICE" *ngFor="let x of lkps.discountType; let i = index;" [value]="x.oid">{{ x.value }}</ion-option>            
           </ion-select>
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.lkpDiscountTypeOid"></control-messages>

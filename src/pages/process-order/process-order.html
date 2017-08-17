@@ -325,7 +325,7 @@
             <div *ngIf="order.transactionDetails.isEdited" [ngClass]="{'discounts': order.transactionDetails.editAmount < 0, 'price-up': order.transactionDetails.editAmount > 0}" class="subtotal-edit" text-right>
               <span><button (click)="presentReasonsForEditModal()" class="reasons-for-edit-btn" ion-button outline small>View</button></span>
               <span>
-                The subtotal has been edited by: {{ order.transactionDetails.editAmount | currency:symbolDisplay:true }}
+                Edits: {{ order.transactionDetails.editAmount | currency:symbolDisplay:true }}
               </span>
             </div>
           </ion-item> 
