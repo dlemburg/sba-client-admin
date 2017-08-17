@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
 import { AddDairyPage } from './add-dairy';
 import { ControlMessagesComponentModule } from '../../components/control-messages/control-messages.component.module';
+import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-icon.component.module';
 
 @NgModule({
   declarations: [
@@ -9,7 +10,8 @@ import { ControlMessagesComponentModule } from '../../components/control-message
   ],
   imports: [
     IonicPageModule.forChild(AddDairyPage),
-    ControlMessagesComponentModule
+    ControlMessagesComponentModule,
+    DollarIconComponentModule
   ],
   exports: [
     AddDairyPage

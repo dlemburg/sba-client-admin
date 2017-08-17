@@ -159,7 +159,7 @@
           <div class="width-50 align-center" *ngFor="let x of myForm.controls.sizesAndPrices.controls; let i = index;">
             <ion-item [formGroupName]="i">
               <ion-label floating><dollar-icon></dollar-icon> {{x.value.name}} Price</ion-label>
-              <ion-input type="text" formControlName="price"></ion-input>
+              <ion-input type="tel" formControlName="price"></ion-input>
             </ion-item>
             <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.sizesAndPrices"></control-messages>
           </div>

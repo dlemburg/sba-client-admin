@@ -32,9 +32,7 @@ export class RewardsPage extends BaseViewController {
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
-  ionViewDidLoad() {
-   // const currentDate = DateUtils.toLocalIsoString(new Date().toString());
-    
+  ionViewDidLoad() {    
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
     let toData = {
@@ -43,29 +41,27 @@ export class RewardsPage extends BaseViewController {
     }
     console.log("toData: ", toData);
     this.API.stack(ROUTES.getRewards, "POST", toData)
-        .subscribe(
-            (response) => {
-              this.rewards = Utils.getImgs(response.data.rewards);
-              this.dismissLoading();
-              console.log('response.data: ' ,response.data);
-            }, this.errorHandler(this.ERROR_TYPES.API));
+      .subscribe(
+        (response) => {
+          this.rewards = Utils.getImgs(response.data.rewards);
+          this.dismissLoading();
+          console.log('response.data: ' ,response.data);
+        }, this.errorHandler(this.ERROR_TYPES.API));
 
     const imgName = CONST_APP_IMGS[7];
     this.API.stack(ROUTES.getImgName + `/${this.auth.companyOid}/${imgName}`, "GET")
       .subscribe(
-          (response) => {
-            console.log('response: ', response);
-            const img = response.data.img;
-            this.rewardImgSrc = AppViewData.getDisplayImgSrc(img);
-          }, (err) => {
-            this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false})(err);
-            this.rewardImgSrc = AppViewData.getDisplayImgSrc(null);
-          });
+        (response) => {
+          console.log('response: ', response);
+          const img = response.data.img;
+          this.rewardImgSrc = AppViewData.getDisplayImgSrc(img);
+        }, (err) => {
+          this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false})(err);
+          this.rewardImgSrc = AppViewData.getDisplayImgSrc(null);
+        });
   }
 
   navRewardDetails(reward): void {
-    let rewardOid = reward.oid;
-    let rewardImg = reward.img;
-    this.navCtrl.push('RewardsDetailsPage', {rewardOid, rewardImg});
+    this.navCtrl.push('RewardsDetailsPage', {rewardOid: reward.oid, rewardImg: reward.img});
   }
 }

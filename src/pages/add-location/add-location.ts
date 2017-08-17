@@ -24,7 +24,7 @@ import { Geolocation } from '@ionic-native/geolocation';
 export class AddLocationPage extends BaseViewController {
   days: Array<string> = Utils.getDays();
   myForm: FormGroup;
-  selectedLocation: ILocation;
+  selectedLocationToPopulateHours: ILocation;
   isSubmitted: boolean;
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
@@ -36,6 +36,8 @@ export class AddLocationPage extends BaseViewController {
   img: string = null;
   failedUploadImgAttempts = 0;
   imageUtility: ImageUtility;
+  isLocationHoursPopulated: boolean = false;
+  isMapLoading: boolean = false;
 
   constructor(
     public navCtrl: NavController, 
@@ -110,6 +112,8 @@ export class AddLocationPage extends BaseViewController {
   }
 
   ionViewDidLeave() {
+    this.isMapLoading ? this.dismissLoading() : null;
+    this.isMapLoading = false;
     AppViewData.setLatAndLong({coordsLat: null, coordsLong: null});
   }
 
@@ -127,90 +131,61 @@ export class AddLocationPage extends BaseViewController {
 
   /* google maps */
   navMap() {
+    this.isMapLoading = true;
+    this.presentLoading();
     const myForm = this.myForm.value;
-    let currentLocation = { coordsLat: null, coordsLong: null};
 
-    if (!myForm.coordsLat || !myForm.coordsLong) {
-      this.getCurrentPosition().then((data) => {
-        currentLocation = {coordsLat: data.coordsLat, coordsLong: data.coordsLong};
-        console.log("currentLocation: ", currentLocation);
-        this.navCtrl.push('MapPage', {currentLocation});
-      })
-      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.GEOLOCATION));
-    } else {
-      currentLocation = {coordsLat: myForm.coordsLat, coordsLong: myForm.coordsLong};
+    debugger;
+
+    this.getCurrentPosition().then((data) => {
+      let currentLocation = {coordsLat: data.coordsLat, coordsLong: data.coordsLong};
+      console.log("currentLocation: ", currentLocation);
       this.navCtrl.push('MapPage', {currentLocation});
-    }
-    
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.GEOLOCATION));
   }
 
   /* location hours are in format: 09:00am. conver to ISOstring date format */
-  locationChanged(): void {
-    let days: any = {
-        sundayOpen: this.selectedLocation.sundayOpen,
-        sundayClose: this.selectedLocation.sundayClose,
-        mondayOpen: this.selectedLocation.mondayOpen,
-        mondayClose: this.selectedLocation.mondayClose,
-        tuesdayOpen: this.selectedLocation.tuesdayOpen,
-        tuesdayClose: this.selectedLocation.tuesdayClose,
-        wednesdayOpen: this.selectedLocation.wednesdayOpen,
-        wednesdayClose: this.selectedLocation.wednesdayClose,
-        thursdayOpen: this.selectedLocation.thursdayOpen,
-        thursdayClose: this.selectedLocation.thursdayClose,
-        fridayOpen: this.selectedLocation.fridayOpen,
-        fridayClose: this.selectedLocation.fridayClose,
-        saturdayOpen: this.selectedLocation.saturdayOpen,
-        saturdayClose: this.selectedLocation.saturdayClose
-      };
-
-      this.setTimesToIsoString(days);
+  populateLocationHours(): void {
+    this.isLocationHoursPopulated = true;
+    this.setTimesToIsoString(this.selectedLocationToPopulateHours);
   }
 
-  setTimesToIsoString(days): void {
-    let daysOfWeek = Utils.getDays();
-
-    // loop through each day open/close
-    daysOfWeek.forEach((x, index) => {
-      let dayOpenKey = x.toLowerCase() + "Open";
-      let dayCloseKey = x.toLowerCase() + "Close";
-
-      if (days[dayOpenKey] === "closed") this.myForm.patchValue({ [dayOpenKey]: "closed", [dayCloseKey]: "closed"});
-      else {
-        this.myForm.patchValue({
-          [dayOpenKey]: DateUtils.convertTimeStringToIsoString(days[dayOpenKey]),
-          [dayCloseKey]: DateUtils.convertTimeStringToIsoString(days[dayCloseKey])
-        });
-      }
-    });
+  setTimesToIsoString(selectedLocation): void {
+    this.myForm.patchValue({
+      sundayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.sundayOpen),
+      sundayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.sundayClose),
+      mondayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.mondayOpen),
+      mondayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.mondayClose),
+      tuesdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.tuesdayOpen),
+      tuesdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.tuesdayClose),
+      wednesdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.wednesdayOpen),
+      wednesdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.wednesdayClose),
+      thursdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.thursdayOpen),
+      thursdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.thursdayClose),
+      fridayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.fridayOpen),
+      fridayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.fridayClose),
+      saturdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.saturdayOpen),
+      saturdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.saturdayClose)
+    })
   }
   
-
-  closedToggle(event: any, index: number): void {
+  closedToggle(event, index): void {
     let days = Utils.getDays();
     let ctrlOpen = days[index].toLowerCase() + "Open";
     let ctrlClose = days[index].toLowerCase() + "Close";
 
-    const filterClosedDaysArr = (): Array<number> => {
-      return this.closedDaysArr.filter((x) => {
-          return x !== index;
-      });
-    }
+    const filterclosedDaysArr = () => this.closedDaysArr.filter((x) => x !== index);
 
     if (!event.checked) {
-      this.closedDaysArr = filterClosedDaysArr();
-      this.myForm.patchValue({
-        [ctrlOpen]: null,
-        [ctrlClose]: null
-      });
+      this.closedDaysArr = filterclosedDaysArr();
+      this.myForm.patchValue({ [ctrlOpen]: null, [ctrlClose]: null });
     } else {
-      this.myForm.patchValue({
-        [ctrlOpen]: "closed",
-        [ctrlClose]: "closed"
-      });
-      this.closedDaysArr = [...this.closedDaysArr, index];  // concat
+      this.myForm.patchValue({[ctrlOpen]: "closed", [ctrlClose]: "closed"});
+      this.closedDaysArr = [...this.closedDaysArr, index];
     }
   }
-
+  
   getImgCordova() {
     this.presentLoading("Retrieving...");
     this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
@@ -253,6 +228,22 @@ export class AddLocationPage extends BaseViewController {
   }
 
   finishSubmit(myForm) {
+    if (this.isLocationHoursPopulated) {
+      myForm.sundayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayOpen),
+      myForm.sundayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.sundayClose),
+      myForm.mondayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayOpen),
+      myForm.mondayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.mondayClose),
+      myForm.tuesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayOpen),
+      myForm.tuesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.tuesdayClose),
+      myForm.wednesdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayOpen),
+      myForm.wednesdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.wednesdayClose),
+      myForm.thursdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayOpen),
+      myForm.thursdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.thursdayClose),
+      myForm.fridayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayOpen),
+      myForm.fridayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.fridayClose),
+      myForm.saturdayOpen = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayOpen),
+      myForm.saturdayClose = DateUtils.convertIsoStringToHoursAndMinutesString(myForm.saturdayClose)
+    }
     const toData: ToDataSaveLocation = {toData: myForm, companyOid: this.auth.companyOid};
 
     this.API.stack(ROUTES.saveLocation, "POST", toData)

@@ -20,7 +20,6 @@ export class EditSubtotalPage extends BaseViewController {
   constructor(
     public navCtrl: NavController,
     public navParams: NavParams, 
-    public utils: Utils, 
     public API: API, 
     public authentication: Authentication, 
     public modalCtrl: ModalController, 

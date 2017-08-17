@@ -107,24 +107,23 @@ export class AddProductPage extends BaseViewController {
     // doesn't need to be async
     this.API.stack(ROUTES.getAllProductOptions + `/${this.auth.companyOid}`, "GET")
       .subscribe(
-          (response) => {
-            console.log("response.data.productInfo: ", response.data.productInfo);
+        (response) => {
+          console.log("response.data.productInfo: ", response.data.productInfo);
 
-            let { categories, flavors, addons, dairy, variety, sweetener, sizes, keywords, nutritions, seasons } = response.data.productInfo;
-            this.categories = categories;
-            this.flavors = flavors;
-            this.addons = addons;
-            this.dairy = dairy;
-            this.variety = variety;
-            this.sweetener = sweetener;
-            this.sizes = sizes;
-            this.keywords = keywords;
-            this.nutritions = nutritions;
-            this.seasons = seasons;
+          let { categories, flavors, addons, dairy, variety, sweetener, sizes, keywords, nutritions, seasons } = response.data.productInfo;
+          this.categories = categories;
+          this.flavors = flavors;
+          this.addons = addons;
+          this.dairy = dairy;
+          this.variety = variety;
+          this.sweetener = sweetener;
+          this.sizes = sizes;
+          this.keywords = keywords;
+          this.nutritions = nutritions;
+          this.seasons = seasons;
 
-            this.dismissLoading();
-            
-          }, this.errorHandler(this.ERROR_TYPES.API));
+          this.dismissLoading();
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   
@@ -137,9 +136,9 @@ export class AddProductPage extends BaseViewController {
   onSizesAndPricesTypeChange() {
     if (this.sizesAndPricesType ===  this.SIZES_AND_PRICES_TYPE.SIZES) {
       this.myForm.patchValue({ fixedPrice: null});
-    }
+    } else this.myForm.patchValue({fixedPrice: 0});
+    
     this.resetFormArr(this.myForm.controls.sizesAndPrices);
-
   }
 
   // 1.) resets form array. best way to do it so far
@@ -161,7 +160,6 @@ export class AddProductPage extends BaseViewController {
     // 2.) dynamically adds input for price:size
     if (sizes.length) {
       sizes.forEach((x, index) => {
-        console.log('x: ', x);
         arr.push(this.formBuilder.group({
           name: x.name,
           oid: x.oid,
@@ -198,7 +196,6 @@ export class AddProductPage extends BaseViewController {
 
 
   submit(myForm, isValid: boolean): void {
-
     // validate size -- this is a hack- should be cleaned up later
     if (myForm.fixedPrice && myForm.sizesAndPrices.length) {
       this.presentToast(false, "Looks like you have values for fixed price and multiple sizes.");
@@ -213,6 +210,7 @@ export class AddProductPage extends BaseViewController {
   }
 
   finishSubmit(myForm) {
+    debugger;
     const toData: ToDataSaveProduct = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
     this.API.stack(ROUTES.saveProduct, "POST", toData)
         .subscribe(

@@ -29,7 +29,7 @@ export class EditLocationPage extends BaseViewController {
   days: Array<string> = Utils.getDays();
   values: Array<INameAndOid> = [];
   myForm: FormGroup;
-  selectedLocation: ILocation;
+  selectedLocationToPopulateHours: ILocation;
   isSubmitted: boolean;
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
@@ -44,6 +44,7 @@ export class EditLocationPage extends BaseViewController {
   failedUploadImgAttempts = 0;
   initHasRun: boolean = false;
   imageUtility: ImageUtility;
+  isMapLoading: boolean = false;
 
 constructor(
   public navCtrl: NavController, 
@@ -93,8 +94,6 @@ constructor(
   }
 
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe((data) => {this.onImgDidChange(data)});
-
     this.presentLoading();
     this.API.stack(ROUTES.getLocations + `/${this.auth.companyOid}`, "GET")
       .subscribe(
@@ -120,6 +119,8 @@ constructor(
   }
 
   ionViewDidLeave() {
+    this.isMapLoading ? this.dismissLoading() : null;
+    this.isMapLoading = false;
     AppViewData.setLatAndLong(null);
   }
 
@@ -137,20 +138,14 @@ constructor(
 
   /* google maps */
   navMap() {
-    const myForm = this.myForm.value;
-    let currentLocation = { coordsLat: null, coordsLong: null};
-
-    if (!myForm.coordsLat || !myForm.coordsLong) {
-      this.getCurrentPosition().then((data) => {
-        currentLocation = {coordsLat: data.coordsLat, coordsLong: data.coordsLong};
-        console.log("currentLocation: ", currentLocation);
-        this.navCtrl.push('MapPage', {currentLocation});
-      })
-      .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.GEOLOCATION));
-    } else {
-      currentLocation = {coordsLat: myForm.coordsLat, coordsLong: myForm.coordsLong};
+    this.isMapLoading = true;
+    this.presentLoading();
+    this.getCurrentPosition().then((data) => {
+      let currentLocation = {coordsLat: data.coordsLat, coordsLong: data.coordsLong};
+      console.log("currentLocation: ", currentLocation);
       this.navCtrl.push('MapPage', {currentLocation});
-    }
+    })
+    .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.GEOLOCATION));
     
   }
 
@@ -173,75 +168,36 @@ constructor(
 
       this.imgSrc = AppViewData.getDisplayImgSrc(this.editValue.img);
       this.oldImg = this.editValue.img;
-
-      // edit value (location to edit) changed:  convert timeString to ISOString
-      let days: any = {
-          sundayOpen: this.editValue.sundayOpen,
-          sundayClose: this.editValue.sundayClose,
-          mondayOpen: this.editValue.mondayOpen,
-          mondayClose: this.editValue.mondayClose,
-          tuesdayOpen: this.editValue.tuesdayOpen,
-          tuesdayClose: this.editValue.tuesdayClose,
-          wednesdayOpen: this.editValue.wednesdayOpen,
-          wednesdayClose: this.editValue.wednesdayClose,
-          thursdayOpen: this.editValue.thursdayOpen,
-          thursdayClose: this.editValue.thursdayClose,
-          fridayOpen: this.editValue.fridayOpen,
-          fridayClose: this.editValue.fridayClose,
-          saturdayOpen: this.editValue.saturdayOpen,
-          saturdayClose: this.editValue.saturdayClose
-        };
-        this.setTimesToIsoString(days);
+      this.setTimesToIsoString(this.editValue);
     }
   }
 
   populateTimesWithAnotherLocation(): void {
-    let days = {
-      sundayOpen: this.selectedLocation.sundayOpen,
-      sundayClose: this.selectedLocation.sundayClose,
-      mondayOpen: this.selectedLocation.mondayOpen,
-      mondayClose: this.selectedLocation.mondayClose,
-      tuesdayOpen: this.selectedLocation.tuesdayOpen,
-      tuesdayClose: this.selectedLocation.tuesdayClose,
-      wednesdayOpen: this.selectedLocation.wednesdayOpen,
-      wednesdayClose: this.selectedLocation.wednesdayClose,
-      thursdayOpen: this.selectedLocation.thursdayOpen,
-      thursdayClose: this.selectedLocation.thursdayClose,
-      fridayOpen: this.selectedLocation.fridayOpen,
-      fridayClose: this.selectedLocation.fridayClose,
-      saturdayOpen: this.selectedLocation.saturdayOpen,
-      saturdayClose: this.selectedLocation.saturdayClose
-    };
-
     //  populate times location changed:   convert timeString to ISOString
-    this.setTimesToIsoString(days);
+    this.setTimesToIsoString(this.selectedLocationToPopulateHours);
   }
 
   onDidPasswordChange() {
     this.didPasswordChange = true;
   }
   
-  setTimesToIsoString(days): void {
-    let daysOfWeek = Utils.getDays();
-
-    // loop through open/close
-    daysOfWeek.forEach((x, index) => {
-      let dayOpenKey = x.toLowerCase() + "Open";
-      let dayCloseKey = x.toLowerCase() + "Close";
-
-      if (days[dayOpenKey] === "closed") {
-        this.myForm.patchValue({
-          [dayOpenKey]: "closed",
-          [dayCloseKey]: "closed"
-        })
-      } else {
-        this.myForm.patchValue({
-          [dayOpenKey]: DateUtils.convertTimeStringToIsoString(days[dayOpenKey]),
-          [dayCloseKey]: DateUtils.convertTimeStringToIsoString(days[dayCloseKey])
-        });
-      }
-      
-    });
+  setTimesToIsoString(selectedLocation): void {
+    this.myForm.patchValue({
+      sundayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.sundayOpen),
+      sundayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.sundayClose),
+      mondayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.mondayOpen),
+      mondayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.mondayClose),
+      tuesdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.tuesdayOpen),
+      tuesdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.tuesdayClose),
+      wednesdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.wednesdayOpen),
+      wednesdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.wednesdayClose),
+      thursdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.thursdayOpen),
+      thursdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.thursdayClose),
+      fridayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.fridayOpen),
+      fridayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.fridayClose),
+      saturdayOpen : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.saturdayOpen),
+      saturdayClose : DateUtils.convertIsoStringToHoursAndMinutesString(selectedLocation.saturdayClose)
+    })
   }
 
   closedToggle(event, index): void {
@@ -249,25 +205,13 @@ constructor(
     let ctrlOpen = days[index].toLowerCase() + "Open";
     let ctrlClose = days[index].toLowerCase() + "Close";
 
-    const filterclosedDaysArr = () => {
-      return this.closedDaysArr.filter((x) => {
-          return x !== index;
-      });
-    }
+    const filterclosedDaysArr = () => this.closedDaysArr.filter((x) => x !== index);
 
     if (!event.checked) {
       this.closedDaysArr = filterclosedDaysArr();
-
-      this.myForm.patchValue({
-        [ctrlOpen]: null,
-        [ctrlClose]: null
-      });
+      this.myForm.patchValue({ [ctrlOpen]: null, [ctrlClose]: null });
     } else {
-     
-      this.myForm.patchValue({
-        [ctrlOpen]: "closed",
-        [ctrlClose]: "closed"
-      });
+      this.myForm.patchValue({[ctrlOpen]: "closed", [ctrlClose]: "closed"});
       this.closedDaysArr = [...this.closedDaysArr, index];
     }
   }
@@ -293,7 +237,8 @@ constructor(
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
         img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
-      })
+      });
+      this.imgDidChange = true;
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
@@ -354,3 +299,26 @@ interface ToDataEditLocation {
 
 
     
+
+
+
+/* loop through open/close
+        let daysOfWeek = Utils.getDays();
+
+    daysOfWeek.forEach((x, index) => {
+      let dayOpenKey = x.toLowerCase() + "Open";
+      let dayCloseKey = x.toLowerCase() + "Close";
+
+      if (days[dayOpenKey] === "closed") {
+        this.myForm.patchValue({
+          [dayOpenKey]: "closed",
+          [dayCloseKey]: "closed"
+        })
+      } else {
+        this.myForm.patchValue({
+          [dayOpenKey]: DateUtils.convertTimeStringToIsoString(days[dayOpenKey]),
+          [dayCloseKey]: DateUtils.convertTimeStringToIsoString(days[dayCloseKey])
+        });
+      }
+    });
+  */

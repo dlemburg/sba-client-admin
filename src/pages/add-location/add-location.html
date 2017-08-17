@@ -89,21 +89,21 @@
           <div *ngIf="locations.length">
             <ion-item class="outline">
               <ion-label>Populate hours from another location</ion-label>
-              <ion-select [(ngModel)]="selectedLocation" [ngModelOptions]="{standalone: true}" (ionChange)="locationChanged(x)">
+              <ion-select [(ngModel)]="selectedLocationToPopulateHours" [ngModelOptions]="{standalone: true}" (ionChange)="populateLocationHours(x)">
                 <ion-option *ngFor="let x of locations; let i = index;" [value]="x">{{ x.name }}</ion-option>
               </ion-select>
             </ion-item>
           </div>
           <div class="open-close-container">
             <ion-row margin-top>
-              <ion-col col-3 > Sunday </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.sundayOpen.value !== 'closed'">
+              <ion-col col-1 > Su </ion-col>
+              <ion-col col-4 *ngIf="myForm.controls.sundayOpen.value !== 'closed'">
                 <ion-item>
                   <ion-datetime formControlName="sundayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
                 <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.sundayOpen"></control-messages>
               </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.sundayOpen.value !== 'closed'">
+              <ion-col col-4 *ngIf="myForm.controls.sundayOpen.value !== 'closed'">
                 <ion-item>
                     <ion-datetime formControlName="sundayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
@@ -117,14 +117,14 @@
             </ion-row>
 
             <ion-row margin-top>
-              <ion-col col-3 > Monday </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.mondayOpen.value !== 'closed'">
+              <ion-col col-1 > M </ion-col>
+              <ion-col col-4 *ngIf="myForm.controls.mondayOpen.value !== 'closed'">
                 <ion-item>
                   <ion-datetime formControlName="mondayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
                 <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.mondayOpen"></control-messages>
               </ion-col> 
-              <ion-col col-3 *ngIf="myForm.controls.mondayOpen.value !== 'closed'">
+              <ion-col col-4 *ngIf="myForm.controls.mondayOpen.value !== 'closed'">
                 <ion-item>
                     <ion-datetime formControlName="mondayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
@@ -139,14 +139,14 @@
             </ion-row>
 
             <ion-row margin-top>
-              <ion-col col-3 > Tuesday </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.tuesdayOpen.value !== 'closed'">
+              <ion-col col-1 > Tu </ion-col>
+              <ion-col col-4 *ngIf="myForm.controls.tuesdayOpen.value !== 'closed'">
                 <ion-item>
                   <ion-datetime formControlName="tuesdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
                 <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.tuesdayOpen"></control-messages>
               </ion-col> 
-              <ion-col col-3 *ngIf="myForm.controls.tuesdayOpen.value !== 'closed'">
+              <ion-col col-4 *ngIf="myForm.controls.tuesdayOpen.value !== 'closed'">
                 <ion-item>
                     <ion-datetime formControlName="tuesdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
@@ -161,14 +161,14 @@
             </ion-row>
 
             <ion-row margin-top>
-              <ion-col col-3 > Wednesday </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.wednesdayOpen.value !== 'closed'">
+              <ion-col col-1 > W </ion-col>
+              <ion-col col-4 *ngIf="myForm.controls.wednesdayOpen.value !== 'closed'">
                 <ion-item>
                   <ion-datetime formControlName="wednesdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
                 <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.wednesdayOpen"></control-messages>
               </ion-col> 
-              <ion-col col-3 *ngIf="myForm.controls.wednesdayOpen.value !== 'closed'">
+              <ion-col col-4 *ngIf="myForm.controls.wednesdayOpen.value !== 'closed'">
                 <ion-item>
                     <ion-datetime formControlName="wednesdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
@@ -183,14 +183,14 @@
             </ion-row>
 
             <ion-row margin-top>
-              <ion-col col-3 > Thursday </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.thursdayOpen.value !== 'closed'">
+              <ion-col col-1> Th </ion-col>
+              <ion-col col-4 *ngIf="myForm.controls.thursdayOpen.value !== 'closed'">
                 <ion-item>
                   <ion-datetime formControlName="thursdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a" (ionChange)="dateChange($event)"></ion-datetime>
                 </ion-item>
                 <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.thursdayOpen"></control-messages>
               </ion-col> 
-              <ion-col col-3 *ngIf="myForm.controls.thursdayOpen.value !== 'closed'">
+              <ion-col col-4 *ngIf="myForm.controls.thursdayOpen.value !== 'closed'">
                 <ion-item>
                     <ion-datetime formControlName="thursdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
@@ -205,14 +205,14 @@
             </ion-row>
 
             <ion-row margin-top>
-              <ion-col col-3 > Friday </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.fridayOpen.value !== 'closed'">
+              <ion-col col-1 > F </ion-col>
+              <ion-col col-4 *ngIf="myForm.controls.fridayOpen.value !== 'closed'">
                 <ion-item>
                   <ion-datetime formControlName="fridayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
                 <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.fridayOpen"></control-messages>
               </ion-col> 
-              <ion-col col-3 *ngIf="myForm.controls.fridayOpen.value !== 'closed'">
+              <ion-col col-4 *ngIf="myForm.controls.fridayOpen.value !== 'closed'">
                 <ion-item>
                     <ion-datetime formControlName="fridayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
@@ -227,14 +227,14 @@
             </ion-row>
 
             <ion-row margin-top>
-              <ion-col col-3 > Saturday </ion-col>
-              <ion-col col-3 *ngIf="myForm.controls.saturdayOpen.value !== 'closed'">
+              <ion-col col-1 > Sa </ion-col>
+              <ion-col col-4 *ngIf="myForm.controls.saturdayOpen.value !== 'closed'">
                 <ion-item>
                   <ion-datetime formControlName="saturdayOpen" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>
                 <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.saturdayOpen"></control-messages>
               </ion-col> 
-              <ion-col col-3 *ngIf="myForm.controls.saturdayOpen.value !== 'closed'">
+              <ion-col col-4 *ngIf="myForm.controls.saturdayOpen.value !== 'closed'">
                 <ion-item>
                     <ion-datetime formControlName="saturdayClose" displayFormat="hh:mm a" pickerFormat="hh:mm a"></ion-datetime>
                 </ion-item>

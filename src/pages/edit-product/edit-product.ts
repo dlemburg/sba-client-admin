@@ -38,7 +38,6 @@ export class EditProductPage extends BaseViewController {
   selectedSizes: Array<INameOidCompanyOid> = [];
   count: number = 0;
   values: Array<INameAndOid> = [];
-  originalValue: string = null;
   editOid: number = null;
   sizesAndPricesType: string = null;
   sizesAndPricesTypesArr: Array<string> = ["Fixed Price", "Sizes"];
@@ -96,7 +95,7 @@ constructor(
   compareFn(c1, c2): boolean { return c1 && c2 ? c1.oid === c2.oid : c1 === c2;}   // [compareWith]="compareFn"
 
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
+    //this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
 
@@ -146,7 +145,6 @@ constructor(
             (response) => {
               console.log('response.data.product: ', response.data.product);
               let product = response.data.product;
-              this.originalValue = product.name;
 
               this.myForm.patchValue({
                 name: product.name,
@@ -189,6 +187,7 @@ constructor(
 
 
 // this is a hack [(ngModel)]="selectedSizes" [ngModelOptions]="{standalone: true}"
+// also using [compareWith]
   getSelectedSizes(sizesAndPrices): Array<any> {
     let arr = [];
     this.sizes.forEach( (x) => {
@@ -204,7 +203,8 @@ constructor(
   onSizesAndPricesTypeChange() {
     if (this.sizesAndPricesType ===  this.SIZES_AND_PRICES_TYPE.SIZES) {
       this.myForm.patchValue({ fixedPrice: null});
-    }
+    } else this.myForm.patchValue({fixedPrice: 0});
+
     this.resetFormArr(this.myForm.controls.sizesAndPrices);
 
   }
@@ -264,7 +264,8 @@ constructor(
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
         img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
-      })
+      });
+      this.imgDidChange = true;
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }

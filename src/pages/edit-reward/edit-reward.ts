@@ -69,10 +69,10 @@ constructor(
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
      this.myForm = this.formBuilder.group({
-      name: ['', Validators.compose([Validators.required, Validators.maxLength(45)])],
+      name: ['', Validators.compose([Validators.required, Validators.maxLength(60)])],
       img: [''],
-      description: ['', Validators.compose([Validators.required, Validators.maxLength(200)])],
-      exclusions: ['', Validators.compose([Validators.maxLength(200)])],
+      description: ['', Validators.compose([Validators.required, Validators.maxLength(1000)])],
+      exclusions: ['', Validators.compose([Validators.maxLength(1000)])],
       processingType: [this.PROCESSING_TYPE.MANUAL],
       lkpDiscountTypeOid: [null],
       lkpDiscountRuleOid: [null],
@@ -98,7 +98,7 @@ constructor(
     // SUBSCRIBE TO FORM
     this.myForm.valueChanges.subscribe(data => {this.onFormChanged(data)});    // all
     this.myForm.get('processingType').valueChanges.subscribe((data) => {this.onProcessingTypeChanged(data)});
-    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
+    //this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.presentLoading();
     
     // get name and oid of all rewards
@@ -264,6 +264,7 @@ constructor(
       this.myForm.patchValue({
         img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
       })
+      this.imgDidChange = true;
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
@@ -284,14 +285,18 @@ constructor(
   submit(myForm): void {
     this.presentLoading(AppViewData.getLoading().saving);
 
+    debugger;
     let expiryDate = myForm.expiryDate.toString();
     let startDate = myForm.startDate.toString();
 
     /*** Package for submit ***/
     myForm.expiryDate = expiryDate.indexOf("T23:59:59") < 0 ? DateUtils.patchEndTime(myForm.expiryDate) : expiryDate;
     myForm.startDate = startDate.indexOf("T00:00:00") < 0 ? DateUtils.patchStartTime(myForm.startDate) : startDate;
-    myForm.dateRuleTimeStart = myForm.dateRuleTimeStart ? DateUtils.getHours(myForm.dateRuleTimeStart) : null,
-    myForm.dateRuleTimeEnd = myForm.dateRuleTimeEnd ? DateUtils.getHours(myForm.dateRuleTimeEnd) : null,
+    
+    
+    myForm.dateRuleTimeStart = myForm.dateRuleTimeStart ? DateUtils.getHoursFromIsoStr(myForm.dateRuleTimeStart) : null;
+    myForm.dateRuleTimeEnd = myForm.dateRuleTimeEnd ? DateUtils.getHoursFromIsoStr(myForm.dateRuleTimeEnd) : null;
+    
     myForm.dateRuleDays = myForm.dateRuleDays ? myForm.dateRuleDays.join(",") : null
     
     if (myForm.img && this.imgDidChange) {

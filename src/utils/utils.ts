@@ -52,8 +52,8 @@ export class Utils {
         let isoDate = DateUtils.toLocalIsoString(new Date().toString());
         isoDate = isoDate.slice(0, isoDate.indexOf("T")).replace(/:/g, "-");
 
-        console.log("isoDate: ", isoDate);
-        return `${CONST_APP_IMGS[data.appImgIndex]}$${data.name}$${data.companyOid}$${Utils.generateRandomString(3)}$${isoDate}.jpg`.replace(/\s+/g, '');
+        // not using name anymore
+        return `${CONST_APP_IMGS[data.appImgIndex]}$${Utils.generateRandomString(4)}$${data.companyOid}$${Utils.generateRandomString(4)}$${isoDate}.jpg`.replace(/\s+/g, '');
 
         // i.e.:  categoriesImg$muffins$12$ai39vl5z$2017-07-14T15-28-12
     }

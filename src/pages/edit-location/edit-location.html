@@ -100,7 +100,7 @@
             <div *ngIf="locations.length">
               <ion-item class="outline">
                 <ion-label>Populate with hours from another location</ion-label>
-                <ion-select [(ngModel)]="selectedLocation" [ngModelOptions]="{standalone: true}" (ionChange)="populateTimesWithAnotherLocation(x)">
+                <ion-select [(ngModel)]="selectedLocationToPopulateHours" [ngModelOptions]="{standalone: true}" (ionChange)="populateTimesWithAnotherLocation(x)">
                   <ion-option *ngFor="let x of locations; let i = index;" [value]="x">{{ x.name }}</ion-option>
                 </ion-select>
               </ion-item>

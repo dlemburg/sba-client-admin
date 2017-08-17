@@ -73,7 +73,7 @@ export class ProcessOrderPage extends BaseViewController {
      // socialMediaPointsBonus: 0,
       isEdited: false,
       editAmount: 0,
-      reasonsForEdit: null,
+      reasonsForEdit: [],
       oldPrice: null,
       newPrice: null
     } 
@@ -255,7 +255,7 @@ export class ProcessOrderPage extends BaseViewController {
     let editSubtotalModal = this.modalCtrl.create('EditSubtotalPage', { subtotal: this.order.transactionDetails.subtotal }, {enableBackdropDismiss: false});
     editSubtotalModal.onDidDismiss((data: IEditSubtotalDismiss) => {
       if (data.isEdited) {
-        let reasonsForEdit = this.order.transactionDetails.reasonsForEdit.length ? this.order.transactionDetails.reasonsForEdit : [];
+        let reasonsForEdit = this.order.transactionDetails.reasonsForEdit; //.length ? this.order.transactionDetails.reasonsForEdit : [];
         let editAmount = this.order.transactionDetails.editAmount + (this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal));
 
         this.order.transactionDetails = Object.assign({}, this.order.transactionDetails, {

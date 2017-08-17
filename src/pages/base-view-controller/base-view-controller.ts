@@ -140,12 +140,12 @@ export class BaseViewController {
     if (message) {
       setTimeout(() => {
         this.loading.dismiss();
-      }, 1000);
+      }, 400);
 
       setTimeout(() => {
         this.loading.data.content = message;
         this.loading.data.spinner = 'hide';
-      }, 400);
+      }, 5);
     } else {
       this.loading.dismiss();
     }

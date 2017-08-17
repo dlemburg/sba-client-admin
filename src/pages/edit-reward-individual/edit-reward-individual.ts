@@ -71,7 +71,6 @@ export class EditRewardIndividualPage extends BaseViewController {
   }
 
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.auth = this.authentication.getCurrentUser();
     this.days = Utils.getDays();
     this.presentLoading();
@@ -182,6 +181,7 @@ export class EditRewardIndividualPage extends BaseViewController {
       this.myForm.patchValue({
         img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
       })
+      this.imgDidChange = true;
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
@@ -213,7 +213,7 @@ export class EditRewardIndividualPage extends BaseViewController {
   }
 
   finishSubmit(myForm) {
-    const toData: ToDataSaveOrEditReward = {toData: this.myForm.value, companyOid: this.auth.companyOid, editOid: this.editOid};
+    const toData: ToDataSaveOrEditReward = {toData: myForm, companyOid: this.auth.companyOid, editOid: this.editOid};
 
     console.log("toData: ", toData);
     this.API.stack(ROUTES.editRewardIndividual, "POST", toData)

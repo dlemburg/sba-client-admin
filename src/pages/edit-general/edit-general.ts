@@ -61,7 +61,7 @@ constructor(
 
 //this page uses: keyword, category, flavor, size, addons
   ionViewDidLoad() {
-    this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
+   // this.myForm.get('img').valueChanges.subscribe((data) => { this.onImgDidChange(data)});
     this.type = this.navParams.data.type;
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
@@ -116,7 +116,8 @@ constructor(
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
         img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
-      })
+      });
+      this.imgDidChange = true;
     })
     .catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }

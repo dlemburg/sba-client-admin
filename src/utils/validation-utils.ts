@@ -12,8 +12,8 @@ export class Validation {
         let props = {
             // general
             required: 'Required field',
-            minlength: `Required length is ${len}`,
-            maxlength: `Required length is ${len}`,
+            minlength: `Minimum length is ${len}`,
+            maxlength: `Max length is ${len}`,
             isNumbersOnly: 'Numbers only',
             isLettersOnly: 'Letters only',
             isAboveZero: 'Must be higher than zero',

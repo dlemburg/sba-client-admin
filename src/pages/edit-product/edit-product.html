@@ -15,10 +15,9 @@
 
 <ion-content padding class="width-100">
   <div class="width-90 align-center">
-    <h3 text-center>Edit Product</h3>
     <ion-list>
       <ion-item class="outline">
-        <ion-label>Select the product to edit</ion-label>
+        <ion-label text-wrap>Select the product to edit</ion-label>
         <ion-select [disabled]="!values.length" [(ngModel)]="editOid" (ionChange)="editValueChange()">
           <ion-option *ngFor="let x of values; let i = index;" [value]="x.oid">{{x.name}}</ion-option>
         </ion-select>
@@ -160,7 +159,7 @@
             <div class="width-50 align-center" *ngFor="let x of myForm.controls.sizesAndPrices.controls; let i = index;">
               <ion-item [formGroupName]="i">
                 <ion-label floating><dollar-icon></dollar-icon> {{x.value.name}} Price</ion-label>
-                <ion-input type="text" formControlName="price"></ion-input>
+                <ion-input type="tel" formControlName="price"></ion-input>
               </ion-item>
               <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.sizesAndPrices"></control-messages>
             </div>

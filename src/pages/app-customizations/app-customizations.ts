@@ -131,6 +131,7 @@ export class AppCustomizationsPage extends BaseViewController {
     this.imageUtility.getImgCordova().then((data) => {
       this.dismissLoading();
       this.imgSrc = data.imageData;
+      this.imgDidChange = true;  // sets to true anytime img is retrieved here. diff from rest of app
       this.myForm.patchValue({
         socialMediaImg: Utils.generateImgName({appImgIndex: 13, name: this.myForm.controls["socialMediaImg"].value, companyOid: this.auth.companyOid})
       })
@@ -142,7 +143,7 @@ export class AppCustomizationsPage extends BaseViewController {
     return new Promise((resolve, reject) => {
 
       let route = this.oldImg ? ROUTES.uploadImgAndUnlink + `/${this.oldImg}` : ROUTES.uploadImgNoCallback;
-      let action = this.oldImg ? 'upload-img-and-unlink' : 'upload-img-no-callback';
+      let action = this.oldImg && this.imgDidChange ? 'upload-img-and-unlink' : 'upload-img-no-callback';
 
      
       this.imageUtility.uploadImg(action, myForm.socialMediaImg, this.imgSrc, route).then((data) => {
@@ -160,7 +161,7 @@ export class AppCustomizationsPage extends BaseViewController {
     if (this.formDidChange || this.imgDidChange) {
       this.presentLoading(AppViewData.getLoading().saving);
       
-      if (myForm.socialMediaImg) {
+      if (myForm.socialMediaImg && this.imgDidChange) {
         this.uploadImg(myForm).then(() => {
           this.finishSubmit(myForm);
         }).catch(this.errorHandler(this.ERROR_TYPES.IMG_UPLOAD))

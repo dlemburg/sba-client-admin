@@ -6,6 +6,10 @@ export class DateUtils {
 
 constructor() { }
 
+    public static getDays() {
+        return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    }
+
     public static getBeginningDateToday() {
         return new Date(new Date().setHours(0, 0, 1, 0));
     }
@@ -32,7 +36,6 @@ constructor() { }
 
     // comes in as military hours, keeps as military hours
     public static convertTimeStringToIsoString(timeString: string): string {
-        debugger;
         let time = this.sliceZero(timeString);
         let hours = this.getHours(time);
         let minutes = this.getMinutes(time);
@@ -43,20 +46,26 @@ constructor() { }
 
     // i.e.: ISOString ->  "09:30am"  
     // keeps in military hours
+    // also takes "closed" or timeString i.e. "09:00am" and returns it
     public static convertIsoStringToHoursAndMinutesString(isoString: string): string {
 
         // this accounts for closed days. should not be apart of re-usable utility fn
-        if (isoString === "closed" || isoString === "Closed") return isoString;
+        if (isoString === "closed" || isoString === "Closed" || isoString.length < 8) return isoString;
 
+        // "2017-08-16T17:00:00Z"
+        const hours = this.getHoursFromIsoStr(isoString);
+        const mins = this.getMinsFromIsoStr(isoString);
+        let amOrPm = "";
+/*
         const date = new Date(isoString);
         const minutes = this.prependZero(date.getMinutes());
         const militaryHours = date.getHours();
-        let amOrPm = "";
+*/
 
-        if (militaryHours >= 12) amOrPm = "pm";
-        else if (militaryHours === 0 || militaryHours < 12) amOrPm = "am";
+        if (hours >= 12) amOrPm = "pm";
+        else if (hours === 0 || hours < 12) amOrPm = "am";
 
-        const minutesAndHoursStr = `${militaryHours}:${minutes}${amOrPm}`;
+        const minutesAndHoursStr = `${hours}:${mins}${amOrPm}`;
         console.log("location minutesAndHoursStr: ", minutesAndHoursStr);
 
         return minutesAndHoursStr;
@@ -82,6 +91,51 @@ constructor() { }
         return ISOtime;
     }
 
+    // "2017-08-16T17:00:00Z" -> 17
+    public static getHoursFromIsoStr(isoString: string) {
+        const arr =  isoString.split(":");
+        const hours = +arr[0].slice(arr[0].length - 2);
+
+        return hours;
+    }
+
+    // "2017-08-16T17:30:00Z" -> 30
+    public static getMinsFromIsoStr(isoString: string) {
+        const arr = isoString.split(":");
+        const mins = arr[1];
+
+        return mins;
+    }
+
+    // accounts for browser offset
+    public static toLocalDate(dateStr: string) {
+        const date = new Date(dateStr);
+        const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+        const localDate = (new Date(date.getTime() - tzoffset))
+
+        return localDate;
+    }
+
+    // "0,1,2,3,4,5,6" -> "Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday"
+    public static numberStringToDayString(str) {
+        if (!str) return "";
+
+        let days = DateUtils.getDays();
+        let strArr = str.split(",");
+        const dayString = strArr.map((x) => days[x]).join(", ");
+
+        return dayString;
+    }
+
+        // "17" -> "5:00pm";
+    public static to12HourTimeString(timeStr): string {
+        const amOrPm = +timeStr < 11 ? "am" : "pm";
+        const time = DateUtils.to12Hour(+timeStr);
+        
+        return `${time}:00${amOrPm}`;
+    }
+
+
     // prepends ISOString type data at beginning
     public static patchStartTime(time: string): string {
         return time + "T00:00:00.000Z";
@@ -102,7 +156,6 @@ constructor() { }
     }
 
     public static prependZero(time: number): string {
-
         if (time < 10) return "0" + time;
         else return time.toString();
     }
@@ -140,7 +193,4 @@ constructor() { }
         else if (isPm && time !== 12) return time + 12;
         else return time;
     }
-
-   
-
 }

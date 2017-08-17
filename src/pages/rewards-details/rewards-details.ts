@@ -5,6 +5,7 @@ import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, LoadingController, ModalController } from 'ionic-angular';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { AppViewData } from '../../global/app-data';
+import { DateUtils } from '../../utils/date-utils';
 
 @IonicPage()
 @Component({
@@ -61,9 +62,12 @@ export class RewardsDetailsPage extends BaseViewController {
     this.API.stack(ROUTES.getRewardDetails + `/${this.auth.companyOid}/${this.rewardOid}`, "GET")
         .subscribe(
             (response) => {
-              console.log('response.data: ' ,response.data);
+              console.log('response.data: ', response.data);
               this.loading.dismiss();
               this.rewardDetails = response.data.rewardDetails;
+              this.rewardDetails.dateRuleDays = DateUtils.numberStringToDayString(this.rewardDetails.dateRuleDays);
+              this.rewardDetails.dateRuleTimeStart = DateUtils.to12HourTimeString(this.rewardDetails.dateRuleTimeStart);
+              this.rewardDetails.dateRuleTimeEnd = DateUtils.to12HourTimeString(this.rewardDetails.dateRuleTimeEnd);
             }, this.errorHandler(this.ERROR_TYPES.API));
   }
 

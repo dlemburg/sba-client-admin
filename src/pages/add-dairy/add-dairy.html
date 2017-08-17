@@ -16,7 +16,7 @@
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.name"></control-messages>
 
         <ion-item margin-vertical *ngIf="companyDetails.doesChargeForDairy">
-          <ion-label floating>Price (if necessary)</ion-label>
+          <ion-label floating><dollar-icon></dollar-icon> Price (if necessary)</ion-label>
           <ion-input type="tel" formControlName="price"></ion-input>
         </ion-item>
         <control-messages [isSubmitted]="isSubmitted" [controlInstance]="myForm.controls.price"></control-messages>
