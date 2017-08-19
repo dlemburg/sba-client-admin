@@ -272,20 +272,20 @@
                     </div>
                     <div>
                       <div class="discounts" *ngIf="x.discountRule === REWARDS_DISCOUNT_RULE.PRODUCT">
-                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.PERCENT || x.discountType === REWARDS_DISCOUNT_TYPE.NEW_PRICE">
-                          <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
+                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.PERCENT">
+                          <span> Discount amount per product: </span>{{ x.discountAmount }}%
                         </div>
-                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.MONEY">
+                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.MONEY || x.discountType === REWARDS_DISCOUNT_TYPE.NEW_PRICE">
                           <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
                         </div>
                       </div>
                       <!-- x.discount does not come from server- its a client prop given to track the discount of dtr -->
                       <div class="discounts" *ngIf="x.discounts && x.discountRule === REWARDS_DISCOUNT_RULE.DATE_TIME_RANGE">
                         <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.PERCENT"> 
-                          <span>Discount amount on order: </span>{{ x.discount.amount }}%
+                          <span>Discount amount on order: </span>{{ x.discountAmount }}%
                         </div>
                         <div *ngIf="x.discounts.type === REWARDS_DISCOUNT_TYPE.MONEY">                     
-                          <span>Discount amount on order: </span> {{ x.discount.amount  | currency:symbolDisplay:true }}
+                          <span>Discount amount on order: </span> {{ x.discountAmount  | currency:symbolDisplay:true }}
                         </div>
                       </div>
                     </div>

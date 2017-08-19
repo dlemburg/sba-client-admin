@@ -41,7 +41,7 @@ export class AppImagesPage extends BaseViewController {
     {label: "Mobile Card", name: CONST_APP_IMGS[11], appImgIndex: 11, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Added-To-Cart", name: CONST_APP_IMGS[12], appImgIndex: 12, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
   ];
-  editValue = {label: null, appImgIndex: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
+  editValue = {targetWidth: 423, targetHeight: 238, label: null, appImgIndex: null, name: null, img: null, imgSrc: null};
   imageUtility: ImageUtility;
 
  constructor(
@@ -75,14 +75,17 @@ export class AppImagesPage extends BaseViewController {
     modal.present();
   }
 
-
+  /*this.editValue.label.replace(/\s+/g, '-') */
   getImgCordova() {
     this.presentLoading("Retrieving...");
     this.imageUtility = new ImageUtility(this.camera, this.transfer, this.file, this.platform);
-    this.imageUtility.getImgCordova({targetHeight: 400, targetWidth: 600}).then((data) => {
+    this.imageUtility.getImgCordova({targetHeight: this.editValue.targetHeight, targetWidth: this.editValue.targetWidth}).then((data) => {
       this.dismissLoading();
       this.editValue.imgSrc = data.imageData;
-      this.editValue.img = Utils.generateImgName({appImgIndex: this.editValue.appImgIndex, name: "", /*this.editValue.label.replace(/\s+/g, '-') */ companyOid: this.auth.companyOid});
+      this.editValue.img = Utils.generateImgName({appImgIndex: this.editValue.appImgIndex, name: "", companyOid: this.auth.companyOid});
+
+      console.log("this.editValue.imgSrc: ", this.editValue.imgSrc);
+      console.log("this.editValue.img: ", this.editValue.img);
     }).catch(this.errorHandler(this.ERROR_TYPES.PLUGIN.CAMERA));
   }
 

@@ -158,7 +158,7 @@ constructor(
               startDate: reward.startDate,
               expiryDate: reward.expiryDate,
             });
-
+            
             // init everything with value to init dynamic value changes
             this.imgSrc = AppViewData.getDisplayImgSrc(reward.img);
             this.oldImg = reward.img;
@@ -285,7 +285,6 @@ constructor(
   submit(myForm): void {
     this.presentLoading(AppViewData.getLoading().saving);
 
-    debugger;
     let expiryDate = myForm.expiryDate.toString();
     let startDate = myForm.startDate.toString();
 

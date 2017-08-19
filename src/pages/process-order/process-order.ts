@@ -135,14 +135,13 @@ export class ProcessOrderPage extends BaseViewController {
   compareFn(c1, c2): boolean { return c1 && c2 ? c1.oid === c2.oid : c1 === c2;}   // [compareWith]="compareFn"
 
   slideChanged() {
-    /* if isGoingBack: clear all transactionDetails... if isGoingForward: api call */
-    this.currentSlideIndex = this.slides.getActiveIndex();
-    if (this.order.purchaseItems.length && (this.currentSlideIndex > this.slides.getActiveIndex()) ) {
+    if (this.order.purchaseItems.length && this.slides.getActiveIndex() === 0) {
       this.order.purchaseItems = this.order.purchaseItems.map((x, index) => {
         x.discounts = 0;
         x.isFreePurchaseItem = false;
         return x;
       });
+
       this.order.transactionDetails = this.processOrderUtils.clearTransactionDetails(this.processOrderUtils.calculateSubtotal(this.order, this.companyDetails), this.order.transactionDetails);
     } else this.getEligibleRewards();
   }
@@ -255,19 +254,23 @@ export class ProcessOrderPage extends BaseViewController {
     let editSubtotalModal = this.modalCtrl.create('EditSubtotalPage', { subtotal: this.order.transactionDetails.subtotal }, {enableBackdropDismiss: false});
     editSubtotalModal.onDidDismiss((data: IEditSubtotalDismiss) => {
       if (data.isEdited) {
-        debugger;
         let reasonsForEdit = this.order.transactionDetails.reasonsForEdit ? this.order.transactionDetails.reasonsForEdit : [];
         let editAmount = this.order.transactionDetails.editAmount + (this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal));
 
-        debugger;
-
         this.order.transactionDetails = Object.assign({}, this.order.transactionDetails, {
           isEdited: true, 
-          subtotal: data.subtotal,
           editAmount,
-          reasonsForEdit: [...reasonsForEdit, {reason: data.reasonForEdit, amount: this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal), priceDown: data.subtotal < data.cacheSubtotal ? true : false}],
-          taxes: this.processOrderUtils.calculateTaxes(this.order.transactionDetails.subtotal, this.companyDetails.taxRate),
-          total:  this.processOrderUtils.calculateTotal(this.order.transactionDetails.subtotal, this.order.transactionDetails.taxes)
+          reasonsForEdit: [...reasonsForEdit, 
+            {
+              reason: data.reasonForEdit, 
+              amount: this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal),
+              priceDown: data.subtotal < data.cacheSubtotal ? true : false
+          }],
+          discount: 0,
+          rewards: [],
+          subtotal: data.subtotal,
+          taxes: this.processOrderUtils.calculateTaxes(data.subtotal, this.companyDetails.taxRate),
+          total:  this.processOrderUtils.calculateTotal(data.subtotal, this.order.transactionDetails.taxes)
         });
       }
     });
@@ -357,6 +360,7 @@ export class ProcessOrderPage extends BaseViewController {
 
       this.API.stack(ROUTES.getEligibleRewardsProcessingTypeAutomaticForTransaction, "POST", toData)
         .subscribe( (response) => {
+          console.log("response.data = ", response.data);
           this.order.purchaseItems = response.data.purchaseItems;
           this.order.transactionDetails = Object.assign({}, response.data.transactionDetails);
           this.dismissLoading();

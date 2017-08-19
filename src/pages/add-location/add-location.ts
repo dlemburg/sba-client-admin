@@ -135,8 +135,6 @@ export class AddLocationPage extends BaseViewController {
     this.presentLoading();
     const myForm = this.myForm.value;
 
-    debugger;
-
     this.getCurrentPosition().then((data) => {
       let currentLocation = {coordsLat: data.coordsLat, coordsLong: data.coordsLong};
       console.log("currentLocation: ", currentLocation);
@@ -201,7 +199,6 @@ export class AddLocationPage extends BaseViewController {
 
   dateChange(event) {
     //test
-    //debugger;
   }
 
   uploadImg(myForm): Promise<any> {
@@ -250,9 +247,7 @@ export class AddLocationPage extends BaseViewController {
         .subscribe(
           (response) => {
             this.dismissLoading(AppViewData.getLoading().saved);
-            setTimeout(() => {
-             this.navCtrl.pop();
-            }, 500);  
+            setTimeout(() => this.navCtrl.pop(), 500);  
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

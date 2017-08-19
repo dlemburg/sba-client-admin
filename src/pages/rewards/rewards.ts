@@ -32,7 +32,6 @@ export class RewardsPage extends BaseViewController {
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
-
   ionViewDidLoad() {    
     this.auth = this.authentication.getCurrentUser();
     this.presentLoading();
