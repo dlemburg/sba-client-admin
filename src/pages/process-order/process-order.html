@@ -69,9 +69,9 @@
 
         <!-- order empty -->
         <div class="align-center empty-order-container" margin-top text-center *ngIf="!order.purchaseItems.length">
-          <ion-card class="width-50 align-center">
-            <ion-card-content text-center>Order is empty</ion-card-content>
-          </ion-card>
+          <ion-item class="width-50 align-center">
+            <div>Order is empty</div>
+          </ion-item>
         </div>
         <!-- order has items, category selected, no product selected -->
         <div class="align-center empty-order-container" margin-top text-center *ngIf="order.purchaseItems.length && currentCategory.name && !purchaseItem.selectedProduct.name">

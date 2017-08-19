@@ -210,7 +210,6 @@ export class AddProductPage extends BaseViewController {
   }
 
   finishSubmit(myForm) {
-    debugger;
     const toData: ToDataSaveProduct = {toData: myForm, companyOid: this.auth.companyOid, isEdit: false};
     this.API.stack(ROUTES.saveProduct, "POST", toData)
         .subscribe(

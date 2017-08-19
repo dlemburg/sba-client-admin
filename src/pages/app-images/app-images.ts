@@ -67,7 +67,7 @@ export class AppImagesPage extends BaseViewController {
   }
 
   editValueChange(value, index) {
-    // do nothing right now
+    // get app img
   }
 
   navExplanations() {
