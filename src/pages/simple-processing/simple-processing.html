@@ -34,6 +34,7 @@
         </div>
       </ion-col>
     </ion-row>
+    <div *ngIf="mobileCardId">Mobile Card Id: <span class="bold">{{ this.mobileCardId }}</span></div>
     <ion-item margin-top>
       <ion-label class="text-area-label" stacked>Additional Comments</ion-label>
       <ion-textarea [(ngModel)]="employeeComments" type="text" ></ion-textarea>
@@ -53,6 +54,6 @@
 </ion-content>
  <ion-footer>
   <ion-toolbar>
-      <button [disabled]="!sufficientFunds || !userData.userOid || !total" (click)="submit()" class="footer-btn" color="secondary" ion-button block detail-push>Submit</button>
+      <button [disabled]="!sufficientFunds || !userData.balance || !total" (click)="submit()" class="footer-btn" color="secondary" ion-button block detail-push>Submit</button>
   </ion-toolbar>
 </ion-footer>

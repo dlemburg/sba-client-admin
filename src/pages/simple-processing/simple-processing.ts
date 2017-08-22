@@ -16,7 +16,9 @@ import { BarcodeScanner } from '@ionic-native/barcode-scanner';
   templateUrl: 'simple-processing.html',
 })
 export class SimpleProcessingPage extends BaseViewController {
-  dataFromRewardIndividualBarcodeScan: any;
+  dataFromRewardIndividualBarcodeScan: any = {
+    type: null
+  };
   userData = {
     userOid: null,
     email: null,
@@ -35,10 +37,12 @@ export class SimpleProcessingPage extends BaseViewController {
   employeeComments: string;
   isRewardUsed: boolean = false;
   auth: any = this.authentication.getCurrentUser();
-  sufficientFunds: boolean = false;
+  sufficientFunds: boolean = true;
   barcodeRewardData: IBarcodeRewardData;
   companyDetails: ICompanyDetails = {};
   taxesAlreadyCalculated: boolean = false;
+  mobileCardId: number = null;
+  taxClicks: number = 0;
 
   constructor(
     public navCtrl: NavController, 
@@ -59,25 +63,26 @@ export class SimpleProcessingPage extends BaseViewController {
     this.getCompanyDetailsAPI();
   }
 
-   getCompanyDetailsAPI() {
+  getCompanyDetailsAPI() {
     this.presentLoading();
     this.API.stack(ROUTES.getCompanyDetailsForTransaction, "POST", {companyOid: this.auth.companyOid})
-        .subscribe(
-            (response) => {
-              console.log('response.data: ', response.data);
-              
-              this.companyDetails = response.data.companyDetails;
-              this.dismissLoading();
-            }, this.errorHandler(this.ERROR_TYPES.API));
+      .subscribe(
+          (response) => {
+            console.log('response.data: ', response.data);
+            this.companyDetails = response.data.companyDetails;
+            this.dismissLoading();
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   calculateTaxes(total) {
+    this.taxClicks += 1;
     if (!+total || isNaN(total)) {
       this.total = "0";
     } else if (!isNaN(+total) && !this.taxesAlreadyCalculated) {
       this.taxes = +Utils.roundAndAppendZero(+total * this.companyDetails.taxRate);
       this.total = Utils.roundAndAppendZero(+total + (this.taxes));
     }
+    this.taxClicks > 1 ? this.presentToast(false, `Warning! You have calculated taxes ${this.taxClicks} times on this order. `) : null;
   }
 
   clear() {
@@ -154,10 +159,8 @@ export class SimpleProcessingPage extends BaseViewController {
     this.barcodeScanner.scan({resultDisplayDuration: 0}).then((barcodeData) => {
       console.log("barcodeData: ", barcodeData);
 
-      /*
-        // barcode data will have  userOid, companyOid, isSocialMediaUsed, socialMediaType: string separated by $
-        // i.e.:  148$12$0$17
-      */
+      // barcode data will have  userOid, companyOid, isSocialMediaUsed, socialMediaType: string separated by $
+      // i.e.:  148$12$0$17
       if (!barcodeData.cancelled) {
         if (barcodeData.text.indexOf("$") > -1) {
           let barcodeUserDataArr: Array<string> = barcodeData.text.split("$");
@@ -181,7 +184,7 @@ export class SimpleProcessingPage extends BaseViewController {
   }
 
   finishOnScanUserBarcode(barcodeUserData: IBarcodeUserData) {
-    this.userData.userOid = barcodeUserData.userOid;
+    //this.userData.userOid = barcodeUserData.userOid;
     this.barcodeUserData = barcodeUserData;
     this.getUserDataForProcessOrderAPI(this.barcodeUserData.userOid, CONST_ID_TYPES.USER, {isSocialMediaUsed: this.barcodeUserData.isSocialMediaUsed, socialMediaType: this.barcodeUserData.socialMediaType});
   }
@@ -216,7 +219,6 @@ export class SimpleProcessingPage extends BaseViewController {
   getUserDataForProcessOrderAPI(userOidOrMobileCardId, idType, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
     let toData = { userOidOrMobileCardId: userOidOrMobileCardId, companyOid: this.auth.companyOid, idType};
-    debugger;
     // get user data
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
       .subscribe(
@@ -229,24 +231,19 @@ export class SimpleProcessingPage extends BaseViewController {
 
             // do checks
             if (this.userData.userOid === null) this.presentToast(false, `No user found by this id number.`)
-            if (this.userData.balance < +this.total) {
-                //if (this.companyDetails.acceptsPartialPayments) {
-                /*
-                if (this.userData.isSocialMediaUsed) {
-                    //this.order.transactionDetails.isSocialMediaUsed = true;
-                    //this.order.transactionDetails.lkpSocialMediaTypeOid = this.userData.lkpSocialMediaTypeOid;
-                } 
-                */
-                this.presentToast(false, `Captured user info! Complete transaction at any time.`);
+            else if (this.userData.balance > +this.total) {
+              /* if (this.companyDetails.acceptsPartialPayments) {} */
+              this.presentToast(false, `Captured user info! Complete transaction at any time.`);
+            } 
+            else {
+              this.sufficientFunds = false;
+              this.mobileCardId = null;
 
-              } else {
-                this.sufficientFunds = false;
-
-                this.showPopup({
-                  title: 'Uh oh!', 
-                  message: "The customer has insufficient funds. Customer balance: $" + this.userData.balance, 
-                  buttons: [{text: "OK"}]
-                });
+              this.showPopup({
+                title: 'Uh oh!', 
+                message: "The customer has insufficient funds. Customer balance: $" + this.userData.balance, 
+                buttons: [{text: "OK"}]
+              });
             } 
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
@@ -255,14 +252,17 @@ export class SimpleProcessingPage extends BaseViewController {
   presentEnterMobileCardIdModal() {
     // modal to enter digits
     // on dismiss: make api call to get userInfo
-    let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
-    enterMobileCardIdModal.onDidDismiss((data) => {
-      debugger;
-      if (data && data.mobileCardId) {
-         this.getUserDataForProcessOrderAPI(data.mobileCardId, CONST_ID_TYPES.MOBILE_CARD_ID);
-      }
-    });
-    enterMobileCardIdModal.present();
+    if (this.total === null || this.total == undefined) this.presentToast(false, `Please enter a total first!`, "top")
+    else {
+      let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
+      enterMobileCardIdModal.onDidDismiss((data) => {
+        if (data && data.mobileCardId) {
+          this.getUserDataForProcessOrderAPI(data.mobileCardId, CONST_ID_TYPES.MOBILE_CARD_ID);
+          this.mobileCardId = data.mobileCardId;
+        }
+      });
+      enterMobileCardIdModal.present();
+    }
   }
 
   doChecks(total): IErrChecks {
@@ -282,7 +282,7 @@ export class SimpleProcessingPage extends BaseViewController {
     } else {
       this.presentLoading();
 
-      let taxes = (+this.total * this.companyDetails.taxRate);
+      let taxes = this.taxes? this.taxes : (+this.total * this.companyDetails.taxRate);
       let subtotal = +this.total - taxes;
 
       const toData = {
@@ -293,6 +293,7 @@ export class SimpleProcessingPage extends BaseViewController {
         subtotal: subtotal,
         reasonForEdit: this.reasonForEdit,
         taxes: taxes,
+        rewards: this.rewards,
         rewardsSavings: this.userData.rewardsSavings,
         isRewardUsed: this.isRewardUsed,
         isRewardIndividualUsed: this.dataFromRewardIndividualBarcodeScan.type === CONST_REWARDS_TYPES.REWARDS_INDIVIDUAL,
@@ -302,11 +303,13 @@ export class SimpleProcessingPage extends BaseViewController {
         employeeComments: this.employeeComments
       }
 
+      console.log("toData: ", toData);
+
       this.API.stack(ROUTES.processTransactionSimpleProcessing, "POST", toData)
         .subscribe(
             (response) => {
               console.log('response.data: ', response.data);
-              this.companyDetails = response.data.companyDetails;
+              //this.companyDetails = response.data.companyDetails;
 
               this.dismissLoading();
             }, this.errorHandler(this.ERROR_TYPES.API));

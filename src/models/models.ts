@@ -347,8 +347,8 @@ export interface SocketEvents {
 export interface IUserDataForProcessOrder {
     userOid: number;
     balance: number;
-    email: string;
-    companyOid: number;
+    email?: string;
+    companyOid?: number;
     isSocialMediaUsed?: boolean;
     socialMediaType?: string;
 }

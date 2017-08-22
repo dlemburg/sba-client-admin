@@ -4,16 +4,18 @@
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-buttons end>
-      <button class="comment-icon" *ngIf="currentSlideIndex === 1" ion-button icon-only (click)="presentCommentModal()">
+      <button class="comment-icon" ion-button icon-only (click)="presentCommentModal()">
         <ion-icon  ios="ios-create-outline" md="ios-create-outline"></ion-icon>
       </button>
-      <button class="comment-icon" *ngIf="currentSlideIndex === 1" ion-button icon-only (click)="presentEnterMobileCardIdModal()">
+      <button class="comment-icon" ion-button icon-only (click)="presentEnterMobileCardIdModal()">
          <ion-icon ios="ios-keypad-outline" md="ios-keypad-outline"></ion-icon>
       </button>
+        <!--
       <ion-icon *ngIf="currentSlideIndex === 0" class="subtotal-header">
         <span *ngIf="!order.transactionDetails.subtotal" color="primary">$0.00</span>
         <span *ngIf="order.transactionDetails.subtotal" color="primary">{{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
       </ion-icon>
+      -->
     </ion-buttons>
     <ion-title *ngIf="isEditInProgress.status">Edit-In-Progress...</ion-title>
   </ion-navbar>
@@ -114,8 +116,8 @@
             
             <ion-row>
               <!-- addons -->
-              <ion-col>
-                <ion-item *ngIf="productDetails.addonsToClient.length">
+              <ion-col *ngIf="productDetails.addonsToClient.length" col-6>
+                <ion-item>
                   <ion-label>Add-ons</ion-label>
                   <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.addons" multiple="true">
                     <ion-option *ngFor="let x of productDetails.addonsToClient; let i = index;" [value]="x">{{ x.name }}</ion-option>
@@ -124,8 +126,8 @@
               </ion-col>
 
               <!-- flavors -->
-              <ion-col>
-                <ion-item *ngIf="productDetails.flavorsToClient.length">
+              <ion-col *ngIf="productDetails.flavorsToClient.length" col-6>
+                <ion-item>
                   <ion-label>Flavors</ion-label>
                   <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.flavors" multiple="true">
                     <ion-option *ngFor="let x of productDetails.flavorsToClient; let i = index;" [value]="x">{{ x.name }}</ion-option>
@@ -136,9 +138,29 @@
 
 
             <ion-row>
+              <!-- variety -->
+              <ion-col col-6 *ngIf="productDetails.varietyToClient.length">
+                <ion-item>
+                  <ion-label>Variety</ion-label>
+                  <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.variety" multiple="true">
+                    <ion-option *ngFor="let x of productDetails.varietyToClient; let i = index;" [value]="x">{{x.name}}</ion-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+
+              <!-- sweetener -->
+              <ion-col col-6 *ngIf="productDetails.sweetenerToClient.length">
+                <ion-item>
+                  <ion-label>Sweetener</ion-label>
+                  <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.sweetener" multiple="true">
+                    <ion-option *ngFor="let x of productDetails.sweetenerToClient; let i = index;" [value]="x">{{x.name}}</ion-option>
+                  </ion-select>
+                </ion-item>
+              </ion-col>
+
               <!-- dairy -->
-              <ion-col>
-                <ion-item *ngIf="productDetails.dairyToClient.length">
+              <ion-col *ngIf="productDetails.dairyToClient.length">
+                <ion-item>
                   <ion-label>Dairy</ion-label>
                   <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.dairy" multiple="true">
                     <ion-option *ngFor="let x of productDetails.dairyToClient; let i = index;" [value]="x">{{ x.name }} &nbsp; <span *ngIf="x.price">{{ x.price | currency:symbolDisplay:true }}</span></ion-option>
@@ -159,26 +181,6 @@
                   </ion-item>
                 </div>
               </ion-col>
-
-              <!-- variety -->
-              <ion-col>
-                <ion-item *ngIf="productDetails.varietyToClient.length">
-                  <ion-label>Variety</ion-label>
-                  <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.variety" multiple="true">
-                    <ion-option *ngFor="let x of productDetails.varietyToClient; let i = index;" [value]="x">{{x.name}}</ion-option>
-                  </ion-select>
-                </ion-item>
-              </ion-col>
-
-              <!-- sweetener -->
-              <ion-col>
-                <ion-item *ngIf="productDetails.sweetenerToClient.length">
-                  <ion-label>Sweetener</ion-label>
-                  <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.sweetener" multiple="true">
-                    <ion-option *ngFor="let x of productDetails.sweetenerToClient; let i = index;" [value]="x">{{x.name}}</ion-option>
-                  </ion-select>
-                </ion-item>
-                </ion-col>
             </ion-row>
 
 
@@ -229,8 +231,6 @@
               </ion-col>
             </ion-row>
           </div>
-
-
         </div>
       <ion-footer>
         <ion-toolbar>
@@ -314,6 +314,7 @@
                 </div>
               </ion-col>
             </ion-row>
+            <div *ngIf="mobileCardId && userData.balance">Mobile Card Id: {{ mobileCardId }}</div>
           </div>
           <!--
           <div class="align-center">

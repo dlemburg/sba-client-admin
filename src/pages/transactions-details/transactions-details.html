@@ -13,8 +13,8 @@
   <!-- date / location -->
   <ion-card>
     <ion-card-content class="internal-info-content">
-      <ion-item><span class="bold">Date: </span> {{ order.purchaseDate | date}}</ion-item>
-      <ion-item><span class="bold">Location: </span>{{ order.locationName }}</ion-item>
+      <ion-item><span class="bold"> Date: </span> {{ order.purchaseDate | date}}</ion-item>
+      <ion-item><span class="bold"> Location: </span>{{ order.locationName }}</ion-item>
       <ion-item><span class="bold"> Subtotal: </span> {{ order.subtotal | currency:symbolDisplay:true }}</ion-item>
       <ion-item><span class="bold"> Taxes: </span> {{ order.taxes | currency:symbolDisplay:true }}</ion-item>
       <ion-item><span class="bold"> Total: </span> {{ order.total | currency:symbolDisplay:true }}</ion-item>
@@ -59,8 +59,9 @@
                 <ProductDetails [list]="x.variety"></ProductDetails>     
               </ion-col>
             </ion-row>
-
+            <!--
             <div margin-top text-center><button ion-button outline color="primary" (click)="navProduct(x)">View {{x.productName}} details</button></div>
+            -->
           </ion-item>
         </div>
     </ion-card-content>

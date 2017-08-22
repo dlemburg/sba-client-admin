@@ -6,7 +6,7 @@ import { Component, OnInit, Input } from '@angular/core';
   //styleUrls: ['./product-details.component.css']
 })
 export class ProductDetailsComponent implements OnInit {
-  @Input() list: any;
+  @Input() list: any = [];
   @Input() quantity: number;
   constructor() { }
 

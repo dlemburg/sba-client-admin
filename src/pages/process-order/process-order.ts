@@ -46,6 +46,7 @@ export class ProcessOrderPage extends BaseViewController {
     isSocialMediaUsed: false,
     balance: 0
   };
+  mobileCardId: number = null;
   sufficientFunds: boolean = true;
   barcodeUserData: IBarcodeUserData;
   barcodeRewardData: IBarcodeRewardData;
@@ -148,7 +149,6 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
   btnSlideChange() {     
-    this.currentSlideIndex += 1;
     this.slides.slideNext();
   }
 
@@ -199,8 +199,6 @@ export class ProcessOrderPage extends BaseViewController {
         this.dismissLoading();
         this.userData = response.data.userData ? response.data.userData : {balance: null, userOid: null};
 
-        debugger;
-
         if (this.userData.userOid === null) this.presentToast(false, `No user found by this id number.`)
         else if (this.processOrderUtils.transactionIsValid(this.userData.balance, this.order.transactionDetails.total, this.companyDetails.acceptsPartialPayments)) {
           
@@ -213,6 +211,8 @@ export class ProcessOrderPage extends BaseViewController {
           } 
         } 
         else {
+          this.mobileCardId = null;
+          this.userData = {balance: null, userOid: null};
           this.sufficientFunds = false;
           this.showPopup({
             title: 'Uh oh!', 
@@ -304,6 +304,9 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
   onEditPurchaseItem(purchaseItem, index) {
+    this.userData = { userOid: null, balance: null, companyOid: null};
+    this.mobileCardId = null;
+
     this.isEditInProgress = this.setEditInProgress(index);
     this.getProductInfo(purchaseItem.selectedProduct.oid);
     this.purchaseItem = purchaseItem;
@@ -466,7 +469,10 @@ export class ProcessOrderPage extends BaseViewController {
   presentEnterMobileCardIdModal() {
     let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
     enterMobileCardIdModal.onDidDismiss((data) => {
-      (data && data.mobileCardId) ? this.getUserData(data.mobileCardId, this.ID_TYPES.MOBILE_CARD_ID) : null;
+      if (data && data.mobileCardId) {
+         this.getUserData(data.mobileCardId, this.ID_TYPES.MOBILE_CARD_ID);
+         this.mobileCardId = data.mobileCardId;
+      }
     });
     enterMobileCardIdModal.present();
   }
