@@ -79,6 +79,7 @@
             <ion-card-content text-center>Select Product</ion-card-content>
           </ion-card>
         </div>
+
         <!-- order details -->
         <div *ngIf="currentCategory.oid && purchaseItem.selectedProduct">
           <div margin-top class="align-center product-details-container">
@@ -185,9 +186,9 @@
         </div>
         <button margin-top 
                 *ngIf="!isEditInProgress.status && currentCategory.oid && purchaseItem.selectedProduct && purchaseItem.selectedProduct.name" 
-                class="width-50" 
+                class="width-50 add-to-order-btn" 
                 ion-button outline 
-                (click)="addToOrder(purchaseItem)">Add to Order</button>
+                (click)="addToOrder(purchaseItem)"><ion-icon class="icon-primary icon" ios="ios-add-outline" md="ios-add-outline"></ion-icon> Add to Order</button>
         <button *ngIf="isEditInProgress.status" 
                 class="width-50" 
                 ion-button outline
@@ -197,10 +198,11 @@
        
         <!-- order summary -->
         <h3 class="order-summary-header"  *ngIf="order.purchaseItems.length">Order Summary</h3>
-          <!-- move this to a component  -->
+
+          <!-- move this to a component     col-sm-6 col-md-4 -->
           <div margin-top class="order-card-container width-100">
             <ion-row text-center>
-              <ion-col *ngFor="let x of order.purchaseItems; let i = index;" col-sm-6 col-md-4 text-center>
+              <ion-col *ngFor="let x of order.purchaseItems; let i = index;" col-8 offset-2 text-center>
                 <ion-card [ngClass]="{'edit-in-progress': isEditInProgress.status && (isEditInProgress.index === i)}" 
                           class="width-80 align-center cart-order" 
                           (click)="onEditPurchaseItem(x, i)">
@@ -208,8 +210,8 @@
                   <ion-card-content>
                     <div>
                       <span class="bold"> {{x.quantity}} </span> 
-                      <span class="bold product-name"> {{ x.selectedProduct.name | uppercase }}<span *ngIf="x.quantity > 1">s</span> </span>
-                      <div><span class="bold"> {{ x.sizeAndOrPrice.name }} {{x.sizeAndOrPrice.price | currency:symbolDisplay:true  }}</span></div>
+                      <span class="bold product-name"> {{ x.selectedProduct.name | uppercase }}</span>
+                      <span class="bold"> {{ x.sizeAndOrPrice.name }} {{x.sizeAndOrPrice.price | currency:symbolDisplay:true  }}</span>
 
                       <div class="extras-container">
                         <ProductDetails [list]="x.flavors"></ProductDetails>
@@ -227,6 +229,8 @@
               </ion-col>
             </ion-row>
           </div>
+
+
         </div>
       <ion-footer>
         <ion-toolbar>
@@ -249,15 +253,15 @@
           <div *ngIf="showOrder">
             <ion-item *ngFor="let x of order.purchaseItems; let i = index;">
               <ion-row>
-                <ion-col text-left col-9>
+                <ion-col class="font-12" text-left col-9>
                   <span>{{ x.quantity }} <span *ngIf="x.sizeAndOrPrice.name">{{ x.sizeAndOrPrice.name }}</span> {{ x.selectedProduct.name }}</span>
                 </ion-col>
                 <ion-col text-right col-3>
-                  <span text-right>{{ x.displayPriceWithoutDiscounts | currency:symbolDisplay:true}}</span>
+                  <span text-right>{{ x.displayPriceWithoutDiscounts | currency:symbolDisplay:true }}</span>
                 </ion-col>
               </ion-row>
               <div class="discounts" *ngIf="x.discounts"> - {{ x.discounts | currency:symbolDisplay:true }} </div>
-              <div *ngIf="x.addonsCost" class="font-12">*Price includes the cost of addons: {{ x.addonsCost }}</div>
+              <div *ngIf="x.addonsCost" class="font-12">*Price includes the cost of addons: {{ x.addonsCost | currency:symbolDisplay:true }}</div>
             </ion-item>
           </div>
           <button ion-item (click)="showRewards = !showRewards">Rewards 
@@ -267,15 +271,16 @@
             <ion-item text-wrap *ngFor="let x of order.transactionDetails.rewards; let i = index;">
                 <div text-wrap class="width-80">
                   <div>
-                    <div>
-                      <span class="bold">{{x.name}}</span>
-                    </div>
+                    <div><span class="bold">{{x.name}}</span></div>
                     <div>
                       <div class="discounts" *ngIf="x.discountRule === REWARDS_DISCOUNT_RULE.PRODUCT">
                         <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.PERCENT">
                           <span> Discount amount per product: </span>{{ x.discountAmount }}%
                         </div>
-                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.MONEY || x.discountType === REWARDS_DISCOUNT_TYPE.NEW_PRICE">
+                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.NEW_PRICE">
+                          <span> New price for product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
+                        </div>
+                        <div *ngIf="x.discountType === REWARDS_DISCOUNT_TYPE.MONEY">
                           <span> Discount amount per product: </span>{{ x.discountAmount | currency:symbolDisplay:true }}
                         </div>
                       </div>
@@ -298,8 +303,8 @@
           <div>
             <ion-row text-center>
               <ion-col>
-                <button margin-top ion-button outline color="primary" (click)="onScanIndividualRewardBarcode()">
-                  <ion-icon class="icon-primary" ios="ios-trophy" md="ios-trophy"></ion-icon><span class="btn-text">Scan Reward</span></button>
+                <button margin-top ion-button color="primary" (click)="onScanIndividualRewardBarcode()">
+                  <ion-icon ios="ios-trophy" md="ios-trophy"></ion-icon><span class="btn-text">Scan Reward</span></button>
               </ion-col>
               <ion-col>
                 <div>
@@ -318,16 +323,11 @@
         <ion-list class="customer-info-list">
           <ion-item margin-top>
             <span>Subtotal:</span> 
-            <div tappable (click)="presentEditSubtotalModal()" text-right> 
-              <span *ngIf="order.transactionDetails.subtotal" class="edit-subtotal-background"> {{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
-              <span *ngIf="!order.transactionDetails.subtotal" class="edit-subtotal-background">$0.00</span>
+            <div text-right> 
+              <span class="subtotal" *ngIf="order.transactionDetails.subtotal"> {{ order.transactionDetails.subtotal | currency:symbolDisplay:true }}</span>
+              <span class="subtotal" *ngIf="!order.transactionDetails.subtotal">$0.00</span>
             </div>
-            <div *ngIf="order.transactionDetails.isEdited" [ngClass]="{'discounts': order.transactionDetails.editAmount < 0, 'price-up': order.transactionDetails.editAmount > 0}" class="subtotal-edit" text-right>
-              <span><button (click)="presentReasonsForEditModal()" class="reasons-for-edit-btn" ion-button outline small>View</button></span>
-              <span>
-                Edits: {{ order.transactionDetails.editAmount | currency:symbolDisplay:true }}
-              </span>
-            </div>
+           
           </ion-item> 
           <ion-item *ngIf="order.transactionDetails.rewardsSavings && order.transactionDetails.rewardsSavings > 0">
               <span>Discounts:</span> 
@@ -339,13 +339,26 @@
           </ion-item>
           <ion-item>
             <span>Total:</span> 
-            <div class="inline-total" text-right>{{ order.transactionDetails.total | currency:symbolDisplay:true }}</div>
+            <div class="inline-total" text-right>
+              <span tappable (click)="presentEditTotalModal()" class="edit-subtotal-background">{{ order.transactionDetails.total | currency:symbolDisplay:true }}</span>
+            </div>
+            
+            <!-- edits -->
+            <div *ngIf="order.transactionDetails.isEdited" [ngClass]="{'price-up': order.transactionDetails.editAmount < 0, 'discounts': order.transactionDetails.editAmount > 0}" class="subtotal-edit" text-right>
+              <span><button (click)="presentReasonsForEditModal()" [ngClass]="{'reasons-for-edit-btn-blue': order.transactionDetails.editAmount < 0, 'reasons-for-edit-btn-red': order.transactionDetails.editAmount > 0}" ion-button outline small>View</button></span>
+              <span>
+                Edits: {{ order.transactionDetails.editAmount | currency:symbolDisplay:true }}
+              </span>
+            </div>
           </ion-item>
         </ion-list>
       </div>
       <ion-footer>
         <ion-toolbar>
-            <button [disabled]="!order.purchaseItems.length || !userData || !sufficientFunds" (click)="submit()" class="footer-btn" color="secondary" ion-button block detail-push>Complete Transaction</button>
+            <button 
+            [disabled]="!order.purchaseItems.length || !userData.balance || !sufficientFunds" 
+            (click)="submit()" class="footer-btn" color="secondary" 
+            ion-button block detail-push>Complete Transaction</button>
         </ion-toolbar>
       </ion-footer>
     </ion-slide>

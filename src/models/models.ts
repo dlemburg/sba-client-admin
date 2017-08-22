@@ -62,10 +62,10 @@ export interface IReasonsForEdit {
     priceDown: boolean;
 }
 
-export interface IEditSubtotalDismiss {
+export interface IEditTotalDismissProps {
     isEdited: boolean;
-    subtotal: number; 
-    cacheSubtotal: number; 
+    total: number; 
+    cacheTotal: number; 
     reasonForEdit: string;
 }
 export interface ICompanyDetailsForProcessOrder {

@@ -12,7 +12,6 @@
 
   <!-- date / location -->
   <ion-card>
-    <h3 margin-top text-center>Transaction Details</h3>
     <ion-card-content class="internal-info-content">
       <ion-item><span class="bold">Date: </span> {{ order.purchaseDate | date}}</ion-item>
       <ion-item><span class="bold">Location: </span>{{ order.locationName }}</ion-item>
@@ -69,9 +68,9 @@
 
 
   <!-- edit details -->
-  <ion-card>
+  <ion-card *ngIf="order.isEdited">
     <ion-card-content>
-      <div *ngIf="order.isEdited">
+      <div>
         <button ion-item detail-push (click)="showEdits = !showEdits"><span class="bold">*Order Edited*: Edit Details</span> </button>
         <div class="width-80 align-center">
           <ion-item *ngIf="showEdits">
@@ -86,9 +85,9 @@
 
 
   <!-- reward details -->
-  <ion-card>
+  <ion-card *ngIf="order.isRewardUsed">
     <ion-card-content>
-      <div text-center *ngIf="order.isRewardUsed">
+      <div text-center>
       <button ion-item detail-push (click)="getRewards()"><span class="bold">Rewards Used</span> </button>
           <div class="width-80 align-center" *ngIf="showRewards">
             <ion-item *ngFor="let x of rewards; let i = index;">

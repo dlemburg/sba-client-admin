@@ -115,12 +115,12 @@ export class SimpleProcessingPage extends BaseViewController {
         if (this.barcodeRewardData.isFreePurchaseItem) {
           this.alertEmployeeFreePurchaseItem().then(() => {
              // get reward data and display in modal, amount to subtract input, accept button
-            let modal = this.modalCtrl.create("EditSubtotalPage", {subtotal: this.total, type: "total"});
+            let modal = this.modalCtrl.create("EditTotalPge", {total: this.total});
             modal.present();
             modal.onDidDismiss((data) => {
-              if (data.subtotal) {
-                this.userData.rewardsSavings = +this.total - data.subtotal;
-                this.total = data.subtotal;
+              if (data.total) {
+                this.userData.rewardsSavings = +this.total - data.total;
+                this.total = data.total;
                 this.reasonForEdit = data.reasonForEdit
               }
             });
@@ -168,12 +168,13 @@ export class SimpleProcessingPage extends BaseViewController {
             socialMediaType: +barcodeUserDataArr[3]
           }
 
-          // do conditional social media accept here
-          if (barcodeUserData.isSocialMediaUsed) {
-            this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
-              this.finishOnScanUserBarcode(data.barcodeUserData);
-            })
-          } else this.finishOnScanUserBarcode(barcodeUserData);
+          if (barcodeUserData.companyOid === +this.auth.companyOid) {
+            if (barcodeUserData.isSocialMediaUsed) {
+              this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
+                this.finishOnScanUserBarcode(data.barcodeUserData);
+              })
+            } else this.finishOnScanUserBarcode(barcodeUserData);
+          }
         }
       }
     }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
@@ -212,10 +213,10 @@ export class SimpleProcessingPage extends BaseViewController {
 
 
   // social media options are optional b/c cant guarantee if mobileCardId entered rather than barcode
-  getUserDataForProcessOrderAPI(userOidOrMobileCardId, type, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
+  getUserDataForProcessOrderAPI(userOidOrMobileCardId, idType, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
-    let toData = { ID: userOidOrMobileCardId, companyOid: this.auth.companyOid, type};
-
+    let toData = { userOidOrMobileCardId: userOidOrMobileCardId, companyOid: this.auth.companyOid, idType};
+    debugger;
     // get user data
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
       .subscribe(
@@ -228,19 +229,21 @@ export class SimpleProcessingPage extends BaseViewController {
 
             // do checks
             if (this.userData.balance < +this.total) {
-              if (this.companyDetails.acceptsPartialPayments) {
-                if (this.userData.isSocialMediaUsed) {
-                    //this.order.transactionDetails.isSocialMediaUsed = true;
-                    //this.order.transactionDetails.lkpSocialMediaTypeOid = this.userData.lkpSocialMediaTypeOid;
-                } 
+              //if (this.companyDetails.acceptsPartialPayments) {
+              /*
+              if (this.userData.isSocialMediaUsed) {
+                  //this.order.transactionDetails.isSocialMediaUsed = true;
+                  //this.order.transactionDetails.lkpSocialMediaTypeOid = this.userData.lkpSocialMediaTypeOid;
+              } 
+              */
               } else {
+                this.sufficientFunds = false;
+
                 this.showPopup({
                   title: 'Uh oh!', 
-                  message: "The customer doesn't have the proper funds available. Your company doesn't allow partial payments (to pay with both application mobile card and cash/card).", 
+                  message: "The customer has insufficient funds. Customer balance: $" + this.userData.balance, 
                   buttons: [{text: "OK"}]
                 });
-                this.sufficientFunds = false;
-              }
             } 
           }, this.errorHandler(this.ERROR_TYPES.API));
   }
@@ -253,7 +256,7 @@ export class SimpleProcessingPage extends BaseViewController {
     enterMobileCardIdModal.onDidDismiss((data) => {
       debugger;
       if (data && data.mobileCardId) {
-         this.getUserDataForProcessOrderAPI(data.mobileCardId, CONST_ID_TYPES.PAYMENT);
+         this.getUserDataForProcessOrderAPI(data.mobileCardId, CONST_ID_TYPES.MOBILE_CARD_ID);
       }
     });
     enterMobileCardIdModal.present();

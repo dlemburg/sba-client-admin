@@ -18,7 +18,7 @@ export const CONST_NODE_MULTER_ACTIONS = {
 // app data constants
 
 export const CONST_ID_TYPES = {
-    PAYMENT: "payment",
+    MOBILE_CARD_ID: "payment",
     USER: "user"
 }
 

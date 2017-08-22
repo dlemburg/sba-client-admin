@@ -30,14 +30,15 @@
       <ion-item text-wrap no-lines *ngIf="rewardDetails.discountAmount">
         <span *ngIf="rewardDetails.discountType !== DISCOUNT_TYPE.NEW_PRICE"><span> Discount Amount ({{ rewardDetails.discountType }}): </span> </span> 
         <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.NEW_PRICE">New price: {{ rewardDetails.discountAmount | currency:symbolDisplay:true }}</span>
-        <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.MONEY"> - {{ rewardDetails.discountAmount | currency:symbolDisplay:true }} regular price.</span>
-        <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.PERCENT"> {{ rewardDetails.discountAmount }}</span>
+        <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.MONEY"> - {{ rewardDetails.discountAmount | currency:symbolDisplay:true }} regular price</span>
+        <span *ngIf="rewardDetails.discountType === DISCOUNT_TYPE.PERCENT"> {{ rewardDetails.discountAmount }}%</span>
       </ion-item>
       <!-- if Date-Time-Range -->
-      <ion-item text-wrap no-lines *ngIf="rewardDetails.dateRuleDays"><span> Customer visit days:  </span>{{ rewardDetails.dateRuleDays }} </ion-item>
-      <ion-item text-wrap no-lines *ngIf="rewardDetails.dateRuleTimeStart"><span> Customer visit time-of-day start:  </span>{{ rewardDetails.dateRuleTimeStart }} </ion-item>
-      <ion-item text-wrap no-lines *ngIf="rewardDetails.dateRuleTimeEnd"><span> Customer visit time-of-day end: </span>{{ rewardDetails.dateRuleTimeEnd }} </ion-item>
-      
+      <div *ngIf="rewardDetails.discountRule === DISCOUNT_RULE.DATE">
+        <ion-item text-wrap no-lines *ngIf="rewardDetails.dateRuleDays"><span> Customer visit days:  </span>{{ rewardDetails.dateRuleDays }} </ion-item>
+        <ion-item text-wrap no-lines *ngIf="rewardDetails.dateRuleTimeStart"><span> Customer visit time-of-day start:  </span>{{ rewardDetails.dateRuleTimeStart }} </ion-item>
+        <ion-item text-wrap no-lines *ngIf="rewardDetails.dateRuleTimeEnd"><span> Customer visit time-of-day end: </span>{{ rewardDetails.dateRuleTimeEnd }} </ion-item>
+      </div>
       <!-- If Product -->
       <ion-item text-wrap no-lines *ngIf="rewardDetails.productName"><span> Product: </span>{{ rewardDetails.productName }} </ion-item>
       <!--<ion-item text-wrap no-lines *ngIf="rewardDetails.productPrice"><span>Regular Price: </span>{{ rewardDetails.productPrice }} </ion-item> -->

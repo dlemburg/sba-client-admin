@@ -8,14 +8,15 @@ import { Utils } from '../../utils/utils';
 
 @IonicPage()
 @Component({
-  selector: 'page-edit-subtotal',
-  templateUrl: 'edit-subtotal.html'
+  selector: 'page-edit-total',
+  templateUrl: 'edit-total.html'
 })
-export class EditSubtotalPage extends BaseViewController {
-  subtotal: number;
-  cacheSubtotal: number;
+export class EditTotalPage extends BaseViewController {
+  total: number;
+  cacheTotal: number;
   reasonForEdit: string;
   type: string;
+  isProcessOrder: boolean = false;
   
   constructor(
     public navCtrl: NavController,
@@ -31,19 +32,20 @@ export class EditSubtotalPage extends BaseViewController {
   }
   
   ionViewDidLoad() {
-    this.subtotal = Utils.round(this.navParams.data.subtotal);
-    this.cacheSubtotal = Utils.round(this.navParams.data.subtotal);
-    this.type = this.navParams.data.type || "subtotal";
+    this.total = Utils.round(this.navParams.data.total);
+    this.cacheTotal = Utils.round(this.navParams.data.total);
+    this.type = this.navParams.data.type || "total";
+    this.isProcessOrder = this.navParams.data.isProcessOrder || false;
   }
 
   dismissWithNewAmount() {
-   let doChecks = this.doChecks(this.subtotal, this.reasonForEdit);
+   let doChecks = this.doChecks(this.total, this.reasonForEdit);
 
    if (doChecks.isValid) {
     this.viewCtrl.dismiss({
      isEdited: true, 
-     subtotal: +this.subtotal, 
-     cacheSubtotal: +this.cacheSubtotal, 
+     total: +this.total, 
+     cacheTotal: +this.cacheTotal, 
      reasonForEdit: this.reasonForEdit
     });
    } else {
@@ -54,21 +56,21 @@ export class EditSubtotalPage extends BaseViewController {
   dismiss() {
     this.viewCtrl.dismiss({
       isEdited: false, 
-      subtotal: this.cacheSubtotal,
-      cacheSubtotal: null,
+      total: this.cacheTotal,
+      cacheTotal: null,
       reasonForEdit: null
     });
   }
 
-  doChecks(subtotal, reasonForEdit): IErrChecks {
+  doChecks(total, reasonForEdit): IErrChecks {
     let errs = [];
 
-    if (!subtotal.toString().match(/^\d+(?:\.\d{0,2})?$/)) {
-      errs.push("Please enter a valid subtotal.")
+    if (!total.toString().match(/^\d+(?:\.\d{0,2})?$/)) {
+      errs.push("Please enter a valid total.")
       return {isValid: false, errs};
     }
     if (!reasonForEdit) {
-      errs.push("Please enter a valid reason for editing the subtotal.")
+      errs.push("Please enter a valid reason for editing the total.")
       return {isValid: false, errs};
     }
 

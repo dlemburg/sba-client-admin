@@ -183,7 +183,8 @@
  .discounts {
     color: map-get($colors, danger);
     font-weight: bold;
-    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 1.3px;
 }
 .price-up {
     color: map-get($colors, primary);

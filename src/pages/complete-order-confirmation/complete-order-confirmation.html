@@ -11,20 +11,18 @@
       <h3 margin-top class="align-center">Want a receipt?</h3>
     </div>
     <div class="flex-1" *ngFor="let x of receiptOptions; let i = index; ">
-      <ion-row *ngIf="x.visible">
-        <div class="align-center col-6">
-          <button [ngClass]="{'selected': receiptType === x.type }"
-                  (click)="onReceiptSelected(x.type)"
-                   margin-top ion-button outline block
-                   class="width-80 align-center">
-                  <span *ngIf="x.type === RECEIPT_TYPES.EMAIL"><ion-icon ios="ios-mail" md="ios-mail"></ion-icon></span>
-                  <span *ngIf="x.type === RECEIPT_TYPES.PRINTER"><ion-icon ios="ios-print" md="ios-print"></ion-icon></span>
-                  <span *ngIf="x.type === RECEIPT_TYPES.TEXT"><ion-icon ios="ios-text" md="ios-text"></ion-icon></span>
-                   
-                  <span class="btn-text">{{ x.type }}</span>
-          </button>
-        </div>
-      </ion-row>
+      <div *ngIf="x.visible" class="align-center width-80">
+        <button [ngClass]="{'selected': receiptType === x.type }"
+                (click)="onReceiptSelected(x.type)"
+                  margin-top ion-button outline block
+                  class="align-center receipt-btns">
+                <span *ngIf="x.type === RECEIPT_TYPES.EMAIL"><ion-icon ios="ios-mail" md="ios-mail"></ion-icon></span>
+                <span *ngIf="x.type === RECEIPT_TYPES.PRINTER"><ion-icon ios="ios-print" md="ios-print"></ion-icon></span>
+                <span *ngIf="x.type === RECEIPT_TYPES.TEXT"><ion-icon ios="ios-text" md="ios-text"></ion-icon></span>
+                  
+                <span class="btn-text">{{ x.type }}</span>
+        </button>
+      </div>
     </div>
     <div class="flex-1">
       <ion-item text-center class="align-center discounts">

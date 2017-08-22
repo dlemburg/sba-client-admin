@@ -3,7 +3,16 @@ page-process-order {
         color: white !important;
     }
 
+    .add-to-order-btn {
+        height: 50px !important;
+    }
+
     .comment-icon {
+        position: relative !important;
+        right: 5px !important;
+    }
+
+    .icon {
         position: relative !important;
         right: 5px !important;
     }
@@ -147,6 +156,12 @@ page-process-order {
         left: 18px !important;
     }
 
+    .subtotal {
+        position: relative;
+        bottom: 4px !important;
+        left: 13px !important;
+    }
+
     .empty-order-container {
         margin-top: 5vh !important;
     }
@@ -168,9 +183,14 @@ page-process-order {
         left: 10px !important;
     }
 
-    .reasons-for-edit-btn {
+    .reasons-for-edit-btn-red {
         color: map-get($colors, danger);
         border-color: map-get($colors, danger); 
+    }
+
+    .reasons-for-edit-btn-blue {
+        color: map-get($colors, primary);
+        border-color: map-get($colors, primary); 
     }
 
     .process-order-header-btn-not-selected {

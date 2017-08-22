@@ -140,7 +140,8 @@ constructor() { }
   }
 
   transactionIsValid(balance, total, acceptsPartialPayments) {
-    return ((balance > total) || acceptsPartialPayments) ? true : false;
+   // return ((balance > total) || acceptsPartialPayments) ? true : false;
+    return ((balance > total)) ? true : false;
   }
 
 

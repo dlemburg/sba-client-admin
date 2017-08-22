@@ -6,6 +6,7 @@ import { IonicPage, NavController, NavParams, AlertController, ToastController, 
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { AppViewData } from '../../global/app-data';
 import { DateUtils } from '../../utils/date-utils';
+import { CONST_DISCOUNT_RULE } from '../../global/global';
 
 @IonicPage()
 @Component({
@@ -21,6 +22,7 @@ export class RewardsDetailsPage extends BaseViewController {
     PERCENT: "Percent",
     NEW_PRICE: "New Price"
   }
+  DISCOUNT_RULE = CONST_DISCOUNT_RULE;
   rewardDetails: IRewardDetailsOwner = {
       img: null,
       description: null,

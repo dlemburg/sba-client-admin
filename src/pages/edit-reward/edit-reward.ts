@@ -142,6 +142,9 @@ constructor(
             this.dismissLoading();
             let {reward} = response.data;
 
+            console.log("reward: ", reward);
+            debugger;
+
             this.myForm.patchValue({
               name: reward.name,
               img: reward.img,
@@ -183,16 +186,12 @@ constructor(
   }
 
   setCurrentDiscountRule(oid: number): string {
-    let lkpObj = this.lkps.discountRule.find((x) => {
-        return x.oid === oid;
-    });
+    let lkpObj = this.lkps.discountRule.find((x) => x.oid === oid);
     return lkpObj.value ? lkpObj.value : "";
   }
 
   setCurrentDiscountType(oid: number): string {
-    let lkpObj = this.lkps.discountType.find((x) => {
-        return x.oid === oid;
-    });
+    let lkpObj = this.lkps.discountType.find((x) => x.oid === oid);
     return lkpObj.value ? lkpObj.value : "";
   }
 

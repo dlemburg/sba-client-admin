@@ -1,20 +1,22 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>Edit Subtotal</ion-title>
+    <ion-title>Edit {{type}}</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding text-center class="align-center">
-  <ion-item color="primary">Note: Editing {{ type }} will clear any rewards applied. </ion-item>
-  <ion-item class="width-50">
-    <div>Current subtotal: {{ cacheSubtotal | currency:symbolDisplay:true }}</div>
+ <!--
+    <ion-item text-wrap color="primary">Note: Editing {{ type }} will clear any rewards applied. </ion-item>
+  -->
+  <ion-item>
+    <div>Current {{type}}: {{ cacheTotal | currency:symbolDisplay:true }}</div>
   </ion-item>
   <ion-item margin-top class="width-50">
     <ion-label stacked><dollar-icon></dollar-icon>New {{ type }}</ion-label>
-    <ion-input [(ngModel)]="subtotal" type="tel"></ion-input>
+    <ion-input [(ngModel)]="total" type="tel"></ion-input>
   </ion-item>
    <ion-item margin-top>
     <ion-label class="text-area-label" stacked>Reason for Edit</ion-label>

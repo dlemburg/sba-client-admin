@@ -129,6 +129,8 @@ constructor() { }
 
         // "17" -> "5:00pm";
     public static to12HourTimeString(timeStr): string {
+        if (timeStr === null) return null;
+        
         const amOrPm = +timeStr < 11 ? "am" : "pm";
         const time = DateUtils.to12Hour(+timeStr);
         

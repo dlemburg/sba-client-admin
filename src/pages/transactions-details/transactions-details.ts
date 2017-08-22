@@ -57,7 +57,7 @@ export class TransactionsDetailsPage extends BaseViewController {
   ionViewDidLoad() {
     this.transactionOid = this.navParams.data.transactionOid;
 
-    this.API.stack(ROUTES.getTransactionDetails + `/${this.auth.companyOid}/${this.transactionOid}`, "GET")
+    this.API.stack(ROUTES.getTransactionDetails, "POST", {companyOid: this.auth.companyOid, transactionOid: this.transactionOid})
         .subscribe(
             (response) => {
               console.log('response.data: ', response.data);

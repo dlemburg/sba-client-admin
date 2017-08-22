@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { IonicPageModule } from 'ionic-angular';
-import { EditSubtotalPage } from './edit-subtotal';
+import { EditTotalPage } from './edit-total';
 
 // imports
 import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-icon.component.module';
@@ -8,14 +8,14 @@ import { DollarIconComponentModule } from '../../components/dollar-icon/dollar-i
  
 @NgModule({
   declarations: [
-   EditSubtotalPage,
+   EditTotalPage,
   ],
   imports: [
-    IonicPageModule.forChild(EditSubtotalPage),
+    IonicPageModule.forChild(EditTotalPage),
     DollarIconComponentModule
   ],
   exports: [
-   EditSubtotalPage
+   EditTotalPage
   ]
 })
-export class EditSubtotalPageModule {}
+export class EditTotalPageModule {}

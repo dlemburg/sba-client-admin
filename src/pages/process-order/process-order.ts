@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { API, ROUTES } from '../../global/api';
 import { Utils } from '../../utils/utils';
-import { IBarcodeUserData, IBarcodeRewardData, ICompanyDetails, IOrder, IPurchaseItem, INameAndOid, IProductForProcessOrder, AuthUserInfo, IEditSubtotalDismiss, IUserDataForProcessOrder,IGetEligibleRewardsToData,IProcessOrderToData,IOrderConfirmation } from '../../models/models';
+import { IBarcodeUserData, IBarcodeRewardData, ICompanyDetails, IOrder, IPurchaseItem, INameAndOid, IProductForProcessOrder, AuthUserInfo, IEditTotalDismissProps, IUserDataForProcessOrder,IGetEligibleRewardsToData,IProcessOrderToData,IOrderConfirmation } from '../../models/models';
 import { Authentication } from '../../global/authentication';
 import { IonicPage, NavController, NavParams, AlertController, ToastController, Slides, LoadingController, ModalController } from 'ionic-angular';
 import { AppViewData } from '../../global/app-data';
@@ -112,6 +112,7 @@ export class ProcessOrderPage extends BaseViewController {
   auth: AuthUserInfo = this.authentication.getCurrentUser();
   currentCategory: {oid: number, name: string, imgSrc: string} = {oid: null, name: null, imgSrc: ""};
   currentProduct: { oid: number, name?: string, imgSrc: string } = { oid: null, name: null, imgSrc: ""};
+  totalBeforeEdits: number = 0;
 
   constructor(
     public navCtrl: NavController, 
@@ -190,16 +191,23 @@ export class ProcessOrderPage extends BaseViewController {
         }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
   }
 
-  getUserData(userOidOrPaymentID, type, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
+  getUserData(userOidOrMobileCardId, idType, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
-    let toData = { ID: userOidOrPaymentID, companyOid: this.auth.companyOid, type};
-
+    let toData = { userOidOrMobileCardId, companyOid: this.auth.companyOid, idType};
+    debugger;
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
       .subscribe( (response) => {
         this.dismissLoading();
         this.userData = response.data.userData;
 
+        // ERASE... fake data
+        this.userData.balance = 10;
+
         if (this.processOrderUtils.transactionIsValid(this.userData.balance, this.order.transactionDetails.total, this.companyDetails.acceptsPartialPayments)) {
+          
+          /* TODO later: popup to confirm balance not enough, apply remaining balance, alert total due */
+          
+          this.presentToast(false, `Captured user info! Complete transaction at any time.`);
           if (socialMediaOpts.isSocialMediaUsed) {
               this.order.transactionDetails.isSocialMediaUsed = true;
               this.order.transactionDetails.socialMediaType = socialMediaOpts.socialMediaType;
@@ -208,11 +216,14 @@ export class ProcessOrderPage extends BaseViewController {
           this.sufficientFunds = false;
           this.showPopup({
             title: 'Uh oh!', 
-            message: "The customer doesn't have the proper funds. This company doesn't allow partial payments (application and cash/card).", 
+            message: "The customer has insufficient funds. Customer balance:  $" + this.userData.balance, 
             buttons: [{text: "OK"}]
           });
         }
-      }, this.errorHandler(this.ERROR_TYPES.API));
+      }, (err) => {
+        console.log("err: ", err);
+        this.errorHandler(this.ERROR_TYPES.API)(err);
+      });
   }
   
   ////////////////////////////////////////////////   modals //////////////////////////////////////////////////
@@ -248,14 +259,21 @@ export class ProcessOrderPage extends BaseViewController {
     selectCategoryModal.present();
   }
 
-  presentEditSubtotalModal() {
+  presentEditTotalModal() {
     this.orderHasBeenEdited = true;
 
-    let editSubtotalModal = this.modalCtrl.create('EditSubtotalPage', { subtotal: this.order.transactionDetails.subtotal }, {enableBackdropDismiss: false});
-    editSubtotalModal.onDidDismiss((data: IEditSubtotalDismiss) => {
+    let editTotalModal = this.modalCtrl.create('EditTotalPage', { 
+      total: this.order.transactionDetails.total, 
+      rewardsSavings: this.order.transactionDetails.rewardsSavings, 
+      isProcessOrder: true  }, 
+      {enableBackdropDismiss: false}
+    );
+
+    editTotalModal.onDidDismiss((data: IEditTotalDismissProps) => {
       if (data.isEdited) {
         let reasonsForEdit = this.order.transactionDetails.reasonsForEdit ? this.order.transactionDetails.reasonsForEdit : [];
-        let editAmount = this.order.transactionDetails.editAmount + (this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal));
+        //let editAmount = this.order.transactionDetails.editAmount + (this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheTotal));
+        let editAmount = Math.abs(this.totalBeforeEdits - data.total);
 
         this.order.transactionDetails = Object.assign({}, this.order.transactionDetails, {
           isEdited: true, 
@@ -263,18 +281,18 @@ export class ProcessOrderPage extends BaseViewController {
           reasonsForEdit: [...reasonsForEdit, 
             {
               reason: data.reasonForEdit, 
-              amount: this.processOrderUtils.calculateEditAmount(data.subtotal, data.cacheSubtotal),
-              priceDown: data.subtotal < data.cacheSubtotal ? true : false
+              amount: this.processOrderUtils.calculateEditAmount(data.total, data.cacheTotal),
+              priceDown: data.total < data.cacheTotal ? true : false
           }],
           discount: 0,
-          rewards: [],
-          subtotal: data.subtotal,
-          taxes: this.processOrderUtils.calculateTaxes(data.subtotal, this.companyDetails.taxRate),
-          total:  this.processOrderUtils.calculateTotal(data.subtotal, this.order.transactionDetails.taxes)
+          //rewards: [],
+          total: data.total,
+          taxes: this.processOrderUtils.calculateTaxes(data.total, this.companyDetails.taxRate),
+         // total:  this.processOrderUtils.calculateTotal(data.total, this.order.transactionDetails.taxes)
         });
       }
     });
-    editSubtotalModal.present();
+    editTotalModal.present();
   }
 
   presentCommentModal() {
@@ -363,6 +381,8 @@ export class ProcessOrderPage extends BaseViewController {
           console.log("response.data = ", response.data);
           this.order.purchaseItems = response.data.purchaseItems;
           this.order.transactionDetails = Object.assign({}, response.data.transactionDetails);
+          this.totalBeforeEdits = this.order.transactionDetails.total;
+
           this.dismissLoading();
         }, this.errorHandler(this.ERROR_TYPES.API));
     }
@@ -374,6 +394,7 @@ export class ProcessOrderPage extends BaseViewController {
       if (!barcodeData.cancelled) {
         if (barcodeData.text.indexOf("$") > -1) {
           let barcodeRewardData: Array<string> = barcodeData.text.split("$");
+          
           this.barcodeRewardData = {
             rewardOid: +barcodeRewardData[0],
             isFreePurchaseItem: +barcodeRewardData[1] === 0 ? false : true,
@@ -381,6 +402,7 @@ export class ProcessOrderPage extends BaseViewController {
           }
           if (this.barcodeRewardData.isFreePurchaseItem) {
             const freePurchaseItemPrice = this.processOrderUtils.calculateFreePurchaseItem(this.order, this.getIndividualRewards(this.order.transactionDetails.rewards));
+            
             this.order.transactionDetails = Object.assign({}, this.order.transactionDetails, {
               rewards: [...this.order.transactionDetails.rewards, ...this.getIndividualRewards(this.order.transactionDetails.rewards)],
               rewardsSavings: Utils.round(this.order.transactionDetails.rewardsSavings + freePurchaseItemPrice),
@@ -398,23 +420,29 @@ export class ProcessOrderPage extends BaseViewController {
     this.barcodeScanner.scan({resultDisplayDuration: 0}).then((barcodeData) => {
       if (!barcodeData.cancelled && barcodeData.text.indexOf("$") > -1) {
         const barcodeUserDataArr: Array<string> = barcodeData.text.split("$");
+        
         const barcodeUserData = {
           userOid: +barcodeUserDataArr[0],
           companyOid: +barcodeUserDataArr[1],
           isSocialMediaUsed: +barcodeUserDataArr[2] === 0 ? false : true,
           socialMediaType: +barcodeUserDataArr[3]
         }
-        if (barcodeUserData.isSocialMediaUsed) {
-          this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
-            if (!data.isAccepted) {
-              barcodeUserData.socialMediaType = null;
-              barcodeUserData.isSocialMediaUsed = false;
-            }
-            this.finishOnScanUserBarcode(barcodeUserData);
-          })
-        } else this.finishOnScanUserBarcode(barcodeUserData);
+        if (barcodeUserData.companyOid === +this.auth.companyOid) {
+          if (barcodeUserData.isSocialMediaUsed) {
+            this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
+              if (!data.isAccepted) {
+                barcodeUserData.socialMediaType = null;
+                barcodeUserData.isSocialMediaUsed = false;
+              }
+              this.finishOnScanUserBarcode(barcodeUserData);
+            })
+          } else this.finishOnScanUserBarcode(barcodeUserData);
+        }
       }
-    }, this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE));
+    }, (err) => {
+      console.log("barcode err: ", err);
+      this.errorHandler(this.ERROR_TYPES.PLUGIN.BARCODE)(err);
+    });
   }
 
   finishOnScanUserBarcode(barcodeUserData: IBarcodeUserData) {
@@ -438,7 +466,7 @@ export class ProcessOrderPage extends BaseViewController {
   presentEnterMobileCardIdModal() {
     let enterMobileCardIdModal = this.modalCtrl.create('EnterIDPage', { }, {enableBackdropDismiss: true, showBackdrop: true});
     enterMobileCardIdModal.onDidDismiss((data) => {
-      (data && data.mobileCardId) ? this.getUserData(data.mobileCardId, this.ID_TYPES.PAYMENT) : null;
+      (data && data.mobileCardId) ? this.getUserData(data.mobileCardId, this.ID_TYPES.MOBILE_CARD_ID) : null;
     });
     enterMobileCardIdModal.present();
   }
