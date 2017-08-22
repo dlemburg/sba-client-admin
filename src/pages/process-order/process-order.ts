@@ -194,16 +194,15 @@ export class ProcessOrderPage extends BaseViewController {
   getUserData(userOidOrMobileCardId, idType, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
     let toData = { userOidOrMobileCardId, companyOid: this.auth.companyOid, idType};
-    debugger;
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
       .subscribe( (response) => {
         this.dismissLoading();
-        this.userData = response.data.userData;
+        this.userData = response.data.userData ? response.data.userData : {balance: null, userOid: null};
 
-        // ERASE... fake data
-        this.userData.balance = 10;
+        debugger;
 
-        if (this.processOrderUtils.transactionIsValid(this.userData.balance, this.order.transactionDetails.total, this.companyDetails.acceptsPartialPayments)) {
+        if (this.userData.userOid === null) this.presentToast(false, `No user found by this id number.`)
+        else if (this.processOrderUtils.transactionIsValid(this.userData.balance, this.order.transactionDetails.total, this.companyDetails.acceptsPartialPayments)) {
           
           /* TODO later: popup to confirm balance not enough, apply remaining balance, alert total due */
           
@@ -212,7 +211,8 @@ export class ProcessOrderPage extends BaseViewController {
               this.order.transactionDetails.isSocialMediaUsed = true;
               this.order.transactionDetails.socialMediaType = socialMediaOpts.socialMediaType;
           } 
-        } else {
+        } 
+        else {
           this.sufficientFunds = false;
           this.showPopup({
             title: 'Uh oh!', 

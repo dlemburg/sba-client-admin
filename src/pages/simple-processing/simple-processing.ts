@@ -223,19 +223,22 @@ export class SimpleProcessingPage extends BaseViewController {
           (response) => {
             console.log('response.data: ', response.data);
             this.dismissLoading();
-            this.userData = response.data;
+            this.userData = response.data.userData ? response.data.userData : {userOid: null, balance: null};
             this.userData.socialMediaType = socialMediaOpts.socialMediaType;
             this.userData.isSocialMediaUsed = socialMediaOpts.isSocialMediaUsed;
 
             // do checks
+            if (this.userData.userOid === null) this.presentToast(false, `No user found by this id number.`)
             if (this.userData.balance < +this.total) {
-              //if (this.companyDetails.acceptsPartialPayments) {
-              /*
-              if (this.userData.isSocialMediaUsed) {
-                  //this.order.transactionDetails.isSocialMediaUsed = true;
-                  //this.order.transactionDetails.lkpSocialMediaTypeOid = this.userData.lkpSocialMediaTypeOid;
-              } 
-              */
+                //if (this.companyDetails.acceptsPartialPayments) {
+                /*
+                if (this.userData.isSocialMediaUsed) {
+                    //this.order.transactionDetails.isSocialMediaUsed = true;
+                    //this.order.transactionDetails.lkpSocialMediaTypeOid = this.userData.lkpSocialMediaTypeOid;
+                } 
+                */
+                this.presentToast(false, `Captured user info! Complete transaction at any time.`);
+
               } else {
                 this.sufficientFunds = false;
 

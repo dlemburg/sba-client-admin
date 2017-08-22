@@ -99,9 +99,11 @@
                 <span *ngIf="!x.isRewardAll"> Individual</span>
               </div>
               <div class="rejected-reward" *ngIf="x.isRewardRejected"><span class="bold">Rejected reason:</span> {{x.isRewardRejectedReason}}</div>
+              <!--
               <div text-center>
                 <button margin-top ion-button outline color="primary" (click)="navReward(x)">View {{ x.name }} details</button>
               </div>
+              -->
             </ion-item>
           </div>      
         </div>
