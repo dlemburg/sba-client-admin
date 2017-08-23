@@ -52,7 +52,7 @@ export class TransactionsPage extends BaseViewController {
             (response) => {
               console.log('response.data: ', response.data);
               this.transactions = response.data.transactions;
-              this.joinTransactionProductsArray();
+              //this.joinTransactionProductsArray();
               this.dismissLoading();
               
             },this.errorHandler(this.ERROR_TYPES.API));
@@ -70,11 +70,13 @@ export class TransactionsPage extends BaseViewController {
     this.getTransactions();
   }
 
+  /*
   joinTransactionProductsArray() {
     this.transactions.forEach((x) => {
       x.productsArray = x.productsArray.join(', ');
     });
   }
+  */
 
   navTransactionDetails(transaction): void {
     let transactionOid: number = transaction.oid;

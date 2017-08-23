@@ -57,15 +57,15 @@ export class ProductsDetailsPage extends BaseViewController {
     this.presentLoading();
 
     this.API.stack(ROUTES.getProductDetails + `/${this.auth.companyOid}/${this.productOid}`, "GET")
-        .subscribe(
-            (response) => {
-              this.dismissLoading();
-              console.log('response.data: ' ,response.data);
-              this.productDetails = response.data.productDetails;
+      .subscribe(
+        (response) => {
+          this.dismissLoading();
+          console.log('response.data: ' ,response.data);
+          this.productDetails = response.data.productDetails;
 
-               if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
-                this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
-               }
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
+            this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
+          }
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

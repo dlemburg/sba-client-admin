@@ -10,14 +10,16 @@ import { AppViewData } from '../../global/app-data';
   templateUrl: 'tabs.html'
 })
 export class TabsPage {
-  hasProcessOrderFeature: boolean = AppViewData.getFeatures().hasProcessOrder;
   auth: AuthUserInfo = this.authentication.getCurrentUser();
   tab1Root: string = 'ProcessOrderPage';
   tab2Root: string = 'SimpleProcessingPage';
   tab3Root: string = 'OrderAheadDashboardPage';
   tab4Root: string = 'OwnerPage';
+
   isOwner: boolean = this.auth && this.auth.role === "Owner" ? true : false;
   isLoggedIntoLocation: boolean = this.auth.locationOid ? true : false;
+  hasProcessOrderFeature: boolean = AppViewData.getFeatures().hasProcessOrder;
+
 
   constructor(private authentication: Authentication) {
   }

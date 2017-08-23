@@ -1,6 +1,8 @@
 <ion-tabs>
   <ion-tab id="tab" *ngIf="hasProcessOrderFeature && isLoggedIntoLocation" [root]="tab1Root" tabTitle="Take Order" tabIcon="ios-clipboard-outline"></ion-tab>
-  <ion-tab id="tab" *ngIf="!hasProcessOrderFeature && isLoggedIntoLocation" [root]="tab2Root" tabTitle="Simple Processing" tabIcon="ios-barcode-outline"></ion-tab>
+  <ion-tab id="tab" *ngIf="isLoggedIntoLocation" [root]="tab2Root" tabTitle="Simple Processing" tabIcon="ios-barcode-outline"></ion-tab>
   <ion-tab id="tab" *ngIf="isLoggedIntoLocation" [root]="tab3Root" tabTitle="Order-Ahead" tabIcon="ios-arrow-round-forward-outline"></ion-tab>
   <ion-tab id="tab" *ngIf="isOwner" [root]="tab4Root" tabTitle="Owner" tabIcon="ios-lock-outline"></ion-tab>
 </ion-tabs>
+
+<!-- on Tab2 !hasProcessOrderFeature &&  -->

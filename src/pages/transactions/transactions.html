@@ -47,17 +47,20 @@
     <ion-card margin-top *ngFor="let x of transactions; let i = index;" tappable (click)="navTransactionDetails(x)">
       <ion-card-header>
         <ion-row text-center>
-          <ion-col col-6 text-left> {{ x.purchaseDate | date }}</ion-col>
-          <ion-col  col-6 text-right>
-              <div *ngIf="x.isEdited" class="bold edited">Edited</div>
-              <div *ngIf="x.isRewardRejected" class="bold edited">Reward Rejected</div>
-              <div *ngIf="x.isRewardUsed" class="bold reward-used">Reward Used</div>
+          <ion-col class="font-8" col-6 text-left> {{ x.purchaseDate }}</ion-col>
+          <ion-col class="primary font-8 bold" col-6 text-right>
+            <div *ngIf="x.isEdited">Edited</div>
+            <div *ngIf="x.isRewardRejected">Reward Rejected</div>
+            <div *ngIf="x.isRewardUsed">Reward Used</div>
+            <div *ngIf="x.isSimpleProcessing">Simple Processing</div>
+            <div *ngIf="!x.isOrderAhead && !x.isSimpleProcessing">Process Order</div>
+            <div *ngIf="x.isOrderAhead">Order Ahead</div>
           </ion-col>
         </ion-row>
       </ion-card-header>
       <ion-card-content text-center>
         <div text-left><span class="bold"> Location: </span> {{ x.locationName }}</div>
-        <div text-left margin-top><span class="bold">Order: </span> {{ x.productsArray }}</div>
+        <div text-left margin-top *ngIf="x.productsStr"><span class="bold">Order: </span> {{ x.productsStr }}</div>
         <div text-left margin-top><span class="bold">Total: {{x.total | currency:symbolDisplay:true}}</span></div>
 
       <!-- <button margin-top ion-button outline block class="details">Details</button> -->

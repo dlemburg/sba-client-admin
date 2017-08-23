@@ -14,7 +14,9 @@ page-transactions {
         color: map-get($colors, secondary);
     }
 
-
+    .primary {
+        color: map-get($colors, primary)
+    }
 
     .details {
        // background-color: map-get($colors, light);
