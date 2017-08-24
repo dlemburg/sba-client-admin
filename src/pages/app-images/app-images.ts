@@ -27,7 +27,7 @@ export class AppImagesPage extends BaseViewController {
   defaultImg: string = DEFAULT_IMG;
   currentIndex: number = null;
   values = [
-    {label: "My Card", name: CONST_APP_IMGS[0], appImgIndex: 0, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    {label: "My Mobile Card", name: CONST_APP_IMGS[0], appImgIndex: 0, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Rewards", name: CONST_APP_IMGS[1], appImgIndex: 1, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Order Ahead", name: CONST_APP_IMGS[2], appImgIndex: 2, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Menu", name: CONST_APP_IMGS[3], appImgIndex: 3, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
@@ -37,12 +37,13 @@ export class AppImagesPage extends BaseViewController {
     {label: "Rewards (top of page)", name: CONST_APP_IMGS[7], appImgIndex: 7, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Login Background", name: CONST_APP_IMGS[8], appImgIndex: 8, img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
     {label: "Order Complete Background", name: CONST_APP_IMGS[9], appImgIndex: 9, img: null, imgSrc: null, targetWidth: 600,targetHeight: 900},
-    {label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], appImgIndex: 10, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
+    //{label: "Order Complete (middle of page)", name: CONST_APP_IMGS[10], appImgIndex: 10, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Mobile Card", name: CONST_APP_IMGS[11], appImgIndex: 11, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
     {label: "Added-To-Cart", name: CONST_APP_IMGS[12], appImgIndex: 12, img: null, imgSrc: null, targetWidth: 450,targetHeight: 250},
   ];
   editValue = {targetWidth: 423, targetHeight: 238, label: null, appImgIndex: null, name: null, img: null, imgSrc: null};
   imageUtility: ImageUtility;
+  imgDidChange: boolean = false;
 
  constructor(
   public navCtrl: NavController, 
@@ -66,8 +67,16 @@ export class AppImagesPage extends BaseViewController {
     this.auth = this.authentication.getCurrentUser();
   }
 
-  editValueChange(value, index) {
-    // get app img
+  editValueChange(editValue, index) {
+    this.presentLoading();
+    this.API.stack(ROUTES.getImgName + `/${this.auth.companyOid}/${this.editValue.name}`, "GET")
+      .subscribe(
+        (response) => {
+          this.dismissLoading();
+          this.editValue.img = response.data.img;
+          this.editValue.imgSrc = AppViewData.getDisplayImgSrc(this.editValue.img);
+
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navExplanations() {
@@ -83,6 +92,7 @@ export class AppImagesPage extends BaseViewController {
       this.dismissLoading();
       this.editValue.imgSrc = data.imageData;
       this.editValue.img = Utils.generateImgName({appImgIndex: this.editValue.appImgIndex, name: "", companyOid: this.auth.companyOid});
+      this.imgDidChange = true;  
 
       console.log("this.editValue.imgSrc: ", this.editValue.imgSrc);
       console.log("this.editValue.img: ", this.editValue.img);
@@ -100,17 +110,18 @@ export class AppImagesPage extends BaseViewController {
       })
     })
   }
-  
 
   submit() {
-    console.log("inside submit");
     this.presentLoading(AppViewData.getLoading().saving);
-
-    this.uploadImg(this.editValue).then((data) => {
-      this.editValue = {label: null, appImgIndex: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
-      this.dismissLoading(AppViewData.getLoading().saved);
-    })
-    .catch(this.errorHandler(this.ERROR_TYPES.API));
+    
+    // Saves on the server here too
+    if (this.imgDidChange) {
+      this.uploadImg(this.editValue).then((data) => {
+       // this.editValue = {label: null, appImgIndex: null, name: null, img: null, imgSrc: null, targetWidth: 423, targetHeight: 238};
+        this.dismissLoading(AppViewData.getLoading().saved);
+      })
+      .catch(this.errorHandler(this.ERROR_TYPES.API));
+    }
   }
 }
 

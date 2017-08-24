@@ -182,8 +182,6 @@
                 </div>
               </ion-col>
             </ion-row>
-
-
           </div>
         </div>
         <button margin-top 
@@ -206,7 +204,7 @@
             <ion-row text-center>
               <ion-col *ngFor="let x of order.purchaseItems; let i = index;" col-8 offset-2 text-center>
                 <ion-card [ngClass]="{'edit-in-progress': isEditInProgress.status && (isEditInProgress.index === i)}" 
-                          class="width-80 align-center cart-order" 
+                          class="width-100 align-center cart-order" 
                           (click)="onEditPurchaseItem(x, i)">
                   <img [src]="x.selectedProduct.imgSrc" onError="this.src='img/default.png';"/>
                   <ion-card-content>

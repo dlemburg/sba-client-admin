@@ -36,6 +36,9 @@ constructor() { }
 
     // comes in as military hours, keeps as military hours
     public static convertTimeStringToIsoString(timeString: string): string {
+
+        debugger;
+
         let time = this.sliceZero(timeString);
         let hours = this.getHours(time);
         let minutes = this.getMinutes(time);
@@ -170,18 +173,14 @@ constructor() { }
         return time;
     }
 
-    // converts timeString   "09:00" ->  9
+    // converts timeString   "09:00" or "09" ->  9
     public static getHours(time: string): number {
-        const hours = time.split(":")[0];
-    
-        return +hours;
+        return time.indexOf(":") > -1 ? +time.split(":")[0] : +time;
     }
 
-    // gets minutes from timeString   i.e.  "09:30"  ->  30
+    // gets minutes from timeString   i.e.  "09:30" or "30"  ->  30
     public static getMinutes(time: string): number {
-        const minutes = time.split(":")[1];
-
-        return +minutes;
+        return time.indexOf(":") > -1 ? +time.split(":")[1] : +time;
     }
 
     // converts normal time to military time

@@ -82,9 +82,9 @@ constructor(
     return [
       {name: 'Reward - All', img: 'img/rewards_all.jpeg', addComponent: 'AddRewardPage', editComponent: 'EditRewardPage' },
       {name: 'Reward - One', img: 'img/rewards_individual.jpeg', addComponent: 'AddRewardIndividualPage', editComponent: 'EditRewardIndividualPage'},
-      {name: 'Categories', img: null, type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
+      {name: 'Categories', img: 'img/categories.jpeg', type: 'Categories', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
       {name: 'Products', img: 'img/products.jpeg', addComponent: 'AddProductPage', editComponent: 'EditProductPage'},
-      {name: 'Sizes', type: 'Sizes', img: null, addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
+      {name: 'Sizes', type: 'Sizes', img: 'img/sizes.jpeg', addComponent: 'AddGeneralPage', editComponent: 'EditGeneralPage'},
     ];
   }
 

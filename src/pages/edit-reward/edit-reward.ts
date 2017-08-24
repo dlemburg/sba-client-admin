@@ -140,10 +140,10 @@ constructor(
       this.API.stack(ROUTES.getRewardToEdit + `/${this.editOid}`, "GET")
           .subscribe((response) => {
             this.dismissLoading();
-            let {reward} = response.data;
+            const {reward} = response.data;
 
-            console.log("reward: ", reward);
             debugger;
+            console.log("reward: ", reward);
 
             this.myForm.patchValue({
               name: reward.name,

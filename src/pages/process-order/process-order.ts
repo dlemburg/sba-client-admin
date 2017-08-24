@@ -138,12 +138,14 @@ export class ProcessOrderPage extends BaseViewController {
 
   slideChanged() {
     if (this.order.purchaseItems.length && this.slides.getActiveIndex() === 0) {
+      
       this.order.purchaseItems = this.order.purchaseItems.map((x, index) => {
         x.discounts = 0;
         x.isFreePurchaseItem = false;
         return x;
       });
-
+      
+      console.log("slide changed... this.order: ", this.order);
       this.order.transactionDetails = this.processOrderUtils.clearTransactionDetails(this.processOrderUtils.calculateSubtotal(this.order, this.companyDetails), this.order.transactionDetails);
     } else this.getEligibleRewards();
   }
@@ -315,11 +317,15 @@ export class ProcessOrderPage extends BaseViewController {
   finishEditPurchaseItem() {
     const index = this.isEditInProgress.index;
 
+    // edits
     this.order.purchaseItems[index] = this.purchaseItem;
     this.isEditInProgress = this.clearEditInProgress();
+
+    // global
     this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
     this.productDetails = this.processOrderUtils.clearProductDetails();
 
+    // transaction details
     this.order.purchaseItems[index].addonsCost = this.processOrderUtils.calculateAddonsCost(this.order.purchaseItems[index], this.productDetails, this.companyDetails);
     this.order.purchaseItems[index].dairyCost = this.processOrderUtils.calculateDairyCost(this.order.purchaseItems[index]);
     this.order.transactionDetails.subtotal = this.processOrderUtils.calculateSubtotal(this.order, this.companyDetails);
@@ -338,6 +344,8 @@ export class ProcessOrderPage extends BaseViewController {
       this.order = this.processOrderUtils.addToOrder(this.order, purchaseItem, this.productDetails, this.companyDetails);
       this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
       this.productDetails = this.processOrderUtils.clearProductDetails();
+
+      console.log("added to order... this.order: ", this.order);
     }
   }
 

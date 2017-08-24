@@ -93,16 +93,16 @@ export class AppCustomizationsPage extends BaseViewController {
     this.presentLoading();
 
     this.API.stack(ROUTES.getCompanyDetails, "POST", {companyOid: this.auth.companyOid})
-        .subscribe(
-            (response) => {
-              this.dismissLoading();
+      .subscribe(
+        (response) => {
+          this.dismissLoading();
 
-              /* new way of handling- may be bugs */
-              this.patchForm(this.myForm.value, response.data.companyDetails);
-              
-              this.oldImg = response.data.companyDetails.socialMediaImg;
-              this.imgSrc = AppViewData.getDisplayImgSrc(response.data.companyDetails.socialMediaImg);
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          /* new way of handling- may be bugs */
+          this.patchForm(this.myForm.value, response.data.companyDetails);
+          
+          this.oldImg = response.data.companyDetails.socialMediaImg;
+          this.imgSrc = AppViewData.getDisplayImgSrc(response.data.companyDetails.socialMediaImg);
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   patchForm(myForm, companyDetails) {
@@ -144,7 +144,6 @@ export class AppCustomizationsPage extends BaseViewController {
 
       let route = this.oldImg ? ROUTES.uploadImgAndUnlink + `/${this.oldImg}` : ROUTES.uploadImgNoCallback;
       let action = this.oldImg && this.imgDidChange ? 'upload-img-and-unlink' : 'upload-img-no-callback';
-
      
       this.imageUtility.uploadImg(action, myForm.socialMediaImg, this.imgSrc, route).then((data) => {
         resolve();
@@ -173,12 +172,12 @@ export class AppCustomizationsPage extends BaseViewController {
     let toData = { toData: myForm, companyOid: this.auth.companyOid };
      this.API.stack(ROUTES.saveCompanyDetails, "POST", toData)
         .subscribe(
-            (response) => {
-              console.log("response: ", response.data);
-              this.dismissLoading(AppViewData.getLoading().saved);
-              setTimeout(() => {
-                this.navCtrl.pop();
-              }, 500)
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          (response) => {
+            console.log("response: ", response.data);
+            this.dismissLoading(AppViewData.getLoading().saved);
+            setTimeout(() => {
+              this.navCtrl.pop();
+            }, 500)
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 }

@@ -194,18 +194,18 @@ export class OrderAheadDashboardPage extends BaseViewController {
   }
 
   setOrderExpired(order) {
-
-    // API 
-    let toData = { 
-      companyOid: this.auth.companyOid,
-      transactionOid: order.transactionOid,
-      userOid: order.userOid
-    };
-    this.API.stack(ROUTES.setOrderToIsExpired, "POST", toData)
+    if (!order.isExpired) {
+      let toData = { 
+        companyOid: this.auth.companyOid,
+        transactionOid: order.transactionOid,
+        userOid: order.userOid
+      };
+      this.API.stack(ROUTES.setOrderToIsExpired, "POST", toData)
         .subscribe(
-            (response) => {
-              console.log('response.data: ' , response.data);
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          (response) => {
+            console.log('response.data: ' , response.data);
+          }, this.errorHandler(this.ERROR_TYPES.API));
+      }
   }
 
   customerNeverPickedUp(order, index) {
