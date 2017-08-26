@@ -20,8 +20,13 @@ export class Utils {
     }
 
     public static getStates(): Array<string> {
-        return ['Alabama','Alaska','American Samoa','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Federated States of Micronesia','Florida','Georgia','Guam','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Marshall Islands','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota','Northern Mariana Islands','Ohio','Oklahoma','Oregon','Palau','Pennsylvania','Puerto Rico','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virgin Island','Virginia','Washington','West Virginia','Wisconsin','Wyoming']
+        return ['Alabama','Alaska','American Samoa','Arizona','Arkansas','California','Colorado','Connecticut','Delaware','District of Columbia','Federated States of Micronesia','Florida','Georgia','Guam','Hawaii','Idaho','Illinois','Indiana','Iowa','Kansas','Kentucky','Louisiana','Maine','Marshall Islands','Maryland','Massachusetts','Michigan','Minnesota','Mississippi','Missouri','Montana','Nebraska','Nevada','New Hampshire','New Jersey','New Mexico','New York','North Carolina','North Dakota',
+        'Northern Mariana Islands','Ohio','Oklahoma','Oregon','Palau','Pennsylvania','Puerto Rico','Rhode Island','South Carolina','South Dakota','Tennessee','Texas','Utah','Vermont','Virgin Island','Virginia','Washington','West Virginia','Wisconsin','Wyoming']
+    }
 
+    public static getStatesAbbreviated() {
+        return ['AL', 'AK', 'American Samoa', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'Washington DC', 'Federated States of Micronesia', 'FL', 'GA', 'Guam', 'HI', 'ID', 'ILL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 
+        'Marshall Islands', 'MD', 'MA', 'MI', 'MN', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'Northern Mariana Islands', 'OH', 'OK', 'OR', 'Palau', 'PA', 'Puerto Rico', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VE', 'Virgin Islands', 'WA', 'WV', 'WI', 'WY']
     }
 
     public static generateRandomString = (length = 8) => {

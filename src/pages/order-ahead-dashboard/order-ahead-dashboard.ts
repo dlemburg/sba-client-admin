@@ -32,8 +32,10 @@ export class OrderAheadDashboardPage extends BaseViewController {
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
 
     /* using ionic's events */
-    this.events.subscribe(this.socketIO.socketEvents.incomingNewOrder, (data) => {
-      this.onIncomingNewOrder(data);
+    this.events.subscribe(this.socketIO.socketEvents.incomingNewOrder, (response) => {
+      const data = response.data;
+      //this.onIncomingNewOrder(data); // the right way, but would have to repackage some of data
+      this.getActiveOrders("New order incoming...", true, data)    // the fast way: on new order -> get all orders
     });
   }
 
@@ -46,7 +48,6 @@ export class OrderAheadDashboardPage extends BaseViewController {
   */
 
   ionViewDidLoad() {
-    console.log("hello world")
     
     /* w/ observer pattern
     this.connection = this.socketService.on(this.socketService.events.incomingNewOrder).subscribe( (data) => {
@@ -70,32 +71,44 @@ export class OrderAheadDashboardPage extends BaseViewController {
 
   // fn callback for socket-events listener runs the orders through the same process as ionViewDidLoad
   onIncomingNewOrder(response) {
-
      let data = response.data;
      let order: Array<IOrderAhead> = this.setArrivalDates([data]);  // the new order
-     this.setTimerIntervalForEachOrder(this.orders);    // set arrival times
-     this.orders = this.sortOrders([...this.orders, ...order]);  // sort orders by arrival times
+     this.orders = this.setTimerIntervalForEachOrder([...this.orders, ...order]);    // set arrival times
+     this.orders = this.sortOrders(this.orders);  // sort orders by arrival times
   }
 
 
-  getActiveOrders() {
+  getActiveOrders(message: string = "Loading...", isIncomingNewOrder: boolean = false, data = null) {
     if (this.auth.locationOid) {
       let toData = {locationOid: this.auth.locationOid, companyOid: this.auth.companyOid};
 
-      this.presentLoading();
+      this.presentLoading(message);
       this.API.stack(ROUTES.getActiveOrders, "POST", toData)
-          .subscribe(
-              (response) => {
-                console.log('response.data: ', response.data);
+        .subscribe(
+          (response) => {
+            console.log('response.data: ', response.data);
 
-                this.orders = this.setArrivalDates(response.data.activeOrders);
-                this.setTimerIntervalForEachOrder(this.orders); 
-                this.orders = this.sortOrders(response.data.activeOrders);
+            this.orders = this.setArrivalDates(response.data.orders);
+            this.setTimerIntervalForEachOrder(this.orders); 
+            this.orders = this.sortOrders(response.data.orders);
 
-                this.dismissLoading();
-              }, this.errorHandler(this.ERROR_TYPES.API));
+            if (isIncomingNewOrder && data.purchaseDate) {
+              this.presentToast(false, `You've just received a new order! The eta for this order is: ${data.eta} minutes`, "top", 8000, "toast-primary");
+
+              //let order = this.orders.find((x) => x.purchaseDate === data.purchaseDate);
+              //order ? order.isIncomingNewOrder = true : null;
+
+              this.orders.forEach((x) => {
+                x.purchaseDate === data.purchaseDate.slice(0, -4) ? x.isIncomingNewOrder = true : x.isIncomingNewOrder = false;
+              })
+            }
+
+            this.dismissLoading();
+          }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
+
+  onRefreshScreen() {}
 
 
   // sorts according to 1.) arrivalMins, then  2.) purchaseDate (if expired)
@@ -115,27 +128,25 @@ export class OrderAheadDashboardPage extends BaseViewController {
 
   }
 
-
-  // can be moved to server
-  setArrivalDates(orders) {
+  setArrivalDates(orders: Array<IOrderAhead>): Array<IOrderAhead> {
     orders.forEach((x, index) => {
       let date = new Date(x.purchaseDate);
-      x.purchaseDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+      x.displayPurchaseDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
       x.arrivalDate = new Date(date.setMinutes(date.getMinutes() + x.eta));
       x.showOrderDetails = false;
     });
     return orders;
   }
 
-  setTimerIntervalForEachOrder(orders): void {
+
+  setTimerIntervalForEachOrder(orders: Array<IOrderAhead>): Array<IOrderAhead> {
     if (this.setIntervalHandler) clearInterval(this.setIntervalHandler);
 
-    if (this.orders.length) {
+    if (orders.length) {
       this.runOrderTimers(orders);  // runs on first tick
-      this.setIntervalHandler = setInterval(() => {
-        this.runOrderTimers(orders);
-      }, 1000);
+      this.setIntervalHandler = setInterval(() => this.runOrderTimers(orders), 1000);
     }
+    return orders;
   }
 
   runOrderTimers(orders): void {
@@ -151,15 +162,15 @@ export class OrderAheadDashboardPage extends BaseViewController {
         if (x.arrivalSeconds < 10) x.arrivalSeconds = '0' + x.arrivalSeconds;
 
         // doesn't need to be async b/c handled on client side as well
-        if (x.isExpired) this.setOrderExpired(x);
+        if (x.isExpired) {
+          this.setOrderExpired(x);
+          this.orders = this.sortOrders(this.orders);
+        }
       }
     });
   }
 
-  onRefreshScreen() {}
-
   onProcessOrder(order, index): void {
-
     let toData = { 
       companyOid: this.auth.companyOid,
       transactionOid: order.transactionOid,
@@ -167,14 +178,13 @@ export class OrderAheadDashboardPage extends BaseViewController {
     };
     this.API.stack(ROUTES.processActiveOrderForOrderAhead, "POST", toData)
         .subscribe(
-            (response) => {
-              this.orders[index].isProcessing = true;
-              console.log('response.data: ' , response.data);
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          (response) => {
+            this.orders[index].isProcessing = true;
+            console.log('response.data: ' , response.data);
+          }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
   onSetInactive(order, index) {
-
     const toData = {
       transactionOid: order.transactionOid,
       userOid: order.userOid,

@@ -29,7 +29,7 @@ export class AddLocationPage extends BaseViewController {
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
   initHasRun: boolean = false;
-  states: Array<string> = Utils.getStates();
+  states: Array<string> = Utils.getStatesAbbreviated();
   locations: Array<ILocation> = [];
   isCoordsSet: boolean = false;
   imgSrc: string = null;

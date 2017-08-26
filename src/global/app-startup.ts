@@ -2,28 +2,30 @@ import { API, ROUTES } from './api';
 import { IClientAdminAppStartupInfoResponse } from '../models/models';
 import { AppViewData } from './app-data';
 import { SocketIO } from './socket-io';
+import { NativeNotifications } from './native-notifications';
 
 
 export class AppStartup {
     constructor(
         public API: API,
-        public socketIO: SocketIO
+        public socketIO: SocketIO,
+        public nativeNotifications: NativeNotifications
     ) { }
     public getAppStartupInfo(companyOid: number): Promise<any> {
         return new Promise((resolve, reject) => {
             this.API.stack(ROUTES.getClientAdminAppStartupInfo, "POST", {companyOid})
                 .subscribe(
                     (response) => {
-                        const res: IClientAdminAppStartupInfoResponse = response.data.appStartupInfo;
+                        const data: IClientAdminAppStartupInfoResponse = response.data.appStartupInfo;
                         console.log("response.data: ", response.data);
 
                         resolve({
-                            defaultImg: res.defaultImg,
-                            logoImg: res.logoImg,
-                            clientAdminVersionNumber: res.currentClientAdminVersionNumber, 
-                            minClientAdminVersionNumber: res.minClientAdminVersionNumber,
-                            mustUpdateClientAdminApp: res.mustUpdateClientAdminApp,
-                            hasProcessOrder: res.hasProcessOrder
+                            defaultImg: data.defaultImg,
+                            logoImg: data.logoImg,
+                            clientAdminVersionNumber: data.currentClientAdminVersionNumber, 
+                            minClientAdminVersionNumber: data.minClientAdminVersionNumber,
+                            mustUpdateClientAdminApp: data.mustUpdateClientAdminApp,
+                            hasProcessOrder: data.hasProcessOrder
                         });
 
                     }, (err) => {
@@ -52,8 +54,15 @@ export class AppStartup {
         });
 
         if (locationOid) {
-            const room = companyOid + locationOid;
-            this.socketIO.connect(room);
+            const room = (companyOid + locationOid).toString();
+            //console.log("client connectin to socket.io room: ", room);
+            this.socketIO.connect().subscribe(room).on(this.socketIO.socketEvents.incomingNewOrder, [
+                this.nativeNotifications.types.vibrate, 
+                this.nativeNotifications.types.localNotifications, 
+                this.nativeNotifications.types.sound
+            ]);
+
+            
         }
     }
 }

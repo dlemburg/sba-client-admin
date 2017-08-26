@@ -12,11 +12,12 @@ export class NativeNotifications {
 
 types: any;
 events: any;
+
 constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public localNotifications: LocalNotifications) { 
 
     this.types = {
         vibrate: "vibrate",
-        localNotification: "localNotification",
+        localNotifications: "localNotifications",
         sound: "sound"
     }
     this.events = {
@@ -53,7 +54,7 @@ constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public
                 }, this.soundLoadErrorHandler);
             }
         },
-        localNotification: () => {
+        localNotifications: () => {
             return (title = "Incoming Order-Ahead", text: "") => {
                 let id: number = Utils.generateRandomNumber();
 

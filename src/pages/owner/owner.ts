@@ -32,7 +32,7 @@ export class OwnerPage extends BaseViewController {
   auth: AuthUserInfo;
   initHasRun: boolean = false;
   companyDetails: ICompanyDetails = {};
-  isNavigating: boolean = false;
+  isLoadingVisible: boolean = false;
 
 constructor(
   public navCtrl: NavController, 
@@ -124,13 +124,13 @@ constructor(
   }
 
   nav(component, theType) {
-    this.isNavigating = true;
+    this.isLoadingVisible = true;
     this.presentLoading();
     this.navCtrl.push(component, {type: theType ? theType : null});
   }
 
   ionViewDidLeave() {
-    this.isNavigating ? this.dismissLoading() : null;
-    this.isNavigating = false;
+    this.isLoadingVisible ? this.dismissLoading() : null;
+    this.isLoadingVisible = false;
   }
 }

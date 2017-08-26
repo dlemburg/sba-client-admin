@@ -41,4 +41,43 @@ page-order-ahead-dashboard {
         top: -10px;
         right: -5px;
     }
+
+    .incoming-new-order-animation {
+        background-color: map-get($colors, white);
+        -webkit-animation: animatezoom 1.2s;
+        animation: animatezoom 1.2s
+    }
+
+    .incoming-new-order {
+        border: 2px solid map-get($colors, primary);
+        background-color: white;
+    }
+
+
+    @-webkit-keyframes animatezoom {
+        from {
+            -webkit-transform: scale(0);
+            background-color: map-get($colors, primary);
+            opacity: 0;
+        } 
+        to {
+            -webkit-transform: scale(1);
+            background-color: white;
+            opacity: 1;
+        }
+    }
+
+    @keyframes animatezoom {
+        from {
+            transform: scale(0);
+            background-color: map-get($colors, primary);
+            opacity: 0;
+        } 
+        to {
+            transform: scale(1);
+            background-color: white;
+            opacity: 1;
+        }
+    }
+
 }

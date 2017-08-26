@@ -2,8 +2,8 @@ page-categories {
     .ion-card {
         position: relative;
         text-align: center;
-        border-top: 5px solid map-get($colors, primary);
-        border-radius: 8px !important;
+        border-radius: 10px !important;
+        box-shadow: 2px 6px 14px;
     }
 
     .card-title {

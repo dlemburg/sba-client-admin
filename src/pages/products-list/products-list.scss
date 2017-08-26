@@ -4,9 +4,8 @@ page-products-list {
     .ion-card {
         position: relative;
         text-align: center;
-        border-left: 5px solid $primary;
-       // max-height: 140px !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
+        box-shadow: 2px 6px 14px;
     }
 
     .ion-card > img {

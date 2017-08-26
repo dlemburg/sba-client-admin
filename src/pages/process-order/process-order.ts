@@ -205,7 +205,7 @@ export class ProcessOrderPage extends BaseViewController {
         else if (this.processOrderUtils.transactionIsValid(this.userData.balance, this.order.transactionDetails.total, this.companyDetails.acceptsPartialPayments)) {
           
           /* TODO later: popup to confirm balance not enough, apply remaining balance, alert total due */
-          
+          this.sufficientFunds = true;
           this.presentToast(false, `Captured user info! Complete transaction at any time.`);
           if (socialMediaOpts.isSocialMediaUsed) {
               this.order.transactionDetails.isSocialMediaUsed = true;
@@ -214,13 +214,14 @@ export class ProcessOrderPage extends BaseViewController {
         } 
         else {
           this.mobileCardId = null;
-          this.userData = {balance: null, userOid: null};
           this.sufficientFunds = false;
           this.showPopup({
             title: 'Uh oh!', 
             message: "The customer has insufficient funds. Customer balance:  $" + this.userData.balance, 
             buttons: [{text: "OK"}]
           });
+          this.userData = {balance: null, userOid: null};
+
         }
       }, (err) => {
         console.log("err: ", err);

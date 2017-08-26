@@ -11,6 +11,7 @@ import { API, ROUTES } from '../global/api';
 import { AppVersion } from '@ionic-native/app-version';
 import { AppStartup } from '../global/app-startup';
 import { IClientAdminAppStartupInfoResponse, AuthUserInfo } from '../models/models';
+import { NativeNotifications } from '../global/native-notifications';
 
 declare var cordova: any;
 
@@ -33,6 +34,7 @@ export class MyApp {
     public API: API, 
     private authentication: Authentication, 
     public socketIO: SocketIO,
+    public nativeNotifications: NativeNotifications,
     public appVersion: AppVersion) {
     
     this.pages = [
@@ -54,7 +56,7 @@ export class MyApp {
     this.platform.ready().then(() => {
       this.test();
 
-      this.appStartup = new AppStartup(this.API, this.socketIO);
+      this.appStartup = new AppStartup(this.API, this.socketIO, this.nativeNotifications);
 
       if (this.authentication.isLoggedIn()) {
         this.auth = this.authentication.getCurrentUser();

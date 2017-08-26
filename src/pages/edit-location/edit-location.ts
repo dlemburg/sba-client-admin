@@ -33,7 +33,7 @@ export class EditLocationPage extends BaseViewController {
   isSubmitted: boolean;
   auth: AuthUserInfo;
   closedDaysArr: Array<number> = [];
-  states: Array<string> = Utils.getStates();
+  states: Array<string> = Utils.getStatesAbbreviated();
   locations: Array<ILocation> = [];
   isCoordsSet: boolean = false;
   originalValue: string = null;
@@ -236,7 +236,7 @@ constructor(
       this.dismissLoading();
       this.imgSrc = data.imageData;
       this.myForm.patchValue({
-        img: Utils.generateImgName({appImgIndex: 14, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
+        img: Utils.generateImgName({appImgIndex: 18, name: this.myForm.controls["name"].value, companyOid: this.auth.companyOid})
       });
       this.imgDidChange = true;
     })

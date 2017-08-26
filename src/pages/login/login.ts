@@ -9,6 +9,7 @@ import { BaseViewController } from '../base-view-controller/base-view-controller
 import { SocketIO } from '../../global/socket-io';
 import { BackgroundMode } from '@ionic-native/background-mode';
 import { AppStartup } from '../../global/app-startup';
+import { NativeNotifications } from '../../global/native-notifications';
 
 @IonicPage()
 @Component({
@@ -24,6 +25,7 @@ export class LoginPage extends BaseViewController {
   auth: AuthUserInfo;
   appStartup: AppStartup;
   logo: string = "img/logo.png";
+  isLoadingVisible: boolean = false;
 
   constructor(
     public navCtrl: NavController,
@@ -36,6 +38,7 @@ export class LoginPage extends BaseViewController {
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController, 
     private formBuilder: FormBuilder, 
+    public nativeNotifications: NativeNotifications,
     public socketIO: SocketIO) { 
       
     super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
@@ -47,8 +50,12 @@ export class LoginPage extends BaseViewController {
   }
 
   ionViewDidLoad() {    
-    // maybe hide tabs here??
     this.authentication.deleteToken();
+  }
+
+  ionViewDidLeave() {
+    this.isLoadingVisible ? this.dismissLoading() : null;
+    this.isLoadingVisible = false;
   }
 
   presentSelectLocationPage(preliminaryCompanyTokenPayload, locations) {
@@ -64,12 +71,16 @@ export class LoginPage extends BaseViewController {
   }
 
   saveTokenAndInitializeApp(token, role) {
+    // show loading... this takes a few seconds
+    this.presentLoading("Acquiring company settings...");
+    this.isLoadingVisible = true;
+
     // save token
     this.authentication.saveToken(token);
 
-    //new stuff here
+    //app startup stuff here
     this.auth = this.authentication.getCurrentUser();
-    this.appStartup = new AppStartup(this.API, this.socketIO);
+    this.appStartup = new AppStartup(this.API, this.socketIO, this.nativeNotifications);
 
     this.appStartup.getAppStartupInfo(this.auth.companyOid).then((startupData: IClientAdminAppStartupInfoResponse) => {
       this.appStartup.initializeApp(startupData, this.auth.companyOid, this.auth.locationOid);

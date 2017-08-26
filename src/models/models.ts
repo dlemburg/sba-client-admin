@@ -307,8 +307,10 @@ export interface INameAndComponent {
 
 export interface IOrderAhead {
     purchaseDate: string; 
+    displayPurchaseDate: string;
     eta: number;
     orderDetails: string; 
+    isIncomingNewOrder: boolean;
     isProcessing: boolean;
     isActive: boolean;
     arrivalDate: Date;

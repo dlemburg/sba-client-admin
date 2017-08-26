@@ -227,6 +227,12 @@
    }
 }
 
+.toast-primary {
+    > div {
+        background-color: map-get($colors, primary) !important;
+    }
+}
+
 .card-title {
     position: absolute;
     top: 30%;
