@@ -162,10 +162,14 @@
               <ion-col *ngIf="productDetails.dairyToClient.length">
                 <ion-item>
                   <ion-label>Dairy</ion-label>
-                  <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.dairy" multiple="true">
-                    <ion-option *ngFor="let x of productDetails.dairyToClient; let i = index;" [value]="x">{{ x.name }} &nbsp; <span *ngIf="x.price">{{ x.price | currency:symbolDisplay:true }}</span></ion-option>
+                  <ion-select [compareWith]="compareFn" [(ngModel)]="purchaseItem.dairy" multiple="true" (ionChange)="setDefaultDairy(purchaseItem.dairy)">
+                    <ion-option *ngFor="let x of productDetails.dairyToClient; let i = index;" [value]="x">
+                      {{ x.name }}
+                      <span *ngIf="x.price">&nbsp; {{ x.price | currency:symbolDisplay:true }}</span>
+                    </ion-option>
                   </ion-select>
                 </ion-item>
+
                 <!-- dairy quantity -->
                 <div *ngFor="let y of purchaseItem.dairy; let i = index;">
                   <ion-item *ngIf="y.hasQuantity">
@@ -220,7 +224,8 @@
                         <ProductDetails [list]="x.variety"></ProductDetails>
                         <ProductDetails [list]="x.sweetener"></ProductDetails>
                       </div>
-                      <div *ngIf="x.addons && x.addons.length && x.addonsCost"><span class="bold">Total add-ons cost: {{ x.addonsCost * x.quantity | currency:symbolDisplay:true }} </span></div>
+                      <div *ngIf="x.addons && x.addons.length && x.addonsCost"><span class="discounts">Total add-ons cost: {{ x.addonsCost * x.quantity | currency:symbolDisplay:true }} </span></div>
+                      <div *ngIf="x.dairy && x.dairy.length && x.dairyCost"><span class="discounts">Total dairy cost: {{ x.dairyCost * x.quantity | currency:symbolDisplay:true }} </span></div>
                     </div>
                     <button class="" *ngIf="!isEditInProgress.status && isEditInProgress.index !== i" color="danger" ion-button full outline (click)="removePurchaseItemFromOrder(order,x, i)">Remove</button>
                     <div *ngIf="isEditInProgress.status && (isEditInProgress.index === i)"  class="edit-in-progress-text">Edit-in-progress</div>
@@ -251,7 +256,7 @@
           <div *ngIf="showOrder">
             <ion-item *ngFor="let x of order.purchaseItems; let i = index;">
               <ion-row>
-                <ion-col class="font-12" text-left col-9>
+                <ion-col class="font-12" text-left text-wrap col-9>
                   <span>{{ x.quantity }} <span *ngIf="x.sizeAndOrPrice.name">{{ x.sizeAndOrPrice.name }}</span> {{ x.selectedProduct.name }}</span>
                 </ion-col>
                 <ion-col text-right col-3>
@@ -259,11 +264,12 @@
                 </ion-col>
               </ion-row>
               <div class="discounts" *ngIf="x.discounts"> - {{ x.discounts | currency:symbolDisplay:true }} </div>
-              <div *ngIf="x.addonsCost" class="font-12">*Price includes the cost of addons: {{ x.addonsCost | currency:symbolDisplay:true }}</div>
-            </ion-item>
+              <div text-wrap *ngIf="x.addonsCost" class="font-12 discounts">*Added cost of addons: {{ x.addonsCost | currency:symbolDisplay:true }}</div>
+              <div text-wrap *ngIf="x.dairyCost" class="font-12 discounts">*Added cost of dairy: {{ x.dairyCost | currency:symbolDisplay:true }}</div>
+          </ion-item>
           </div>
-          <button ion-item (click)="showRewards = !showRewards">Rewards 
-            <span *ngIf="order.transactionDetails.rewards.length">({{ order.transactionDetails.rewards.length }})</span>
+          <button *ngIf="order.transactionDetails.rewards.length" ion-item (click)="showRewards = !showRewards">Rewards 
+            <span>({{ order.transactionDetails.rewards.length }})</span>
           </button>
           <div *ngIf="showRewards">
             <ion-item text-wrap *ngFor="let x of order.transactionDetails.rewards; let i = index;">

@@ -2,7 +2,6 @@
 <div text-wrap>
   <span *ngFor="let x of list; let i = index;">
     <span class="bold" *ngIf="x.name">{{ x.name }}</span>
-    <span *ngIf="!x.name">{{x}}</span>
-    <span *ngIf="hasQuantity && x.quantity > 0">({{x.quantity}})</span><span *ngIf="i !== list.length - 1">, </span>
+    <span *ngIf="!x.name">{{x}}</span><span *ngIf="hasQuantity && x.quantity > 0">({{x.quantity}})</span><span *ngIf="i !== list.length - 1">, </span>
   </span>
 </div>

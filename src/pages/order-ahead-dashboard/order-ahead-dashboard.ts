@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { IonicPage, Events, NavController, NavParams, LoadingController, AlertController, ToastController } from 'ionic-angular';
+import { Platform, IonicPage, Events, NavController, NavParams, LoadingController, AlertController, ToastController } from 'ionic-angular';
 import { API, ROUTES } from '../../global/api';
 import { Authentication } from '../../global/authentication';
 import { BaseViewController } from '../base-view-controller/base-view-controller';
 import { IOrderAhead, AuthUserInfo } from '../../models/models';
 import { SocketIO } from '../../global/socket-io';
+import { DateUtils } from '../../utils/date-utils';
 //import { Observable } from 'rxjs/Observable';
 
 @IonicPage()
@@ -20,6 +21,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
   initHasRun: boolean = false;
 
   constructor(
+    public platform: Platform,
     public navCtrl: NavController, 
     public navParams: NavParams, 
     public API: API, 
@@ -40,10 +42,15 @@ export class OrderAheadDashboardPage extends BaseViewController {
   }
 
   /* EVENTS THAT CAN HAPPEN ON THIS PAGE
-  - incoming order (socket -> ionic event)
+  - incoming order (socket -> ionic event) -> outline blue -> on click hide blue outline
   - process
   - clear active
   - customer never picked up
+
+
+  -sorts according to: 1.) arrival time, 2.) expired goes last
+  - on expired -> re-sorts
+
 
   */
 
@@ -69,6 +76,7 @@ export class OrderAheadDashboardPage extends BaseViewController {
 
   }
 
+  /*
   // fn callback for socket-events listener runs the orders through the same process as ionViewDidLoad
   onIncomingNewOrder(response) {
      let data = response.data;
@@ -76,24 +84,29 @@ export class OrderAheadDashboardPage extends BaseViewController {
      this.orders = this.setTimerIntervalForEachOrder([...this.orders, ...order]);    // set arrival times
      this.orders = this.sortOrders(this.orders);  // sort orders by arrival times
   }
-
+  */
 
   getActiveOrders(message: string = "Loading...", isIncomingNewOrder: boolean = false, data = null) {
     if (this.auth.locationOid) {
       let toData = {locationOid: this.auth.locationOid, companyOid: this.auth.companyOid};
 
-      this.presentLoading(message);
+      if (!isIncomingNewOrder) this.presentLoading(message);
+      else this.presentToast(false, message);
+
       this.API.stack(ROUTES.getActiveOrders, "POST", toData)
         .subscribe(
           (response) => {
+            if (!isIncomingNewOrder) this.dismissLoading();
+
             console.log('response.data: ', response.data);
 
             this.orders = this.setArrivalDates(response.data.orders);
             this.setTimerIntervalForEachOrder(this.orders); 
             this.orders = this.sortOrders(response.data.orders);
 
+            // this gets run on 'new incoming order'
             if (isIncomingNewOrder && data.purchaseDate) {
-              this.presentToast(false, `You've just received a new order! The eta for this order is: ${data.eta} minutes`, "top", 8000, "toast-primary");
+              this.presentToast(false, `You've just received a new order! The eta for this order is: ${data.eta} minutes`, "top", 20000, "toast-primary");
 
               //let order = this.orders.find((x) => x.purchaseDate === data.purchaseDate);
               //order ? order.isIncomingNewOrder = true : null;
@@ -102,8 +115,6 @@ export class OrderAheadDashboardPage extends BaseViewController {
                 x.purchaseDate === data.purchaseDate.slice(0, -4) ? x.isIncomingNewOrder = true : x.isIncomingNewOrder = false;
               })
             }
-
-            this.dismissLoading();
           }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
@@ -130,7 +141,8 @@ export class OrderAheadDashboardPage extends BaseViewController {
 
   setArrivalDates(orders: Array<IOrderAhead>): Array<IOrderAhead> {
     orders.forEach((x, index) => {
-      let date = new Date(x.purchaseDate);
+      const date = DateUtils.overrideTimezone(x.purchaseDate)
+      
       x.displayPurchaseDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
       x.arrivalDate = new Date(date.setMinutes(date.getMinutes() + x.eta));
       x.showOrderDetails = false;

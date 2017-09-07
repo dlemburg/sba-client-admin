@@ -22,10 +22,10 @@ constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public
     }
     this.events = {
         vibrate: () => {
-            return (duration = 2000, times = 4) => {
+            return (opts: any = {duration: 2000, times: 4}) => {
                 let sequence = [];
-                for (let x = 0; x < times; x++) {
-                    sequence = [...sequence, duration];
+                for (let x = 0; x < opts.times; x++) {
+                    sequence = [...sequence, opts.duration];
                 }
                 this.vibration.vibrate(sequence);
             }
@@ -33,35 +33,35 @@ constructor(public vibration: Vibration, public nativeAudio: NativeAudio, public
 
         // simple sound only
         sound: () => {
-            return (file = 'assets/audio/alert.mp3', timeIncrement = 2000, times = 3) => {
+            return (opts: any = {file: 'assets/audio/alert.mp3', timeIncrement: 2000, times: 3}) => {
             
                 let count = 0;
                 let id = Utils.generateRandomString();
 
-                this.nativeAudio.preloadSimple(id, file).then(() => {
+                this.nativeAudio.preloadSimple(id, opts.file).then(() => {
                    // this.nativeAudio.play(id); first tick?
 
                     let nativeAudioHandler = setInterval(() => {
-                        if (count === times) {
+                        if (count === opts.times) {
                             clearInterval(nativeAudioHandler);
                             this.nativeAudio.unload(id).then(this.soundUnloadSuccessHandler, this.soundUnloadErrorHandler);
                         } else {
                             count++;
                             this.nativeAudio.play(id);
                         }
-                    }, timeIncrement + 1);
+                    }, opts.timeIncrement + 1);
 
                 }, this.soundLoadErrorHandler);
             }
         },
         localNotifications: () => {
-            return (title = "Incoming Order-Ahead", text: "") => {
-                let id: number = Utils.generateRandomNumber();
+            return (opts: any = {title: "Incoming Order-Ahead", text: ""}) => {
+                const id: number = Utils.generateRandomNumber();
 
                 this.localNotifications.schedule([{
                     id: id,
-                    title: title,
-                    text: text,
+                    title: opts.title,
+                    text: opts.text,
                     data: { data: "some-data" }
                 }]);
             }

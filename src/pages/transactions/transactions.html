@@ -60,7 +60,7 @@
       </ion-card-header>
       <ion-card-content text-center>
         <div text-left><span class="bold"> Location: </span> {{ x.locationName }}</div>
-        <div text-left margin-top *ngIf="x.productsStr"><span class="bold">Order: </span> {{ x.productsStr }}</div>
+        <div text-left margin-top *ngIf="x.productsStr"><span class="bold">Order Snapshot: </span>{{ x.productsStr }}</div>
         <div text-left margin-top><span class="bold">Total: {{x.total | currency:symbolDisplay:true}}</span></div>
 
       <!-- <button margin-top ion-button outline block class="details">Details</button> -->

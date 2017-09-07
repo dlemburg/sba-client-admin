@@ -94,6 +94,27 @@ constructor() { }
         return ISOtime;
     }
 
+    // "2017-08-26T15:30:25", 
+    public static overrideTimezone(dateStr: string): Date {
+        const date: Date = new Date(dateStr);
+        const hours: number = date.getHours();
+        const tIndex: number = dateStr.indexOf("T");
+        const dateStrHours: number = +(dateStr.slice(tIndex + 1, tIndex + 3));
+        const tzOffset =  DateUtils.getTimezoneOffset("h");
+
+        if (dateStrHours === hours) return date;
+        else return new Date(date.setHours(date.getHours() + tzOffset));
+    }
+
+    public static getTimezoneOffset(unit = "h") {
+        switch(unit) {
+            case "h": 
+                return (new Date()).getTimezoneOffset() / 60;
+            default:
+                return (new Date()).getTimezoneOffset() / 60;
+        }
+    }
+
     // "2017-08-16T17:00:00Z" -> 17
     public static getHoursFromIsoStr(isoString: string) {
         const arr =  isoString.split(":");

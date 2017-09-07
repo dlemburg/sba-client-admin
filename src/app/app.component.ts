@@ -54,9 +54,9 @@ export class MyApp {
 
   init() {
     this.platform.ready().then(() => {
-      this.test();
-
+     // this.test();
       this.appStartup = new AppStartup(this.API, this.socketIO, this.nativeNotifications);
+
 
       if (this.authentication.isLoggedIn()) {
         this.auth = this.authentication.getCurrentUser();
@@ -76,27 +76,10 @@ export class MyApp {
     });
   }
 
-  test() {
-    this.API.stack(ROUTES.testDotnet, "GET")
-      .subscribe(
-        (response) => {
-          console.log("DOTNET: response.data: ", response.data);
-        }, (err) => {
-          console.log("err on DOTNET test: ", err);
-        });
-
-    this.API.stack(ROUTES.testNode, "POST")
-      .subscribe(
-        (response) => {
-          console.log("NODEjs: response.data: ", response.data);
-        }, (err) => {
-          console.log("err on NODEjs test: ", err);
-        });
-  }
 
   doNativeThingsOnAppStartup(currentClientAdminVersionNumber = 0, minClientAdminVersionNumber = 0, mustUpdateClientAdminVersion = false) {
 
-    // do version checks w/ update prompt here
+    //TODO do version checks w/ update prompt here
 
     this.invokePlatformListeners();
     !this.backgroundMode.isEnabled && this.backgroundMode.enable();
@@ -121,22 +104,38 @@ export class MyApp {
   }
 
   signOut() {
+    const room = (this.auth.companyOid + this.auth.locationOid).toString();
+    
     this.authentication.deleteToken();
-    this.socketIO.disconnect();
+    this.socketIO.unsubscribe(room).disconnect();
     this.backgroundMode.isEnabled && this.backgroundMode.disable();
 
-    let navLogin = setTimeout(() => {
-      this.nav.setRoot('LoginPage');
-    },300);
-
-   // clearTimeout(navLogin);
+    setTimeout(() => this.nav.setRoot('LoginPage'), 300);
   }
 
-  ionViewDidUnload() {
-  
-  }
+  ionViewDidUnload() { }
 }
 
+
+/*
+  test() {
+    this.API.stack(ROUTES.testDotnet, "GET")
+      .subscribe(
+        (response) => {
+          console.log("DOTNET: response.data: ", response.data);
+        }, (err) => {
+          console.log("err on DOTNET test: ", err);
+        });
+
+    this.API.stack(ROUTES.testNode, "POST")
+      .subscribe(
+        (response) => {
+          console.log("NODEjs: response.data: ", response.data);
+        }, (err) => {
+          console.log("err on NODEjs test: ", err);
+        });
+  }
+  */
 
 
 /******************************* NOTES *******************************/

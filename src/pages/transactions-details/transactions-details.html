@@ -7,12 +7,12 @@
   </ion-navbar>
 </ion-header>
 
-
 <ion-content padding>
-
-  <!-- date / location -->
+  <!-- transaction details -->
   <ion-card>
     <ion-card-content class="internal-info-content">
+      <ion-card-title>Transaction Details</ion-card-title>
+
       <ion-item><span class="bold"> Date: </span> {{ order.purchaseDate | date}}</ion-item>
       <ion-item><span class="bold"> Location: </span>{{ order.locationName }}</ion-item>
       <ion-item><span class="bold"> Subtotal: </span> {{ order.subtotal | currency:symbolDisplay:true }}</ion-item>
@@ -30,38 +30,13 @@
             <ion-row>
               <ion-col><span class="bold"> {{x.quantity}} <span *ngIf="x.size">{{x.size}}</span> {{x.productName}}</span></ion-col>
             </ion-row>
-            <ion-row>
-              <ion-col *ngIf="x.addons.length" class="font-8">Addons:   
-                <ProductDetails [list]="x.addons"></ProductDetails>     
-              </ion-col>
-            </ion-row>
 
-            <ion-row>
-              <ion-col *ngIf="x.flavors.length" class="font-8"> Flavors:
-                <ProductDetails [list]="x.flavors"></ProductDetails>     
-              </ion-col>
-            </ion-row>
-
-            <ion-row>
-              <ion-col *ngIf="x.dairy.length" class="font-8"> Dairy:
-                <ProductDetails [list]="x.dairy"></ProductDetails>     
-              </ion-col>
-            </ion-row>
-
-             <ion-row>
-              <ion-col *ngIf="x.sweetener.length" class="font-8"> Sweetener:
-                <ProductDetails [list]="x.sweetener"></ProductDetails>     
-              </ion-col>
-            </ion-row>
-
-             <ion-row>
-              <ion-col *ngIf="x.variety.length" class="font-8"> Variety:
-                <ProductDetails [list]="x.variety"></ProductDetails>     
-              </ion-col>
-            </ion-row>
-            <!--
-            <div margin-top text-center><button ion-button outline color="primary" (click)="navProduct(x)">View {{x.productName}} details</button></div>
-            -->
+            <ion-row><ion-col *ngIf="x.addons" class="font-8">Addons: {{x.addons}}</ion-col></ion-row>
+            <ion-row><ion-col *ngIf="x.flavors" class="font-8"> Flavors: {{x.flavors}}</ion-col></ion-row>
+            <ion-row><ion-col *ngIf="x.dairy" class="font-8"> Dairy: {{x.dairy}}</ion-col></ion-row>
+            <ion-row><ion-col *ngIf="x.sweetener" class="font-8"> Sweetener: {{x.sweetener}}</ion-col></ion-row>
+            <ion-row><ion-col *ngIf="x.variety" class="font-8"> Variety: {{x.variety}}</ion-col></ion-row>
+            
           </ion-item>
         </div>
     </ion-card-content>

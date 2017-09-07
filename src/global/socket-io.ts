@@ -3,7 +3,7 @@ import { Events } from 'ionic-angular'
 import { SERVER_URL_CSHARP, SERVER_URL_NODE } from './global';
 import * as io from "socket.io-client";
 import { Authentication } from './authentication';
-import { AuthUserInfo, SocketEvents}  from '../models/models';
+import { AuthUserInfo, SocketEvents, NativeNotificationStaging }  from '../models/models';
 import { NativeNotifications } from './native-notifications';
 
 @Injectable()
@@ -24,16 +24,15 @@ export class SocketIO {
         locationIsProcessingOrder: "location-is-processing-order"
     }
     this.socketOpts =  { reconnection: true, reconnectionAttempts: 10};
-   
   }
 
-/*
- NOTE:  connects on app-start-up
+  /* subscriber pattern for ng2 apps w/o ionic events
+    this.subscriber$ = this.on(this.events.incomingNewOrder).subscribe((data) => {
+        // cordova sound, vibrate
+    });
+  */
 
-*/
-    /*
-    @room: room to connect to on server
-    */
+    /* @room: room to connect to on server */
     public connect(): SocketIO {
         console.log("this.socket: ", this.socket);
         if (!this.socket) {
@@ -43,18 +42,17 @@ export class SocketIO {
         return this;
     }
 
-    public subscribe(room: number): SocketIO {
+    public subscribe(room: string): SocketIO {
         if (room) this.emit(this.socketEvents.subscribe, { room });
-
         console.log("subscribing...");
 
         return this;
 
-        /* subscriber pattern
-        this.subscriber$ = this.on(this.events.incomingNewOrder).subscribe((data) => {
-            // cordova sound, vibrate
-        });
-        */
+    }
+
+    public unsubscribe(room): SocketIO {
+        if (room) this.emit(this.socketEvents.unsubscribe, { room })
+        return this;
     }
 
     public disconnect() {
@@ -65,6 +63,7 @@ export class SocketIO {
             this.emit(this.socketEvents.unsubscribe, {room});
             this.socket.removeAllListeners();
             this.socket.disconnect();
+            this.socket = null;
         }
     }
 
@@ -72,24 +71,27 @@ export class SocketIO {
     @socketEvent:  the type of socket event emitted to the server
     @notifications: the types of native notifications that will be triggered
     */
-    public on(socketEvent: string, notifications: Array<string> = []) {
-        console.log("setting on listeners...");
-        this.socket.on(socketEvent, (data) => {
-            notifications.forEach((x) => {
-               // 2nd fn invokation (closure) allows params specific to that notification
-               let notify = this.nativeNotifications.create(x)();
+    public on(socketEvent: string, notifications: Array<NativeNotificationStaging> = []) {
+        if (this.socket) {
+            console.log("setting on listeners...");
+            this.socket.on(socketEvent, (data) => {
+                notifications.forEach((x) => {
+                // 2nd fn invokation (closure) allows params specific to that notification
+                let notify = this.nativeNotifications.create(x.type)(x.opts);
+                });
 
+                this.publishEventToClientListeners(socketEvent, data);
             });
 
-            this.publishEventToClientListeners(socketEvent, data);
-        });
-
-        console.log( "listeners", this.socket.listeners(socketEvent));
+            console.log( "listeners", this.socket.listeners(socketEvent));
+        }
     }
 
     public emit(eventName: string, data: any) {
-        console.log("socket io emitting: ", eventName, data);
-        this.socket.emit(eventName, data);
+        if (this.socket) {
+            console.log("socket io emitting: ", eventName, data);
+            this.socket.emit(eventName, data);
+        }
     }
 
     public publishEventToClientListeners(event: string, data) {

@@ -7,6 +7,8 @@ page-order-ahead-dashboard {
 
     .purchase-date {
         font-size: 12px;
+        position: relative;
+        top: -15px;
     }
 
     .order-title {
@@ -35,22 +37,41 @@ page-order-ahead-dashboard {
         font-size: 18px;
     }
 
+    .active-checkmark-location {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
     .checkmark {
         font-size: 30px !important;
         position: relative;
         top: -10px;
-        right: -5px;
+        animation: checkmarkzoom 1s;
+       // right: -5px;
     }
 
     .incoming-new-order-animation {
         background-color: map-get($colors, white);
-        -webkit-animation: animatezoom 1.2s;
-        animation: animatezoom 1.2s
+        -webkit-animation: animatezoom 1.6s;
+        animation: animatezoom 1.6s;
+        
     }
 
     .incoming-new-order {
         border: 2px solid map-get($colors, primary);
         background-color: white;
+    }
+
+    .is-expired {
+        border: 2px solid map-get($colors, danger);
+    }
+
+    .active-title {
+        color: map-get($colors, secondary);
+        font-size: 10px;
+        font-variant: small-caps;
+        letter-spacing: 1.4px;
     }
 
 
@@ -77,6 +98,30 @@ page-order-ahead-dashboard {
             transform: scale(1);
             background-color: white;
             opacity: 1;
+        }
+    }
+
+     @-webkit-keyframes checkmarkzoom {
+        from {
+            -webkit-transform: scale(0);
+            background-color: map-get($colors, primary);
+            opacity: 0;
+        } 
+        to {
+            -webkit-transform: scale(1);
+            background-color: white;
+            opacity: 1;
+        }
+    }
+
+    @keyframes checkmarkzoom {
+        from {
+            transform: scale(0);
+            font-size: 60px;
+        } 
+        to {
+            transform: scale(1);
+            font-size: 30px;
         }
     }
 

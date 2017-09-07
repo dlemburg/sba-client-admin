@@ -59,11 +59,11 @@ export class TransactionsDetailsPage extends BaseViewController {
     console.log("this.transactionOid: ", this.transactionOid);
 
     this.API.stack(ROUTES.getTransactionDetails, "POST", {companyOid: this.auth.companyOid, transactionOid: this.transactionOid})
-        .subscribe(
-            (response) => {
-              console.log('response.data: ', response.data);
-              this.order = response.data.transactionDetails;
-            },  this.errorHandler(this.ERROR_TYPES.API));
+      .subscribe(
+          (response) => {
+            console.log('response.data: ', response.data);
+            this.order = response.data.transactionDetails;
+          },  this.errorHandler(this.ERROR_TYPES.API));
   }
 
   navReward(reward): void {
@@ -78,8 +78,7 @@ export class TransactionsDetailsPage extends BaseViewController {
 
   getRewards(): void {
     const route = ROUTES.getRewardsUsedInTransaction + `/${this.auth.companyOid}/${this.transactionOid}
-                  ?isRewardAllUsed=${this.order.isRewardAllUsed}
-                  &isRewardIndividualUsed=${this.order.isRewardIndividualUsed}`;
+                  ?isRewardAllUsed=${this.order.isRewardAllUsed}&isRewardIndividualUsed=${this.order.isRewardIndividualUsed}`;
     this.showRewards = !this.showRewards;
 
     if (this.doCallGetRewards) {
@@ -87,10 +86,10 @@ export class TransactionsDetailsPage extends BaseViewController {
 
       this.API.stack(route, "GET")
         .subscribe(
-            (response) => {
-              console.log('response.data: ', response.data);
-              this.rewards = response.data.rewards
-            }, this.errorHandler(this.ERROR_TYPES.API));
+          (response) => {
+            console.log('response.data: ', response.data);
+            this.rewards = response.data.rewards
+          }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }
 }

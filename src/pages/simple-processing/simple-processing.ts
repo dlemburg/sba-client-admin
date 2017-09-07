@@ -217,35 +217,38 @@ export class SimpleProcessingPage extends BaseViewController {
 
   // social media options are optional b/c cant guarantee if mobileCardId entered rather than barcode
   getUserDataForProcessOrderAPI(userOidOrMobileCardId, idType, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
+
+    console.log("about to get user data after scanning barcode...");
+
     this.presentLoading();
     let toData = { userOidOrMobileCardId: userOidOrMobileCardId, companyOid: this.auth.companyOid, idType};
     // get user data
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
       .subscribe(
-          (response) => {
-            console.log('response.data: ', response.data);
-            this.dismissLoading();
-            this.userData = response.data.userData ? response.data.userData : {userOid: null, balance: null};
-            this.userData.socialMediaType = socialMediaOpts.socialMediaType;
-            this.userData.isSocialMediaUsed = socialMediaOpts.isSocialMediaUsed;
+        (response) => {
+          console.log('user response.data: ', response.data);
+          this.dismissLoading();
+          this.userData = response.data.userData ? response.data.userData : {userOid: null, balance: null};
+          this.userData.socialMediaType = socialMediaOpts.socialMediaType;
+          this.userData.isSocialMediaUsed = socialMediaOpts.isSocialMediaUsed;
 
-            // do checks
-            if (this.userData.userOid === null) this.presentToast(false, `No user found by this id number.`)
-            else if (this.userData.balance > +this.total) {
-              /* if (this.companyDetails.acceptsPartialPayments) {} */
-              this.presentToast(false, `Captured user info! Complete transaction at any time.`);
-            } 
-            else {
-              this.sufficientFunds = false;
-              this.mobileCardId = null;
+          // do checks
+          if (this.userData.userOid === null) this.presentToast(false, `No user found by this id number.`)
+          else if (this.userData.balance > +this.total) {
+            /* if (this.companyDetails.acceptsPartialPayments) {} */
+            this.presentToast(false, `Captured user info! Complete transaction at any time.`);
+          } 
+          else {
+            this.sufficientFunds = false;
+            this.mobileCardId = null;
 
-              this.showPopup({
-                title: 'Uh oh!', 
-                message: "The customer has insufficient funds. Customer balance: $" + this.userData.balance, 
-                buttons: [{text: "OK"}]
-              });
-            } 
-          }, this.errorHandler(this.ERROR_TYPES.API));
+            this.showPopup({
+              title: 'Uh oh!', 
+              message: "The customer has insufficient funds. Customer balance: $" + this.userData.balance, 
+              buttons: [{text: "OK"}]
+            });
+          } 
+        }, this.errorHandler(this.ERROR_TYPES.API));
   }
 
    // manual entering mobileCardId
@@ -310,8 +313,9 @@ export class SimpleProcessingPage extends BaseViewController {
             (response) => {
               console.log('response.data: ', response.data);
               //this.companyDetails = response.data.companyDetails;
+              this.navCtrl.setRoot("TabsPage");
 
-              this.dismissLoading();
+              this.dismissLoading("Transaction Complete!");
             }, this.errorHandler(this.ERROR_TYPES.API));
     }
   }

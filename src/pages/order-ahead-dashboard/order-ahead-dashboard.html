@@ -18,76 +18,89 @@
     <ion-card 
         class="align-left" 
         *ngFor="let order of orders; let i = index;" 
-        (click)="order.showOrderDetails = !order.showOrderDetails; order.isIncomingNewOrder = false;"
-        [ngClass]="{'incoming-new-order-animation': order.isIncomingNewOrder, 'incoming-new-order': order.isIncomingNewOrder}">
+        [ngClass]="{'incoming-new-order-animation': order.isIncomingNewOrder, 'incoming-new-order': order.isIncomingNewOrder, 'is-expired': order.isExpired}">
       <div>
-        <ion-card-header>
-          <!-- top -->
-          <ion-row>
-            <ion-col class="purchase-date">{{ order.displayPurchaseDate }}</ion-col>
-            <ion-col text-right>
-              <ion-icon *ngIf="!order.isProcessing" tappable class="checkmark" color="secondary" (click)="onProcessOrder(order, i)" ios="ios-checkbox-outline" md="ios-checkbox-outline"></ion-icon>
-            </ion-col>
-          </ion-row>
+        <ion-list>
+          <ion-item-sliding #item>
+            <ion-item detail-push>
+              <ion-card-header (click)="order.showOrderDetails = !order.showOrderDetails; order.isIncomingNewOrder = false;">
+                <!-- top -->
+                <ion-row>
+                  <ion-col class="purchase-date">{{ order.displayPurchaseDate }}</ion-col>
+                  <div class="active-checkmark-location" text-right>
+                    <ion-icon *ngIf="order.isProcessing" class="checkmark" color="secondary" ios="ios-checkmark-circle" md="md-checkmark-circle"></ion-icon>
+                  </div>
+                  <div class="active-checkmark-location" *ngIf="!order.isProcessing" text-right>
+                    <div class="active-title">Active</div>
+                  </div>
+                </ion-row>
 
-          <!-- bottom -->
-          <ion-row>
-            <ion-col *ngIf="order.customerName">
-              <span class="name">Name:</span> <span class="bold">{{ order.customerName }}</span>
-            </ion-col>
-          </ion-row>
-          <ion-row>
-            <ion-col *ngIf="!order.isExpired">
-              <span class="arriving">Arriving:</span>
-              <span class="arriving-time">{{ order.arrivalMins }}:{{ order.arrivalSeconds }}</span>
-            </ion-col>
-            <ion-col *ngIf="!order.isExpired && order.arrivalMins === null">
-              <span class="arriving">Arriving:</span>
-              <span class="arriving-time">Calculating arrival...</span>
-            </ion-col>
-            <ion-col *ngIf="order.isExpired">
-              <span class="arriving">Arriving:</span>
-              <span class="arriving-time">Expired</span>
-            </ion-col>
+                <!-- bottom -->
+                <ion-row>
+                  <ion-col *ngIf="order.customerName">
+                    <span class="name">Name:</span> <span class="bold">{{ order.customerName }}</span>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col *ngIf="!order.isExpired">
+                    <span class="arriving">Arriving:</span>
+                    <span class="arriving-time">{{ order.arrivalMins }}:{{ order.arrivalSeconds }}</span>
+                  </ion-col>
+                  <ion-col *ngIf="!order.isExpired && order.arrivalMins === null">
+                    <span class="arriving">Arriving:</span>
+                    <span class="arriving-time">Calculating arrival...</span>
+                  </ion-col>
+                  <ion-col *ngIf="order.isExpired">
+                    <span class="arriving">Arriving:</span>
+                    <span class="arriving-time">Expired</span>
+                  </ion-col>
+              
+                </ion-row>
+              </ion-card-header>
+            </ion-item>
+            <ion-item-options side="right">
+              <button 
+                *ngIf="!order.isProcessing" 
+                (click)="onProcessOrder(order, i)"
+                ion-button color="secondary">Process</button>
+              <button 
+                *ngIf="order.isProcessing" 
+                (click)="onSetInactive(order, i)" 
+                ion-button color="danger">Clear</button>
+            </ion-item-options>
+          </ion-item-sliding>
+        </ion-list>
+
         
-            <ion-col *ngIf="order.isProcessing" text-right>
-              <button (click)="onSetInactive(order, i)" class="process-btn" color="danger" ion-button outline no-margin>Clear</button>
-            </ion-col>
-          </ion-row>
-        </ion-card-header>
-        
-        <ion-card-content *ngIf="order.showOrderDetails">
-            <div>
-              <span class="bold order-title">Order</span>
-              <div class="purchase-item-container" *ngFor="let x of order.purchaseItems; let i = index;">  
-                <span class="bold">{{ x.quantity }} </span>
-                <span class="bold" *ngIf="x.sizeAndOrPrice.name"> {{ x.sizeAndOrPrice.name }} </span>
-                <span class="bold"> {{ x.selectedProduct.name | uppercase }}</span><span class="bold" *ngIf="x.quantity > 1">s</span>
-                <div class="extras-container">
-                  <div>{{ x.flavors }}</div>
-                  <div>{{ x.addons }}</div>
-                  <div>{{ x.variety }}</div>
-                  <div>{{ x.sweetener }}</div>
-
-            <!--   <ProductDetails [list]="x.dairy" hasQuantity="true"></ProductDetails> -->
-
-                </div>
+        <ion-card-content *ngIf="order.showOrderDetails" (click)="order.showOrderDetails = !order.showOrderDetails; order.isIncomingNewOrder = false;">
+          <div>
+            <span class="bold order-title">Order</span>
+            <div class="purchase-item-container" *ngFor="let x of order.purchaseItems; let i = index;">  
+              <span class="bold">{{ x.quantity }} </span>
+              <span class="bold" *ngIf="x.sizeAndOrPrice.name"> {{ x.sizeAndOrPrice.name }} </span>
+              <span class="bold"> {{ x.selectedProduct.name | uppercase }}</span><span class="bold" *ngIf="x.quantity > 1">s</span>
+              <div class="extras-container">
+                <div>{{ x.flavors }}</div>
+                <div>{{ x.addons }}</div>
+                <div>{{ x.variety }}</div>
+                <div>{{ x.sweetener }}</div>
               </div>
-              <!--
-              <div margin-top>
-                <span *ngIf="order.userComments" class="bold">User Comments: </span>
-                <span>{{ order.userComments }}</span>
-              </div>
-              -->
-              <div margin-top>
-                <span class="bold">Total: </span>
-                <span class="total bold">{{ order.total | currency:symbolDisplay:true }}</span>
-              </div>
-              <div *ngIf="order.isExpired && !order.customerNeverPickedUp" margin-top text-center>
-                <button (click)="customerNeverPickedUp(order, i)" color="danger" ion-button outline no-margin>Not picked up</button>
-              </div>
-              <div *ngIf="order.customerNeverPickedUp" class="customer-never-picked-up" text-center>Customer didn't pick up this order</div>
             </div>
+            <!--
+            <div margin-top>
+              <span *ngIf="order.userComments" class="bold">User Comments: </span>
+              <span>{{ order.userComments }}</span>
+            </div>
+            -->
+            <div margin-top>
+              <span class="bold">Total: </span>
+              <span class="total bold">{{ order.total | currency:symbolDisplay:true }}</span>
+            </div>
+            <div *ngIf="order.isExpired && !order.customerNeverPickedUp" margin-top text-center>
+              <button (click)="customerNeverPickedUp(order, i)" color="danger" ion-button outline no-margin>Not picked up</button>
+            </div>
+            <div *ngIf="order.customerNeverPickedUp" class="customer-never-picked-up" text-center>Customer didn't pick up this order</div>
+          </div>
         </ion-card-content>
       </div>
     </ion-card>

@@ -242,6 +242,10 @@
     color: #fff;
 }
 
+ion-card > img {
+    filter: brightness(90%) !important;
+}
+
     /* MEDIA QUERY EXAMPLES
     /* Large phones 
     @media only screen and (min-width: 376px) and (max-width: 480px) {

@@ -446,3 +446,9 @@ export interface IOrderConfirmation {
   doesWantReceipt:boolean;
   receiptType?:string
 }
+
+
+export interface NativeNotificationStaging {
+    type: string;
+    opts: any;
+}

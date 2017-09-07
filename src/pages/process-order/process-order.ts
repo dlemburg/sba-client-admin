@@ -195,9 +195,12 @@ export class ProcessOrderPage extends BaseViewController {
 
   getUserData(userOidOrMobileCardId, idType, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
     this.presentLoading();
+    console.log("about to get user data after scanning barcode");
     let toData = { userOidOrMobileCardId, companyOid: this.auth.companyOid, idType};
     this.API.stack(ROUTES.getUserDataForProcessOrder, "POST", toData)
       .subscribe( (response) => {
+
+        console.log("user response.data: ", response.data);
         this.dismissLoading();
         this.userData = response.data.userData ? response.data.userData : {balance: null, userOid: null};
 
@@ -227,6 +230,12 @@ export class ProcessOrderPage extends BaseViewController {
         console.log("err: ", err);
         this.errorHandler(this.ERROR_TYPES.API)(err);
       });
+  }
+
+  setDefaultDairy() {
+    this.purchaseItem.dairy.forEach((x) => {
+      x.quantity = x.hasQuantity && (!x.quantity && x.quantity !== 0) ? 3 : x.quantity;
+    })
   }
   
   ////////////////////////////////////////////////   modals //////////////////////////////////////////////////
@@ -326,10 +335,6 @@ export class ProcessOrderPage extends BaseViewController {
     this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
     this.productDetails = this.processOrderUtils.clearProductDetails();
 
-    // transaction details
-    this.order.purchaseItems[index].addonsCost = this.processOrderUtils.calculateAddonsCost(this.order.purchaseItems[index], this.productDetails, this.companyDetails);
-    this.order.purchaseItems[index].dairyCost = this.processOrderUtils.calculateDairyCost(this.order.purchaseItems[index]);
-    this.order.transactionDetails.subtotal = this.processOrderUtils.calculateSubtotal(this.order, this.companyDetails);
   }
 
   setEditInProgress(index) { return { status: true, index: index };}
@@ -439,6 +444,9 @@ export class ProcessOrderPage extends BaseViewController {
           isSocialMediaUsed: +barcodeUserDataArr[2] === 0 ? false : true,
           socialMediaType: +barcodeUserDataArr[3]
         }
+        console.log("barcodeUserData: ", barcodeUserData);
+
+
         if (barcodeUserData.companyOid === +this.auth.companyOid) {
           if (barcodeUserData.isSocialMediaUsed) {
             this.presentAcceptOrRejectSocialMediaAlert(barcodeUserData).then((data) => {
@@ -495,11 +503,24 @@ export class ProcessOrderPage extends BaseViewController {
   }
 
   printReceiptCordova() {
-    this.presentLoading("Printing...");    
+    //this.presentLoading("Printing...");
+
+    console.log("checking printer availability");
     this.printer.isAvailable()
-      .then(() => this.printer.check())
-      .then(() => this.printer.pick())
-      .then((data) => this.printer.print(ReceiptTemplates.generateReceiptHTML(this.order, this.auth), { name: 'Receipt', duplex: true, landscape: true, grayscale: true }))
+      .then(() => {
+        console.log("printer available...")
+        return this.printer.pick();
+      })
+      /*
+      .then(() => {
+        console.log("about to pick...")
+        return this.printer.pick();
+      })
+      */
+      .then((data) => {
+        console.log("about to print...");
+        this.printer.print(ReceiptTemplates.generateReceiptHTML(this.order, this.auth), { name: 'Receipt', duplex: true, landscape: true, grayscale: true });
+      })
       .then(() => {
         this.dismissLoading("Done Printing!");
         this.navCtrl.setRoot("TabsPage");

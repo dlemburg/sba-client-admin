@@ -55,14 +55,16 @@ export class AppStartup {
 
         if (locationOid) {
             const room = (companyOid + locationOid).toString();
-            //console.log("client connectin to socket.io room: ", room);
+
+
+            // app-wide socket listeners
             this.socketIO.connect().subscribe(room).on(this.socketIO.socketEvents.incomingNewOrder, [
-                this.nativeNotifications.types.vibrate, 
-                this.nativeNotifications.types.localNotifications, 
-                this.nativeNotifications.types.sound
+                { type: this.nativeNotifications.types.vibrate, opts: undefined},
+                { type: this.nativeNotifications.types.localNotifications, opts: {title: "Incoming Order-Ahead!", text: "You have a new order..." }},
+                { type: this.nativeNotifications.types.sound, opts: undefined}
             ]);
 
-            
+
         }
     }
 }

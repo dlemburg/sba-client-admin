@@ -18,7 +18,7 @@ export class TabsPage {
 
   isOwner: boolean = this.auth && this.auth.role === "Owner" ? true : false;
   isLoggedIntoLocation: boolean = this.auth.locationOid ? true : false;
-  hasProcessOrderFeature: boolean = AppViewData.getFeatures().hasProcessOrder;
+  hasProcessOrderFeature: boolean = true; // AppViewData.getFeatures().hasProcessOrder;
 
 
   constructor(private authentication: Authentication) {
