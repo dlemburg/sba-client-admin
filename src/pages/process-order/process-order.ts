@@ -13,6 +13,7 @@ import { NativeNotifications } from '../../global/native-notifications';
 import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 import { Printer, PrintOptions } from '@ionic-native/printer';
 import { ProcessOrderUtils } from './process-order-utils';
+import { ProcessOrderService } from './process-order.service';
 
 @IonicPage()
 @Component({
@@ -127,7 +128,8 @@ export class ProcessOrderPage extends BaseViewController {
     public alertCtrl: AlertController, 
     public toastCtrl: ToastController, 
     public loadingCtrl: LoadingController,
-    public processOrderUtils: ProcessOrderUtils) {
+    public processOrderUtils: ProcessOrderUtils,
+    public processOrderService: ProcessOrderService) {
       super(alertCtrl, toastCtrl, loadingCtrl, navCtrl);
   }
 
@@ -165,32 +167,55 @@ export class ProcessOrderPage extends BaseViewController {
 
   getCategories() {
     this.products = []; // reset products
-    this.API.stack(ROUTES.getCategories + `/${this.auth.companyOid}`, "GET")
-      .subscribe( (response) => {
-        this.dismissLoading();
-        this.categories = response.data.categories;
-      }, this.errorHandler(this.ERROR_TYPES.API));
-  }
+    const cachedCategories = this.processOrderService.getCategories();
 
-  getCategoryInfo(currentCategory): void {
-    this.API.stack(ROUTES.getProducts + `/${this.auth.companyOid}/${currentCategory.oid}`, "GET")
-      .subscribe( (response) => {
-        this.products = response.data.products;
-        this.productDetails = this.processOrderUtils.clearProductDetails();
-        this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
-        this.canViewProducts = true;
-      }, this.errorHandler(this.ERROR_TYPES.API));
-  }
-
-  getProductInfo(currentProductOid) {     
-     this.API.stack(ROUTES.getProductDetails + `/${this.auth.companyOid}/${currentProductOid}`, "GET")
+    if (cachedCategories.length) {
+      this.categories = cachedCategories;
+    } else {
+      this.API.stack(ROUTES.getCategories + `/${this.auth.companyOid}`, "GET")
         .subscribe( (response) => {
-          this.productDetails = response.data.productDetails;
+          this.dismissLoading();
+          this.categories = this.processOrderService.setCategories(response.data.categories);
+        }, this.errorHandler(this.ERROR_TYPES.API));
+    }
+  }
 
-          if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
-            this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
-          }
-        }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+  getProducts(currentCategory): void {
+    this.productDetails = this.processOrderUtils.clearProductDetails();
+    this.purchaseItem = this.processOrderUtils.clearPurchaseItem();
+
+    const cachedProducts = this.processOrderService.getProducts(currentCategory.oid);
+    if (cachedProducts.length) {
+      this.products = cachedProducts;
+      this.canViewProducts = true;
+    } else {
+      this.API.stack(ROUTES.getAllProducts + `/${this.auth.companyOid}`, "GET")
+        .subscribe( (response) => {
+          this.products = this.processOrderService.setProducts(response.data.products).filter((x) => currentCategory.oid === x.categoryOid);
+          this.canViewProducts = true;
+
+        }, this.errorHandler(this.ERROR_TYPES.API));
+    }
+  }
+
+  getProductInfo(productOid) {
+    const cachedProductDetails = this.processOrderService.getCachedProductDetails(productOid);
+    if (cachedProductDetails) {
+      this.productDetails = cachedProductDetails;
+
+      if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
+        this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
+      }
+    } else {
+        this.API.stack(ROUTES.getProductDetails + `/${this.auth.companyOid}/${productOid}`, "GET")
+          .subscribe( (response) => {
+            this.productDetails = this.processOrderService.setCachedProductDetails(productOid, response.data.productDetails);
+
+            if (!this.productDetails.sizesAndPrices.length && this.productDetails.fixedPrice) {
+              this.purchaseItem.sizeAndOrPrice = {name: null, oid: null, price: this.productDetails.fixedPrice};
+            }
+          }, this.errorHandler(this.ERROR_TYPES.API, undefined, {shouldDismissLoading: false}));
+    }
   }
 
   getUserData(userOidOrMobileCardId, idType, socialMediaOpts = {socialMediaType: null, isSocialMediaUsed: false}) {
@@ -265,7 +290,7 @@ export class ProcessOrderPage extends BaseViewController {
     selectCategoryModal.onDidDismiss((data) => {
       if (data) {
         this.currentCategory = { oid: data.oid, name: data.name, imgSrc: AppViewData.getDisplayImgSrc(data.img)};
-        this.getCategoryInfo(this.currentCategory);
+        this.getProducts(this.currentCategory);
       }
     });
     selectCategoryModal.present();
@@ -555,6 +580,25 @@ export class ProcessOrderPage extends BaseViewController {
     }     
 }
 
+
+/* local cache
+-get all categories and products in background
+-use cache if available
+-use other queries if not available
+
+
+categoriesCache: {
+  0: {
+    // category details
+  }
+}
+
+productsCache: {
+  0: {
+    // product details
+  }
+}
+*/
 
 
 

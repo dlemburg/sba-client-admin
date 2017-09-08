@@ -21,6 +21,7 @@ import { Geolocation } from '@ionic-native/geolocation';
 import { AppVersion } from '@ionic-native/app-version';
 
 
+
 // both admin and owner
 import { MyApp } from './app.component';
 
@@ -29,6 +30,7 @@ import { Authentication } from '../global/authentication';    // holds all auth 
 import { API } from '../global/api';                          // holds routes and api call
 import { SocketIO } from '../global/socket-io';     //  holds socket.io methods
 import { NativeNotifications } from '../global/native-notifications';     // all native notification logic
+import { ProcessOrderService } from '../pages/process-order/process-order.service';
 
 // classes
 import { ImageUtility } from '../global/image-utility';
@@ -72,6 +74,7 @@ import { SearchComponent } from '../components/search/search.component';
     Geolocation,
     BarcodeScanner,
     Printer,
+    ProcessOrderService,
 
     // didn't want to use API, but the way Angular handles app-wide errors vs
     // the way i wanted to handle them caused circular dependencies; so

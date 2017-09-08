@@ -144,6 +144,7 @@ export const ROUTES = {
     getRewards: '/api/cs/shared/getRewards',
     getCategories: '/api/cs/shared/getCategories',
     getProducts: '/api/cs/shared/getProducts',
+    getAllProducts: '/api/cs/owner/getAllProducts',
     getProductDetails: '/api/cs/shared/getProductDetails',
     getRewardDetails: '/api/cs/owner/getRewardDetails',
     getTransactions: '/api/cs/owner/getTransactions',
